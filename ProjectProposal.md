@@ -2,7 +2,9 @@
 #### By: Patrick Beekman
 
 ## Project Overview
-With this project I hope to expand my knowledge on web development and exploratory data science. 
+With this project I plan to expand my knowledge on exploratory data science and web development. Since I took a machine learning course over the summer I have been very interested in what data has to offer and I can explore the meaning behind the data. This interest has pushed me to start a side project of analyzing my friends tweets to find fun and insightful meaning, statistics and correlations. With this capstone I am going to move in a different direction and learn how to pursue more complex analyses and how to best visualize my findings. To display these visualizations an interactive website seems to make the most sense so anyone can view, examine and explore my findings on any computer with internet access. This Capstone is a research project 
+
+website design knowledge is lacking so it will not be too crazy but at least the foundation will be there for me to expand on the knowledge I learn from this capstone project.
 
 Digital ocean (AWS) this is bells and whistle
 Brexit
