@@ -4,6 +4,30 @@
 ## Project Overview
 With this project I plan to expand my knowledge on exploratory data science and web development. Since I took a machine learning course over the summer I have been very interested in what data has to offer and I can explore the meaning behind the data. This interest has pushed me to start a side project of analyzing my friends tweets to find fun and insightful meaning, statistics and correlations. With this capstone I am going to move in a different direction and learn how to pursue more complex analyses and how to best visualize my findings. To display these visualizations an interactive website seems to make the most sense so anyone can view, examine and explore my findings on any computer with internet access. This Capstone is a research project 
 
+### Features
+- Essential
+  - Interact directly with the twitter api through HTTP requests
+  - Grab all tweets from a specific user
+  - Grab all replies from a specific tweet
+  - Find 'network' of friends to a variable degree, friends of degree 1 are immediate followers while degree 2 would be that plus all of those followers followers
+  - Save tweets into a json file
+  - Interact directly with IBM Watsons tone analyze through HTTP requests
+  - Convet tweets into a readable format for the tone analyzer
+  - Analyze a collection of tweets saved in a text file
+  - Create a basic website (unstylized) using the MEAN stack (without the mongoDB part)
+  - Display static visualizations on the website
+    - Calendar view to show emotional trends over time
+    - Histograms to show common words/emojis used in different emotional buckets
+    - 
+- Want to have
+  - Stylize the website with css
+  - Display interacive visualizations on the website
+  - Create a network graph visualization to show the relationships I (or some generic user) have with friends
+  - 
+- Bells and Whistles
+  - Digital Ocean (or AWS) hosted website
+  - Embed tweets directly on the website
+
 website design knowledge is lacking so it will not be too crazy but at least the foundation will be there for me to expand on the knowledge I learn from this capstone project.
 
 Digital ocean (AWS) this is bells and whistle
