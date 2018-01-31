@@ -38,13 +38,15 @@ Since this is a research project I am not gearing*** it towards anyone specific,
 Researchers at stanford did something [similar](https://web.stanford.edu/~jesszhao/files/twitterSentiment.pdf) by analyzing the sentiment of users tweets about presidental candidates. In this study they focused on creating a machine learning model to analyze tweets and predict an emotion, while I will be using IBM Watsons tone analyzer to do this. The difference between these is that the model used in the study only predicts a single emotion while Watson returns the specific likelihoods for each of the five emotions which can give more insight into my data. One interesting idea the study took into account was the use of looking at emojis after they found a large percentage of tweets included them. I want to include this concept into my analysis as well, I will create my own mapping of common emojis into emotional buckets. Another piece of interest from this paper is what tweets they collected to represent the whole of a populations opinion about the candidates. They just simply looked for a small sample of keywords and the candidates name. I do not think this is enough and I am going to look at the replies to a candidate's(or any generic user) tweets to find the emotional response to that tweet but with enough of these pooled together I hope to gain an overview of the publics opion about a candidate(specific user).
 
 ## Previous Experience
-twitter api HTTP requests, minor web development with PHP to connect to mysql backend, data manipulation from machine learning course, 
+Over winter break I have been working on a small side project accessing the twitter api and collecting some tweets for a basic analysis. This project is useful because the knowledge learned from it will be the starting point for this project. This knowledge of interacting with an api through HTTP requests will also be applicable for using IBM Watsons tone analyzer. Other experience includes some basic web development with PHP to connect a webpage to a mysql backed which we did in my Database class. In my machine learning course over the summer I was formally introduced to python, data manipulation and visualization techniques. I was also introduced to some powerful python libraries such as pandas, numpy and matplotlib which all directly be used for this project.
 
 ## Technology
+I will be using Travis-CI to handle the continuous integration of my project and set it up so that none of my feature branches can be merged into master without passing all its tests and code style requirements. The same will be done for commits directly to the master branch.
 - Travis-CI
 - [IBM Watson Tone Analyzer](https://www.ibm.com/watson/services/tone-analyzer/)
 - python
 - PEP8 checkstyle
+- pip
 - pytest
 - ~~M~~EAN stack (Express, Angular, Node)
 - matplotlib
