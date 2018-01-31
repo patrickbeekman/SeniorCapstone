@@ -55,6 +55,8 @@ I will be using Travis-CI to handle the continuous integration of my project and
 - Github
 
 ## Risk Areas
+I have never used IBM Watson's tone analyzer or any of IBM's other products. Fortunately they just have an api with HTTP endpoints that are standard and should be easy to access
+
 never used ibm watson but Its just an api and i know how to access it with HTTP requests
 website design knowledge is lacking so it will not be too crazy but at least the foundation will be there for me to expand on the knowledge I learn from this capstone project. Going to read the MEAN book for adv. software engineering and talk to my friend (webb) who knows web dev
 not much experience with the whole of the data science pipeline, going to talk to Waldon and Parry for advice
