@@ -2,9 +2,14 @@
   "name": "starter-node-angular",
   "main": "server.js",
   "dependencies": {
-    "express" : "~4.5.1",
-    "mongoose" : "~3.8.0",
-    "body-parser" : "~1.4.2",
-    "method-override" : "~2.0.2"
+    "express": "latest",
+    "mongoose": "latest",
+    "body-parser": "latest",
+    "method-override": "latest",
+    "bootstrap": "latest",
+    "font-awesome": "latest",
+    "animate.css": "latest",
+    "angular": "latest",
+    "angular-route": "latest"
   }
 }
