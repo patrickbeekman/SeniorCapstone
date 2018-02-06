@@ -41,6 +41,7 @@ class TweetGrabber:
         }
         tweet_data = self.query(token, search_params, '1.1/statuses/user_timeline.json')
         len_new = 100
+        '''
         while len_new >= 1:
             print(str(len(tweet_data)))
             search_params = {
@@ -51,8 +52,12 @@ class TweetGrabber:
             new_data = self.query(token, search_params, '1.1/statuses/user_timeline.json')
             len_new = len(new_data)
             tweet_data += new_data
-
+        '''
         return tweet_data
+
+    def save_to_json(self, data, filename):
+        with open(filename, "a", encoding='utf8') as outfile:
+            json.dump(data, outfile, indent=4)
 
     def query(self, bearer_tok, params, endpoint):
         """
@@ -71,7 +76,6 @@ class TweetGrabber:
 
         if self.check_status(resp.status_code):
             tweet_data = resp.json()
-            #df = pd.DataFrame(tweet_data)
             return tweet_data
         else:
             return None
@@ -129,7 +133,11 @@ def main():
     if bearer_token is not None:
         tweets = tg.get_user_timeline(bearer_token, 'patrickbeekman')
 
-    print(tweets)
+    df = pd.read_json('tweets.json')
+    print(df['created_at'])
+    print(list(df))
+
+    #tg.save_to_json(tweets, "tweets.json")
 
 if __name__ == "__main__":
     main()
