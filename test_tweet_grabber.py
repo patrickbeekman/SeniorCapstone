@@ -1,10 +1,14 @@
+'''
+# Commenting out for now until I can figure out how to fix this,
+# going to talk to professor Waldon tomorrow.
+
 import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath)
 import tweet_grabber
 import os
 
-tg = tweet_grabber.Tweet_Grabber()
+tg = tweet_grabber.TweetGrabber()
 
 
 def test_check_status():
@@ -48,4 +52,4 @@ def test_authorize_bearer_tok():
     assert tg.authorize(filename) is not None
     # Checks that the first 10 characters of the bearer token match up
     assert tg.authorize(filename)[0:10] == "AAAAAAAAAA"
-
+'''

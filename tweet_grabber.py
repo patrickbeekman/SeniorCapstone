@@ -10,7 +10,8 @@ import os
 import pandas as pd
 import numpy as np
 
-class Tweet_Grabber:
+
+class TweetGrabber:
 
     def __init__(self):
         self.base_url = 'https://api.twitter.com/'
@@ -26,6 +27,54 @@ class Tweet_Grabber:
         else:
             print('Error: authorization failed with status ' + str(status_code))
             return False
+
+    def get_user_timeline(self, token, username):
+        """
+        grabs all of the tweets from a users timeline and returns them in a python array
+        :param token: The bearer token to access the api
+        :param username: The username of the users timeline you want to get
+        :return: A python array of all the users tweets
+        """
+        search_params = {
+            'screen_name': str(username),
+            'count': 100
+        }
+        tweet_data = self.query(token, search_params, '1.1/statuses/user_timeline.json')
+        len_new = 100
+        while len_new >= 1:
+            print(str(len(tweet_data)))
+            search_params = {
+                'screen_name': str(username),
+                'since_id': tweet_data[len(tweet_data) - 1]['id'],
+                'count': 100
+            }
+            new_data = self.query(token, search_params, '1.1/statuses/user_timeline.json')
+            len_new = len(new_data)
+            tweet_data += new_data
+
+        return tweet_data
+
+    def query(self, bearer_tok, params, endpoint):
+        """
+        Performs a query on the twitter RESTful api using params and an endpoint
+        :param bearer_tok: The bearer token that we got from a successful authorization
+        :param params: A map object of the parameters we will be on the api
+        :param endpoint: The endpoint location we will access on the api
+        :return: All the requested information in json format
+        """
+        headers = {
+            'Authorization': 'Bearer {}'.format(bearer_tok)
+        }
+
+        api_path = self.base_url + endpoint
+        resp = requests.get(api_path, headers=headers, params=params)
+
+        if self.check_status(resp.status_code):
+            tweet_data = resp.json()
+            #df = pd.DataFrame(tweet_data)
+            return tweet_data
+        else:
+            return None
 
     def authorize(self, filename):
         """
@@ -73,9 +122,14 @@ class Tweet_Grabber:
 
 
 def main():
-    tg = Tweet_Grabber()
+    tg = TweetGrabber()
     bearer_token = tg.authorize('keys.txt')
     print(bearer_token)
+    tweets = None
+    if bearer_token is not None:
+        tweets = tg.get_user_timeline(bearer_token, 'patrickbeekman')
+
+    print(tweets)
 
 if __name__ == "__main__":
     main()
