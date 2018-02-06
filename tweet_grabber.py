@@ -37,7 +37,11 @@ class Tweet_Grabber:
         keys_file = open(filename, 'r')
         keys_file.readline()  # skip the first line of comments
         public_key = keys_file.readline().rstrip()
+        if public_key == "":
+            return "No public key"
         private_key = keys_file.readline().rstrip()
+        if private_key == "":
+            return "No private key"
 
         # Format the public:private and then encode using base64
         key_secret = '{}:{}'.format(public_key, private_key).encode('ascii')
