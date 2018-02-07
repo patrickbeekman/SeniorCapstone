@@ -1,5 +1,5 @@
 '''
-twitter_grabber.py
+tweet_grabber.py
 A direct way to access the twitter RESTful api to grab twitter data
 '''
 
@@ -41,7 +41,6 @@ class TweetGrabber:
         }
         tweet_data = self.query(token, search_params, '1.1/statuses/user_timeline.json')
         len_new = 100
-        '''
         while len_new >= 1:
             print(str(len(tweet_data)))
             search_params = {
@@ -52,10 +51,15 @@ class TweetGrabber:
             new_data = self.query(token, search_params, '1.1/statuses/user_timeline.json')
             len_new = len(new_data)
             tweet_data += new_data
-        '''
+
         return tweet_data
 
     def save_to_json(self, data, filename):
+        """
+        Saves the json formatted data from a python list of json tweets
+        :param data: a python list of json formatted tweets
+        :param filename: the filename to save to
+        """
         with open(filename, "a", encoding='utf8') as outfile:
             json.dump(data, outfile, indent=4)
 
@@ -75,8 +79,8 @@ class TweetGrabber:
         resp = requests.get(api_path, headers=headers, params=params)
 
         if self.check_status(resp.status_code):
-            tweet_data = resp.json()
-            return tweet_data
+            tweets_q = resp.json()
+            return tweets_q
         else:
             return None
 
@@ -133,11 +137,12 @@ def main():
     if bearer_token is not None:
         tweets = tg.get_user_timeline(bearer_token, 'patrickbeekman')
 
+    os.remove("tweets.json")
+    tg.save_to_json(tweets, "tweets.json")
+
     df = pd.read_json('tweets.json')
     print(df['created_at'])
     print(list(df))
-
-    #tg.save_to_json(tweets, "tweets.json")
 
 if __name__ == "__main__":
     main()
