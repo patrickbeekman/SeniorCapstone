@@ -1,5 +1,10 @@
 language: python
 python:
-    - "3.6"
+  - "3.6"
+install:
+  - pip install requests
+  - pip install pandas
+  - pip install numpy
 script:
-    - pytest
+  - pytest
+
