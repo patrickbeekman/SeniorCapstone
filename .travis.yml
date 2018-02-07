@@ -1,8 +1,10 @@
 language: python
 python:
   - "3.6"
-virtualenv:
-  system_site_packages: true
+install:
+  - pipenv install requests
+  - pip install pandas
+  - pip install numpy
 script:
   - pytest
 
