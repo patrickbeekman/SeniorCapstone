@@ -1,6 +1,9 @@
-import sys, os
-myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath)
+import os
+import sys
+
+#myPath = os.path.dirname(os.path.abspath(__file__))
+#sys.path.insert(0, myPath + "../src/")
+sys.path.insert(0, '/home/patt/Documents/senior_year/SeniorCapstone/src')
 import tweet_grabber
 import os
 

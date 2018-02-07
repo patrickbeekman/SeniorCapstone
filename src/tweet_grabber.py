@@ -131,13 +131,13 @@ class TweetGrabber:
 
 def main():
     tg = TweetGrabber()
-    bearer_token = tg.authorize('keys.txt')
+    bearer_token = tg.authorize(os.path.dirname(__file__) + '/../keys.txt')
     print(bearer_token)
     tweets = None
     if bearer_token is not None:
         tweets = tg.get_user_timeline(bearer_token, 'patrickbeekman')
 
-    json_filename = "tweets.json"
+    json_filename = os.path.dirname(__file__) + "/../tweets.json"
 
     os.remove(json_filename)
     tg.save_to_json(tweets, json_filename)
