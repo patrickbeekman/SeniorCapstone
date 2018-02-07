@@ -141,7 +141,6 @@ def main():
     tg.save_to_json(tweets, "tweets.json")
 
     df = pd.read_json('tweets.json')
-    print(df['created_at'])
     print(list(df))
 
 if __name__ == "__main__":
