@@ -16,5 +16,5 @@ def test_check_status():
 
 def test_authorize_connection():
     assert tg.authorize() is not None
-    assert tg.authorize() == "AAAAAAAAAA"
+    assert tg.authorize()[0:10] == "AAAAAAAAAA"
 
