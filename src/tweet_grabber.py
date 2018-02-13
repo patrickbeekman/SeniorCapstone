@@ -84,24 +84,15 @@ class TweetGrabber:
         else:
             return None
 
-    def authorize(self, filename):
+    def authorize(self):
         """
         Authorizes the user application and connects to the RESTful twitter api
         :param filename: The name of the file containing the public/private keys this file should
                          have a single line of documentation \n public key \n private key
         :return: The bearer token for api requests
         """
-        keys_file = open(filename, 'r')
-        keys_file.readline()  # skip the first line of comments
-        public_key = keys_file.readline().rstrip()
-        if public_key == "":
-            return "No public key"
-        private_key = keys_file.readline().rstrip()
-        if private_key == "":
-            return "No private key"
-
         # Format the public:private and then encode using base64
-        key_secret = '{}:{}'.format(public_key, private_key).encode('ascii')
+        key_secret = '{}:{}'.format(os.environ['TWEET_PUB'], os.environ['TWEET_PRI']).encode('ascii')
         b64_encoded_key = base64.b64encode(key_secret)
         b64_encoded_key = b64_encoded_key.decode('ascii')
 
@@ -131,7 +122,7 @@ class TweetGrabber:
 
 def main():
     tg = TweetGrabber()
-    bearer_token = tg.authorize(os.path.dirname(__file__) + '/../keys.txt')
+    bearer_token = tg.authorize()
     print(bearer_token)
     tweets = None
     if bearer_token is not None:
