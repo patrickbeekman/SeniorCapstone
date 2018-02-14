@@ -8,7 +8,4 @@ install:
   - pip install --upgrade watson-developer-cloud
 script:
   - pytest
-cache:
-  pip
-  directories:
-    - node_modules # NPM packages
+cache: pip
