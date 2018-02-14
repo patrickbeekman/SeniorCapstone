@@ -9,6 +9,6 @@ install:
 script:
   - pytest
 cache:
-    pip
-    directories:
-        - node_modules # NPM packages
+  pip
+  directories:
+    - node_modules # NPM packages
