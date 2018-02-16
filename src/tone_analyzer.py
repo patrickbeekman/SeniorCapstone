@@ -44,6 +44,13 @@ class MyToneAnalyzer():
         with open('file_name.json', 'w') as f:
             f.write(new_df)
 
+    def dump_json_to_file(self, data, filename):
+        if filename[0] == '/':
+            filename = os.path.dirname(__file__) + filename
+        else:
+            filename = os.path.dirname(__file__) + "/" + filename
+        with open(filename, 'w') as out:
+            json.dump(data, out)
 
 def main():
     ta = MyToneAnalyzer()
@@ -55,7 +62,8 @@ def main():
 
     filename_tweet = os.path.dirname(__file__) + "/../small_tweets.json"
     ta.strip_text_from_json(filename_tweet)
-    print(json.dumps(ta.analyze_json_file(analyzer, os.path.dirname(__file__) + "/file_name.json")))
+    json.dumps(ta.analyze_json_file(analyzer, os.path.dirname(__file__) + "/file_name.json"))
+    ta.dump_json_to_file(json.dumps(ta.analyze_json_file(analyzer, os.path.dirname(__file__) + "/file_name.json")), "hi.json")
 
 if __name__ == "__main__":
     main()
