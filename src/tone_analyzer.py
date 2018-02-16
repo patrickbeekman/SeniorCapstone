@@ -30,15 +30,32 @@ class MyToneAnalyzer():
                 exit(0)
         return tone_resp
 
+    def strip_text_from_json(self, filename, newfilename=""):
+        df = pd.read_json(filename)
+        tweet_text = df['text']
+        hundred_tweets = ""
+        for tweet in tweet_text:
+            s_tweet = tweet.strip().replace('.','')
+            s_tweet += '..'
+            hundred_tweets += " " + s_tweet
+        print(hundred_tweets)
+        d = {'text': [hundred_tweets]}
+        new_df = pd.DataFrame(data=d).to_json(orient='records')[1:-1]
+        with open('file_name.json', 'w') as f:
+            f.write(new_df)
 
 
 def main():
     ta = MyToneAnalyzer()
     analyzer = ta.create_connection('2018-02-07')
 
-    filename = os.path.dirname(__file__) + "/../test_text.json"
-    tone_resp = ta.analyze_json_file(analyzer, filename)
-    print(json.dumps(tone_resp, indent=2))
+    filename_tone = os.path.dirname(__file__) + "/../test_text.json"
+    tone_resp = ta.analyze_json_file(analyzer, filename_tone)
+    #print(json.dumps(tone_resp, indent=2))
+
+    filename_tweet = os.path.dirname(__file__) + "/../small_tweets.json"
+    ta.strip_text_from_json(filename_tweet)
+    print(json.dumps(ta.analyze_json_file(analyzer, os.path.dirname(__file__) + "/file_name.json")))
 
 if __name__ == "__main__":
     main()
