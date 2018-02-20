@@ -30,18 +30,37 @@ class MyToneAnalyzer():
                 exit(0)
         return tone_resp
 
-    def strip_text_from_json(self, filename, newfilename="hundred_tweets.json"):
-        df = pd.read_json(filename)
-        tweet_text = df['text']
-        hundred_tweets = ""
+    # Tone analyzer only reads first 100 sentences for tone analysis and only first
+    # 1000 sentences for document level analysis. Max filesize = 128KB
+    def strip_text_from_json(self, tweet_text, newfilename):
+        ninety_tweets = ""
         for tweet in tweet_text:
-            s_tweet = tweet.strip().replace('.', '')
-            s_tweet += '..'
-            hundred_tweets += " " + s_tweet
-        d = {'text': [hundred_tweets]}
+            s_tweet = tweet.strip().replace('.', '') + ".."
+            #s_tweet += '..'
+            ninety_tweets += " " + s_tweet
+        d = {'text': [ninety_tweets]}
         new_df = pd.DataFrame(data=d).to_json(orient='records')[1:-1]
         with open(newfilename, 'w') as f:
             f.write(new_df)
+
+    def send_all_tweets_to_text_json(self, filename, ta):
+        num = 0
+        start = 0
+        stop = 90
+        increment = 90
+        df = pd.read_json(filename)
+        while start < (len(df)-increment):
+            newfilename = ta.path_name("/../data/tweet_text" + "_" + str(num) + ".json")
+            subset = df[start:stop]['text']
+            ta.strip_text_from_json(subset, newfilename)
+            start += 90
+            stop += 90
+            num += 1
+        newfilename = ta.path_name("/../data/tweet_text" + "_" + str(num) + ".json")
+        start -= 90
+        stop = len(df)
+        subset = df[start:stop]['text']
+        ta.strip_text_from_json(subset, newfilename)
 
     def dump_json_to_file(self, data, filename):
         if filename[0] == '/':
@@ -61,9 +80,11 @@ def main():
     tone_resp = ta.analyze_json_file(analyzer, ta.path_name("/../test_text.json"))
     #print(json.dumps(tone_resp, indent=2, separators=(',', ': ')))
 
-    ta.strip_text_from_json(ta.path_name("/../small_tweets.json"), "/hundred_tweets.json")
-    tweet_resp = ta.analyze_json_file(analyzer, ta.path_name("/hundred_tweets.json"))
+    #ta.strip_text_from_json(ta.path_name("/../small_tweets.json"), "hundred_tweets.json")
+    ta.send_all_tweets_to_text_json(ta.path_name("/../small_tweets.json"), ta)
+    tweet_resp = ta.analyze_json_file(analyzer, ta.path_name("/../data/tweet_text_0.json"))
     ta.dump_json_to_file(json.dumps(tweet_resp, indent=4, separators=(',', ': ')), "/tweets_tone.json")
+
 
 if __name__ == "__main__":
     main()
