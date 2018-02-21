@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import json
+from io import StringIO
 from watson_developer_cloud import ToneAnalyzerV3
 from watson_developer_cloud import WatsonException
 from watson_developer_cloud import WatsonInvalidArgument
@@ -27,7 +28,7 @@ class MyToneAnalyzer:
             except WatsonException as e:
                 print("WatsonException", e)
                 exit(0)
-        return tone_resp
+        return json.dumps(tone_resp)
 
     # analyzes all the tweet_text files in /data/tweets_text/ and saves the
     # analysis files to /data/analysis/
@@ -37,6 +38,9 @@ class MyToneAnalyzer:
             tone_data = ta.analyze_json_file(analyzer, tweets_path + filename)
             num = filename.split('tweet_text_')[1].split('.')[0]
             output_file = tweets_path + "../analysis/tone_tweet_" + num + ".json"
+            #new_df = pd.DataFrame(data=tone_data).to_json()
+            #with open(output_file, 'w') as f:
+            #    f.write(new_df)
             ta.dump_json_to_file(json.dumps(tone_data, indent=4, separators=(',', ': ')), output_file)
 
 
@@ -45,7 +49,7 @@ class MyToneAnalyzer:
     def clean_text_write_to_json(self, tweet_text, newfilename):
         ninety_tweets = ""
         for tweet in tweet_text:
-            s_tweet = tweet.strip().rstrip("\n") + ".\n"
+            s_tweet = tweet.strip().replace("\n", " ") + ".\\n"
             ninety_tweets += " " + s_tweet
         d = {'text': [ninety_tweets]}
         new_df = pd.DataFrame(data=d).to_json(orient='records')[1:-1]
@@ -85,7 +89,28 @@ def main():
     ta = MyToneAnalyzer()
     analyzer = ta.create_connection('2018-02-07')
 
-    data = ta.analyze_json_file(analyzer, ta.path_name("/../tests/good_text.json"))
+    #ta.analyze_all_data_folder(ta, analyzer)
+    resp = ta.analyze_json_file(analyzer, ta.path_name("/../data/tweets_text/tweet_text_0.json"))
+
+    # Load the data and create a new string with only the sentence_tones not the document_tone
+    data = json.loads(resp)
+    io = StringIO()
+    str = "["
+    for i in data["sentences_tone"]:
+        json.dump(i, io)
+    str += io.getvalue()
+    new = str.replace("}{", "},{")
+    new += "]"
+    ta.dump_json_to_file(new, ta.path_name("/../data/analysis/hi.json"))
+
+    # I need to be able to read this json file into a dataframe not just the string
+    with open(ta.path_name("/../data/analysis/hi.json")) as file:
+        tes = file.read().replace("\\", "")
+    print(tes[1:-1])
+    ta.dump_json_to_file(tes, ta.path_name("/../data/analysis/hi1.json"))
+    print(new)
+    #df = pd.read_json(tes, lines=True)
+    #print(df['text'])
 
     #tone_resp = ta.analyze_json_file(analyzer, ta.path_name("/../test_text.json"))
     #print(json.dumps(tone_resp, indent=2, separators=(',', ': ')))
