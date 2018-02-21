@@ -5,7 +5,8 @@ install:
   - pip install requests
   - pip install pandas
   - pip install numpy
+  - pip install pymongo
   - pip install --upgrade watson-developer-cloud
 script:
   - pytest
-
+cache: pip
