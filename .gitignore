@@ -5,3 +5,4 @@ keys.txt
 credentials.json
 .cache
 *.json
+/data
