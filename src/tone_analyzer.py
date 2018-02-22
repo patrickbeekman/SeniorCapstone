@@ -28,20 +28,34 @@ class MyToneAnalyzer:
             except WatsonException as e:
                 print("WatsonException", e)
                 exit(0)
-        return json.dumps(tone_resp)
+        return tone_resp
+
+    def write_only_sentence_tone_to_file(self, resp, output_file):
+        # Load the data and create a new string with only the sentence_tones not the document_tone
+        data = json.loads(json.dumps(resp))
+        try:
+            io = StringIO()
+            str = "["
+            for i in data["sentences_tone"]:
+                json.dump(i, io)
+            str += io.getvalue()
+            new = str.replace("}{", "},{")
+            new += "]"
+            self.dump_json_to_file(json.loads(new), output_file)
+        except Exception as e:
+            print(e)
+
 
     # analyzes all the tweet_text files in /data/tweets_text/ and saves the
     # analysis files to /data/analysis/
-    def analyze_all_data_folder(self, ta, analyzer):
+    def analyze_all_data_folder(self, analyzer):
         tweets_path = os.path.dirname(__file__) + "/../data/tweets_text/"
         for filename in os.listdir(tweets_path):
-            tone_data = ta.analyze_json_file(analyzer, tweets_path + filename)
             num = filename.split('tweet_text_')[1].split('.')[0]
-            output_file = tweets_path + "../analysis/tone_tweet_" + num + ".json"
-            #new_df = pd.DataFrame(data=tone_data).to_json()
-            #with open(output_file, 'w') as f:
-            #    f.write(new_df)
-            ta.dump_json_to_file(json.dumps(tone_data, indent=4, separators=(',', ': ')), output_file)
+            print("analyzing : " + num)
+            tone_resp = self.analyze_json_file(analyzer, tweets_path + filename)
+            output_file = tweets_path + "/../analysis/tone_tweet_" + num + ".json"
+            self.write_only_sentence_tone_to_file(tone_resp, output_file)
 
 
     # Tone analyzer only reads first 100 sentences for tone analysis and only first
@@ -89,28 +103,10 @@ def main():
     ta = MyToneAnalyzer()
     analyzer = ta.create_connection('2018-02-07')
 
-    #ta.analyze_all_data_folder(ta, analyzer)
-    resp = ta.analyze_json_file(analyzer, ta.path_name("/../data/tweets_text/tweet_text_0.json"))
+    #ta.analyze_all_data_folder(analyzer)
 
-    # Load the data and create a new string with only the sentence_tones not the document_tone
-    data = json.loads(resp)
-    io = StringIO()
-    str = "["
-    for i in data["sentences_tone"]:
-        json.dump(i, io)
-    str += io.getvalue()
-    new = str.replace("}{", "},{")
-    new += "]"
-    ta.dump_json_to_file(new, ta.path_name("/../data/analysis/hi.json"))
-
-    # I need to be able to read this json file into a dataframe not just the string
-    with open(ta.path_name("/../data/analysis/hi.json")) as file:
-        tes = file.read().replace("\\", "")
-    print(tes[1:-1])
-    ta.dump_json_to_file(tes, ta.path_name("/../data/analysis/hi1.json"))
-    print(new)
-    #df = pd.read_json(tes, lines=True)
-    #print(df['text'])
+    resp = ta.analyze_json_file(analyzer, ta.path_name("/../data/tweets_text/tweet_text_24.json"))
+    ta.write_only_sentence_tone_to_file(resp, ta.path_name("/../data/hi.json"))
 
     #tone_resp = ta.analyze_json_file(analyzer, ta.path_name("/../test_text.json"))
     #print(json.dumps(tone_resp, indent=2, separators=(',', ': ')))
