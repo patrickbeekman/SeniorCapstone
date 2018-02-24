@@ -52,9 +52,9 @@ class MyToneAnalyzer:
         tweets_path = os.path.dirname(__file__) + "/../data/tweets_text/"
         for filename in os.listdir(tweets_path):
             num = filename.split('tweet_text_')[1].split('.')[0]
-            print("analyzing : " + num)
+            print("analyzing : " + num.zfill(4))
             tone_resp = self.analyze_json_file(analyzer, tweets_path + filename)
-            output_file = tweets_path + "/../analysis/tone_tweet_" + num + ".json"
+            output_file = tweets_path + "/../analysis/tone_tweet_" + num.zfill(4) + ".json"
             self.write_only_sentence_tone_to_file(tone_resp, output_file)
 
 
@@ -63,7 +63,7 @@ class MyToneAnalyzer:
     def clean_text_write_to_json(self, tweet_text, newfilename):
         ninety_tweets = ""
         for tweet in tweet_text:
-            s_tweet = tweet.strip().replace("\n", " ") + ".\\n"
+            s_tweet = tweet.strip().replace('\n', ' ').replace('\r', ' ') + ".\\n"
             ninety_tweets += " " + s_tweet
         d = {'text': [ninety_tweets]}
         new_df = pd.DataFrame(data=d).to_json(orient='records')[1:-1]
@@ -79,13 +79,13 @@ class MyToneAnalyzer:
         increment = 90
         df = pd.read_json(filename)
         while start < (len(df)-increment):
-            newfilename = ta.path_name("/../data/tweets_text/tweet_text" + "_" + str(num) + ".json")
+            newfilename = ta.path_name("/../data/tweets_text/tweet_text" + "_" + num.zfill(4) + ".json")
             subset = df[start:stop]['text']
             ta.clean_text_write_to_json(subset, newfilename)
             start += 90
             stop += 90
             num += 1
-        newfilename = ta.path_name("/../data/tweets_text/tweet_text" + "_" + str(num) + ".json")
+        newfilename = ta.path_name("/../data/tweets_text/tweet_text" + "_" + num.zfill(4) + ".json")
         start -= 90
         stop = len(df)
         subset = df[start:stop]['text']
