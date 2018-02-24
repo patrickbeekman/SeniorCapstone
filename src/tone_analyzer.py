@@ -94,26 +94,27 @@ class MyToneAnalyzer:
 
     def single_file_tone_analysis(self):
         count = 0
-        appended_data = []
+        output_file = self.path_name("/../data/all_analysis.json")
         dirFiles = os.listdir(self.path_name("/../data/analysis/"))
         dirFiles.sort()
         print(dirFiles)
 
-        for file in dirFiles:
-            path = self.path_name("/../data/analysis/" + file)
-            data = pd.read_json(path)
-            print("before:\n", data['sentence_id'])
-            data['sentence_id'] = range(count, count+len(data))
-            print("after:\n", data['sentence_id'])
-            count += len(data)
+        with open(output_file, 'w') as outfile:
+            first = True
+            for file in dirFiles:
+                if first:
+                    outfile.write('[')
+                    first = False
+                else:
+                    outfile.write(',')
 
-        '''
-        for infile in glob.glob(self.path_name("/../data/analysis/*.json")):
-            data = pd.read_json(infile)
-            appended_data.append(data)
-        appended_data = pd.concat(appended_data, axis=1)
-        appended_data.to_json(self.path_name("/../data/analysis/all_analysis.json"))
-        '''
+                path = self.path_name("/../data/analysis/" + file)
+                data = pd.read_json(path)
+                data['sentence_id'] = range(count, count+len(data))
+                count += len(data)
+                #print(data.to_json(orient='records'))
+                outfile.write(data.to_json(orient='records').strip()[1:-1])
+            outfile.write(']')
 
     def dump_json_to_file(self, data, filename):
         with open(filename, 'w') as out:
@@ -130,7 +131,10 @@ def main():
     # files with just the text and then analyze each tweet.
     #ta.send_all_tweets_to_text_json(ta.path_name("/../data/tweets.json"))
     #ta.analyze_all_tweets_text_folder(analyzer)
-    ta.single_file_tone_analysis()
+    #ta.single_file_tone_analysis()
+
+    df = pd.read_json(ta.path_name("/../data/all_analysis.json"))
+    print(df['sentence_id'])
 
     '''
     resp = ta.analyze_json_file(analyzer, ta.path_name("/../data/tweets_text/tweet_text_0000.json"))
