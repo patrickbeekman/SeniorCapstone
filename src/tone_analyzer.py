@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import json
+import glob
 from io import StringIO
 from watson_developer_cloud import ToneAnalyzerV3
 from watson_developer_cloud import WatsonException
@@ -91,6 +92,29 @@ class MyToneAnalyzer:
         subset = df[start:stop]['text']
         self.clean_text_write_to_json(subset, newfilename)
 
+    def single_file_tone_analysis(self):
+        count = 0
+        appended_data = []
+        dirFiles = os.listdir(self.path_name("/../data/analysis/"))
+        dirFiles.sort()
+        print(dirFiles)
+
+        for file in dirFiles:
+            path = self.path_name("/../data/analysis/" + file)
+            data = pd.read_json(path)
+            print("before:\n", data['sentence_id'])
+            data['sentence_id'] = range(count, count+len(data))
+            print("after:\n", data['sentence_id'])
+            count += len(data)
+
+        '''
+        for infile in glob.glob(self.path_name("/../data/analysis/*.json")):
+            data = pd.read_json(infile)
+            appended_data.append(data)
+        appended_data = pd.concat(appended_data, axis=1)
+        appended_data.to_json(self.path_name("/../data/analysis/all_analysis.json"))
+        '''
+
     def dump_json_to_file(self, data, filename):
         with open(filename, 'w') as out:
             json.dump(data, out)
@@ -100,29 +124,18 @@ class MyToneAnalyzer:
 
 def main():
     ta = MyToneAnalyzer()
-    analyzer = ta.create_connection('2018-02-07')
+    analyzer = ta.create_connection('2018-02-24')
 
-    ta.send_all_tweets_to_text_json(ta.path_name("/../data/tweets.json"))
-
+    # Uncomment to read in a tweets.json file with all of your tweets and seperate them into
+    # files with just the text and then analyze each tweet.
+    #ta.send_all_tweets_to_text_json(ta.path_name("/../data/tweets.json"))
     #ta.analyze_all_tweets_text_folder(analyzer)
+    ta.single_file_tone_analysis()
 
     '''
     resp = ta.analyze_json_file(analyzer, ta.path_name("/../data/tweets_text/tweet_text_0000.json"))
     ta.write_only_sentence_tone_to_file(resp, ta.path_name("/../data/hi.json"))
     '''
-
-    #tone_resp = ta.analyze_json_file(analyzer, ta.path_name("/../test_text.json"))
-    #print(json.dumps(tone_resp, indent=2, separators=(',', ': ')))
-
-    #ta.strip_text_from_json(ta.path_name("/../small_tweets.json"), "hundred_tweets.json")
-
-    '''
-    ta.send_all_tweets_to_text_json(ta.path_name("/../tweets.json"), ta)
-    ta.analyze_all_data_folder(ta, analyzer)
-    '''
-    #tweet_resp = ta.analyze_json_file(analyzer, ta.path_name("/../data/tweet_text_0.json"))
-    #ta.dump_json_to_file(json.dumps(tweet_resp, indent=4, separators=(',', ': ')), "/tweets_tone.json")
-
 
 if __name__ == "__main__":
     main()
