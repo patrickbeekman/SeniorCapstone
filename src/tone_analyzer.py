@@ -77,21 +77,17 @@ class MyToneAnalyzer:
     def send_all_tweets_to_text_json(self, input_filename):
         num = 0
         start = 0
-        stop = 90
-        increment = 90
+        stop = 99
+        increment = 99
         df = pd.read_json(input_filename)
-        while start < (len(df)-increment):
+        while start < (len(df)):
             newfilename = self.path_name("/../data/tweets_text/tweet_text" + "_" + str(num).zfill(4) + ".json")
             subset = df[start:stop]['text']
             self.clean_text_write_to_json(subset, newfilename)
-            start += 90
-            stop += 90
+            start += increment
+            stop += increment
             num += 1
-        newfilename = self.path_name("/../data/tweets_text/tweet_text" + "_" + str(num).zfill(4) + ".json")
-        start -= 90
-        stop = len(df)
-        subset = df[start:stop]['text']
-        self.clean_text_write_to_json(subset, newfilename)
+
 
     def single_file_tone_analysis(self):
         count = 0
@@ -113,7 +109,6 @@ class MyToneAnalyzer:
                 data = pd.read_json(path)
                 data['sentence_id'] = range(count, count+len(data))
                 count += len(data)
-                #print(data.to_json(orient='records'))
                 outfile.write(data.to_json(orient='records').strip()[1:-1])
             outfile.write(']')
 
@@ -128,24 +123,12 @@ def main():
     ta = MyToneAnalyzer()
     analyzer = ta.create_connection('2018-02-24')
 
-    # s_tweet = "@RTB_HRoss Tons more images for your enjoyment! https://t.co/GMSx6v4YfT"
-    # s_tweet = re.sub(r'http\S+', '[link]', s_tweet, flags=re.MULTILINE)
-    # s_tweet = s_tweet.strip().replace('\n', ' ').replace('\r', ' ').replace('. ', ' ') + ".\\n"
-    # print(s_tweet)
-
     # Uncomment to read in a tweets.json file with all of your tweets and seperate them into
     # files with just the text and then analyze each tweet.
     #ta.send_all_tweets_to_text_json(ta.path_name("/../data/tweets.json"))
     ta.send_all_tweets_to_text_json(ta.path_name("/../data/tweets.json"))
     ta.analyze_all_tweets_text_folder(analyzer)
     ta.single_file_tone_analysis()
-
-    df = pd.read_json(ta.path_name("/../data/all_analysis.json"))
-    df2 = pd.read_json(ta.path_name("/../data/tweets.json"))
-    df['text'].to_csv('text1.csv')
-    df2['text'].to_csv('text2.csv')
-
-    print("analysis: ", len(df), " tweets: ", len(df2))
 
     '''
     resp = ta.analyze_json_file(analyzer, ta.path_name("/../data/tweets_text/tweet_text_0000.json"))
