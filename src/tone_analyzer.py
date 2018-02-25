@@ -131,6 +131,26 @@ class MyToneAnalyzer:
             except Exception as e:
                 print(e)
 
+    def attach_analysis_to_tweet(self):
+        analysis_path = os.path.dirname(__file__) + "/../data/all_analysis.json"
+        tweets_path = os.path.dirname(__file__) + "/../data/tweets.json"
+
+        analysis = pd.read_json(analysis_path)
+        tweets = pd.read_json(tweets_path)
+        tweets['sentence_id'] = range(0, len(tweets))
+
+        merged = pd.merge(left=tweets, right=analysis, left_on='sentence_id', right_on='sentence_id')
+        cols = list(merged.columns)
+        print(cols)
+        print("text_y: ", cols[-2])
+        cols[-2] = 'processed_text'
+        print("text_x: ", cols[-9])
+        cols[-9] = 'text'
+        merged.columns = cols
+
+        output_file_path = os.path.dirname(__file__) + "/../data/merged_analysis.json"
+        with open(output_file_path, 'w') as file:
+            file.write(merged.to_json(orient='records'))
 
     def dump_json_to_file(self, data, filename):
         with open(filename, 'w') as out:
@@ -150,6 +170,7 @@ def main():
     ta.analyze_all_tweets_text_folder(analyzer)
     ta.single_file_tone_analysis()
     ta.temp_file_cleanup()
+    ta.attach_analysis_to_tweet()
 
     '''
     resp = ta.analyze_json_file(analyzer, ta.path_name("/../data/tweets_text/tweet_text_0000.json"))
