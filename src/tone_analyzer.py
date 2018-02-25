@@ -112,6 +112,26 @@ class MyToneAnalyzer:
                 outfile.write(data.to_json(orient='records').strip()[1:-1])
             outfile.write(']')
 
+    def temp_file_cleanup(self):
+        analysis_path = self.path_name("/../data/analysis/")
+        tweets_text_path = self.path_name("/../data/tweets_text/")
+        for the_file in os.listdir(analysis_path):
+            file_path = os.path.join(analysis_path, the_file)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception as e:
+                print(e)
+        for the_file in os.listdir(tweets_text_path):
+            file_path = os.path.join(tweets_text_path, the_file)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+                    # elif os.path.isdir(file_path): shutil.rmtree(file_path)
+            except Exception as e:
+                print(e)
+
+
     def dump_json_to_file(self, data, filename):
         with open(filename, 'w') as out:
             json.dump(data, out)
@@ -125,10 +145,11 @@ def main():
 
     # Uncomment to read in a tweets.json file with all of your tweets and seperate them into
     # files with just the text and then analyze each tweet.
-    #ta.send_all_tweets_to_text_json(ta.path_name("/../data/tweets.json"))
+    ta.send_all_tweets_to_text_json(ta.path_name("/../data/tweets.json"))
     ta.send_all_tweets_to_text_json(ta.path_name("/../data/tweets.json"))
     ta.analyze_all_tweets_text_folder(analyzer)
     ta.single_file_tone_analysis()
+    ta.temp_file_cleanup()
 
     '''
     resp = ta.analyze_json_file(analyzer, ta.path_name("/../data/tweets_text/tweet_text_0000.json"))
