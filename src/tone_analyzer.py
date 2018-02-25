@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import json
-import glob
+import re
 from io import StringIO
 from watson_developer_cloud import ToneAnalyzerV3
 from watson_developer_cloud import WatsonException
@@ -64,7 +64,8 @@ class MyToneAnalyzer:
     def clean_text_write_to_json(self, tweet_text, newfilename):
         ninety_tweets = ""
         for tweet in tweet_text:
-            s_tweet = tweet.strip().replace('\n', ' ').replace('\r', ' ').replace('.', ' ') + ".\\n"
+            s_tweet = re.sub(r'http\S+', '[link]', tweet, flags=re.MULTILINE)
+            s_tweet = s_tweet.strip().replace('\n', ' ').replace('\r', ' ').replace('.', ' ').replace('!', ' ').replace('?', ' ') + ".\\n"
             ninety_tweets += " " + s_tweet
         d = {'text': [ninety_tweets]}
         new_df = pd.DataFrame(data=d).to_json(orient='records')[1:-1]
@@ -127,14 +128,24 @@ def main():
     ta = MyToneAnalyzer()
     analyzer = ta.create_connection('2018-02-24')
 
+    # s_tweet = "@RTB_HRoss Tons more images for your enjoyment! https://t.co/GMSx6v4YfT"
+    # s_tweet = re.sub(r'http\S+', '[link]', s_tweet, flags=re.MULTILINE)
+    # s_tweet = s_tweet.strip().replace('\n', ' ').replace('\r', ' ').replace('. ', ' ') + ".\\n"
+    # print(s_tweet)
+
     # Uncomment to read in a tweets.json file with all of your tweets and seperate them into
     # files with just the text and then analyze each tweet.
     #ta.send_all_tweets_to_text_json(ta.path_name("/../data/tweets.json"))
-    #ta.analyze_all_tweets_text_folder(analyzer)
-    #ta.single_file_tone_analysis()
+    ta.send_all_tweets_to_text_json(ta.path_name("/../data/tweets.json"))
+    ta.analyze_all_tweets_text_folder(analyzer)
+    ta.single_file_tone_analysis()
 
     df = pd.read_json(ta.path_name("/../data/all_analysis.json"))
-    print(df['sentence_id'])
+    df2 = pd.read_json(ta.path_name("/../data/tweets.json"))
+    df['text'].to_csv('text1.csv')
+    df2['text'].to_csv('text2.csv')
+
+    print("analysis: ", len(df), " tweets: ", len(df2))
 
     '''
     resp = ta.analyze_json_file(analyzer, ta.path_name("/../data/tweets_text/tweet_text_0000.json"))
