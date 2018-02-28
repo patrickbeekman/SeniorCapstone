@@ -3,6 +3,7 @@ import os
 import json
 import re
 from io import StringIO
+from datetime import datetime
 from watson_developer_cloud import ToneAnalyzerV3
 from watson_developer_cloud import WatsonException
 from watson_developer_cloud import WatsonInvalidArgument
