@@ -148,7 +148,7 @@ class MyToneAnalyzer:
         print("text_x: ", cols[-9])
         cols[-9] = 'text'
         merged.columns = cols
-
+        print(merged.columns)
         output_file_path = os.path.dirname(__file__) + "/../data/merged_analysis.json"
         with open(output_file_path, 'w') as file:
             file.write(merged.to_json(orient='records'))
