@@ -23,9 +23,10 @@ class TweetsDataAnalysis:
 
     def graph_tweet_freq_per_month(self, data, filename):
         # Want to show bar graph of number of joy vs sad for each month
-        data.created_at = data.created_at.apply(lambda x: int(str(x)[0:10]))
-        data.created_at = data.created_at.apply(lambda x: datetime.fromtimestamp(x).strftime('%Y-%m-%d')) # %H:%M:%S
-        data.created_at = data.created_at.astype('datetime64[ns]')
+        # data.created_at = data.created_at.apply(lambda x: int(str(x)[0:10]))
+        # data.created_at = data.created_at.apply(lambda x: datetime.fromtimestamp(x).strftime('%Y-%m-%d')) # %H:%M:%S
+        # data.created_at = data.created_at.astype('datetime64[ns]')
+        plt.figure(1)
         data['tone_name'].groupby(data.created_at.dt.month).count().plot(kind="bar", title='Count of tweets per month')
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
 
@@ -41,6 +42,7 @@ class TweetsDataAnalysis:
         months1 = [1-.2,2-.2,3-.2,4-.2,5-.2,6-.2,7-.2,8-.2,9-.2,10-.2,11-.2,12-.2]
         months2 = [1,2,3,4,5,6,7,8,9,10,11,12]
 
+        plt.figure(2)
         ax = plt.subplot(111)
         p1 = ax.bar(months1, joy_counts, width=.2, color='g', align='center')
         p2 = ax.bar(months2, sad_counts, width=.2, color='r', align='center')
@@ -60,18 +62,19 @@ class TweetsDataAnalysis:
         fear_counts = data['month'][data.tone_name == "Fear"].value_counts().sort_index()
         confident_counts = data['month'][data.tone_name == "Confident"].value_counts().sort_index()
         anger_counts = data['month'][data.tone_name == "Anger"].value_counts().sort_index()
-        months1 = [1-.2,2-.2,3-.2,4-.2,5-.2,6-.2,7-.2,8-.2,9-.2,10-.2,11-.2,12-.2]
-        months2 = [1-.1,2-.1,3-.1,4-.1,5-.1,6-.1,7-.1,8-.1,9-.1,10-.1,11-.1,12-.1]
+        months1 = [1-.4,2-.4,3-.4,4-.4,5-.4,6-.4,7-.4,8-.4,9-.4,10-.4,11-.4,12-.4]
+        months2 = [1-.2,2-.2,3-.2,4-.2,5-.2,6-.2,7-.2,8-.2,9-.2,10-.2,11-.2,12-.2]
         months3 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-        months4 = [1+.1, 2+.1, 3+.1, 4+.1, 5+.1, 6+.1, 7+.1, 8+.1, 9+.1, 10+.1, 11+.1, 12+.1]
-        months5 = [1+.2, 2+.2, 3+.2, 4+.2, 5+.2, 6+.2, 7+.2, 8+.2, 9+.2, 10+.2, 11+.2, 12+.2]
+        months4 = [1+.2, 2+.2, 3+.2, 4+.2, 5+.2, 6+.2, 7+.2, 8+.2, 9+.2, 10+.2, 11+.2, 12+.2]
+        months5 = [1+.4, 2+.4, 3+.4, 4+.4, 5+.4, 6+.4, 7+.4, 8+.4, 9+.4, 10+.4, 11+.4, 12+.4]
 
+        plt.figure(3)
         ax = plt.subplot(111)
-        p1 = ax.bar(months1, analytical_counts, width=.1, color='#cef442', align='center')
-        p2 = ax.bar(months2, tentative_counts, width=.1, color='#77f441', align='center')
-        p3 = ax.bar(months3, fear_counts, width=.1, color='#33cc35', align='center')
-        p4 = ax.bar(months4, confident_counts, width=.1, color='#33cc89', align='center')
-        p5 = ax.bar(months5, anger_counts, width=.1, color='#28ccb6', align='center')
+        p1 = ax.bar(months1, analytical_counts, width=.2, color='#cef442', align='center')
+        p2 = ax.bar(months2, tentative_counts, width=.2, color='#ccb526', align='center')
+        p3 = ax.bar(months3, fear_counts, width=.2, color='#c127cc', align='center')
+        p4 = ax.bar(months4, confident_counts, width=.2, color='#26cc3e', align='center')
+        p5 = ax.bar(months5, anger_counts, width=.2, color='#cc262f', align='center')
         plt.ylabel('# Tweets')
         plt.title('All my tweets: Other Emotions by Month')
         plt.xticks(months3, ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
@@ -102,7 +105,7 @@ def main():
     tda.convert_to_datetime(data)
     # tda.max_favorites_of_tweets(data)
     # tda.max_retweets_of_tweets(data)
-    # tda.graph_tweet_freq_per_month(data, 'my_freq_per_month.png')
+    tda.graph_tweet_freq_per_month(data, 'my_freq_per_month.png')
     tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
     tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
 
