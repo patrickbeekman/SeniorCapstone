@@ -18,23 +18,15 @@ class TweetsDataAnalysis:
     def max_retweets_of_tweets(self, data):
         rt_max = np.max(data.retweet_count)
         rt = data[data.retweet_count == rt_max].index[0]
-        # Max FAVs:
+        # Max RTs:
         print("The tweet with the most retweets is: \n{}".format(data['text'][rt]), "with", rt_max, "retweets!")
 
     def graph_tweet_freq_per_month(self, data, filename):
-        # Want to show bar graph of number of joy vs sad for each month
-        # data.created_at = data.created_at.apply(lambda x: int(str(x)[0:10]))
-        # data.created_at = data.created_at.apply(lambda x: datetime.fromtimestamp(x).strftime('%Y-%m-%d')) # %H:%M:%S
-        # data.created_at = data.created_at.astype('datetime64[ns]')
         plt.figure(1)
         data['tone_name'].groupby(data.created_at.dt.month).count().plot(kind="bar", title='Count of tweets per month')
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
 
     def graph_joy_vs_sad_per_month(self, data, filename):
-        # Want to show bar graph of number of joy vs sad for each month
-        # data.created_at = data.created_at.apply(lambda x: int(str(x)[0:10]))
-        # data.created_at = data.created_at.apply(lambda x: datetime.fromtimestamp(x).strftime('%Y-%m-%d')) # %H:%M:%S
-        # data.created_at = data.created_at.astype('datetime64[ns]')
         data.set_index(data["created_at"], inplace=True)
         data["month"] = data['created_at'].apply(lambda x: x.strftime('%m'))
         joy_counts = data['month'][data.tone_name == "Joy"].value_counts().sort_index()
@@ -53,9 +45,6 @@ class TweetsDataAnalysis:
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
 
     def graph_other_emotions_per_month(self, data, filename):
-        # data.created_at = data.created_at.apply(lambda x: int(str(x)[0:10]))
-        # data.created_at = data.created_at.apply(lambda x: datetime.fromtimestamp(x).strftime('%Y-%m-%d')) # %H:%M:%S
-        # data.created_at = data.created_at.astype('datetime64[ns]')
         data["month"] = data['created_at'].apply(lambda x: x.strftime('%m'))
         analytical_counts = data['month'][data.tone_name == "Analytical"].value_counts().sort_index()
         tentative_counts = data['month'][data.tone_name == "Tentative"].value_counts().sort_index()
@@ -81,13 +70,32 @@ class TweetsDataAnalysis:
         plt.legend((p1[0], p2[0], p3[0], p4[0], p5[0]), ('Analytical', 'Tentative', 'Fear', 'Confident', 'Anger'))
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
 
+    def graph_pie_chart(self, data, filename):
+        total = len(data.index)
+        joy_counts = len(data[data.tone_name == "Joy"])
+        sad_counts = len(data[data.tone_name == "Sadness"])
+        analytical_counts = len(data[data.tone_name == "Analytical"])
+        tentative_counts = len(data[data.tone_name == "Tentative"])
+        fear_counts = len(data[data.tone_name == "Fear"])
+        confident_counts = len(data[data.tone_name == "Confident"])
+        anger_counts = len(data[data.tone_name == "Anger"])
+        sizes = [joy_counts, sad_counts, analytical_counts, tentative_counts, fear_counts, confident_counts, anger_counts]
+        sizes = [(x / total) * 100 for x in sizes]
+        labels = 'Joy', 'Sadness', 'Analytical', 'Tentative', 'Fear', 'Confident', 'Anger'
+
+        plt.figure(4)
+        plt.title('My Tweets Emotions Pie Chart')
+        plt.pie(sizes, labels=labels, autopct='%1.1f%%')
+        plt.axis('equal')
+        plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
+
 
     def get_flattened_data(self, filename, record_path, meta=[]):
         with open(filename) as f:
             data = json.load(f)
         data_flattened = pd.io.json.json_normalize(data, record_path=record_path, meta=meta)
-        print(data_flattened.head())
-        return data_flattened #self.convert_to_datetime(data_flattened)
+        #print(data_flattened.head())
+        return data_flattened
 
     def convert_to_datetime(self, data):
         data.created_at = data.created_at.apply(lambda x: int(str(x)[0:10]))
@@ -100,14 +108,14 @@ def main():
     tda = TweetsDataAnalysis()
 
     data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count'])
-    #merged_analysis = pd.read_json(os.path.dirname(__file__) + "/../data/merged_analysis.json", orient='records')
-    print(list(data.columns.values))
+
     tda.convert_to_datetime(data)
     # tda.max_favorites_of_tweets(data)
     # tda.max_retweets_of_tweets(data)
-    tda.graph_tweet_freq_per_month(data, 'my_freq_per_month.png')
-    tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
-    tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
+    # tda.graph_tweet_freq_per_month(data, 'my_freq_per_month.png')
+    # tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
+    # tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
+    tda.graph_pie_chart(data, 'my_tweets_pie_chart.png')
 
 
 if __name__ == "__main__":
