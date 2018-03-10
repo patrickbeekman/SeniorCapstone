@@ -34,8 +34,21 @@ class TweetsDataAnalysis:
         data.created_at = data.created_at.apply(lambda x: int(str(x)[0:10]))
         data.created_at = data.created_at.apply(lambda x: datetime.fromtimestamp(x).strftime('%Y-%m-%d')) # %H:%M:%S
         data.created_at = data.created_at.astype('datetime64[ns]')
-        january_joy = data.loc[(data['created_at'].dt.month == 1) & (data.tone_name == "Joy")]
-        print(january_joy)
+        data.set_index(data["created_at"], inplace=True)
+        data["month"] = data['created_at'].apply(lambda x: x.strftime('%m'))
+        joy_counts = data['month'][data.tone_name == "Joy"].value_counts().sort_index()
+        sad_counts = data['month'][data.tone_name == "Sadness"].value_counts().sort_index()
+        months1 = [1-.2,2-.2,3-.2,4-.2,5-.2,6-.2,7-.2,8-.2,9-.2,10-.2,11-.2,12-.2]
+        months2 = [1,2,3,4,5,6,7,8,9,10,11,12]
+        #months = data["month"].unique()
+        ax = plt.subplot(111)
+        p1 = ax.bar(months1, joy_counts, width=.2, color='g', align='center')
+        p2 = ax.bar(months2, sad_counts, width=.2, color='r', align='center')
+        plt.ylabel('# Tweets')
+        plt.title('All my tweets: Joy vs Sad by Month')
+        plt.xticks(months2, ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
+        plt.legend((p1[0], p2[0]), ('Joy', 'Sad'))
+        plt.show()
 
     def get_flattened_data(self, filename, record_path, meta=[]):
         with open(filename) as f:
