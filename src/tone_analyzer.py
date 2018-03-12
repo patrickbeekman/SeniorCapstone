@@ -26,7 +26,7 @@ class MyToneAnalyzer:
     def analyze_json_file(self, analyzer, filename):
         with open(filename) as tone_json:
             try:
-                tone_resp = analyzer.tone(tone_json.read())
+                tone_resp = analyzer.tone(tone_json.read(), content_type='application/json')
             except WatsonException as e:
                 print("WatsonException", e)
                 exit(0)
