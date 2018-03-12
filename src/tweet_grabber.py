@@ -128,13 +128,15 @@ def main():
     if bearer_token is not None:
         tweets = tg.get_user_timeline(bearer_token, 'patrickbeekman')
 
-    json_filename = os.path.dirname(__file__) + "/../tweets.json"
+    json_filename = os.path.dirname(__file__) + "/../data/tweets.json"
 
-    os.remove(json_filename)
+    try:
+        os.remove(json_filename) # remove old file
+    except FileNotFoundError:
+        print("no need to delete file doesn't exist")
     tg.save_to_json(tweets, json_filename)
 
-    df = pd.read_json(json_filename)
-    print(list(df))
+    #df = pd.read_json(json_filename)
 
 if __name__ == "__main__":
     main()
