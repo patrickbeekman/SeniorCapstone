@@ -11,12 +11,15 @@ import datetime
 
 now = datetime.datetime.now()
 ta = tone_analyzer.MyToneAnalyzer()
-analyzer = ta.create_connection(now.strftime("%Y-%m-%d"))
+analyzer = ta.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], now.strftime("%Y-%m-%d"))
 
 
 def test_good_connection():
-    tone = ta.create_connection(now.strftime("%Y-%m-%d %H:%M"))
+    tone = ta.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], now.strftime("%Y-%m-%d %H:%M"))
     assert tone is not None
+
+def test_bad_connection():
+    assert True
 
 
 def test_bad_json_file():
@@ -41,12 +44,3 @@ def test_dump_json_to_file():
     os.remove(output_file)
     assert new_data is not None
 
-def test_strip_text_from_json():
-    tweets_json = pd.read_json(ta.path_name("/../tests/small_tweets.json"))
-    first_text = tweets_json[:1]['text'].to_string()[4:14]
-    output_file = ta.path_name("/../tests/stripped_text.json")
-    ta.clean_text_write_to_json(tweets_json[:1]['text'], output_file)
-    with open(output_file) as json_data:
-        new_data = json.load(json_data)
-    os.remove(output_file)
-    assert new_data['text'][0:10] == first_text

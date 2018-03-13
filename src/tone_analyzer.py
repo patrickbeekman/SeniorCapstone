@@ -12,11 +12,11 @@ from watson_developer_cloud import WatsonInvalidArgument
 
 class MyToneAnalyzer:
 
-    def create_connection(self, version_num):
+    def create_connection(self, username, password, version_num):
         try:
             tone_analyzer = ToneAnalyzerV3(
-                username=os.environ['TONE_U'],
-                password=os.environ['TONE_P'],
+                username=username,
+                password=password,
                 version=version_num)
         except WatsonInvalidArgument as e:
             print(e)
@@ -50,13 +50,13 @@ class MyToneAnalyzer:
 
     # analyzes all the tweet_text files in /data/tweets_text/ and saves the
     # analysis files to /data/analysis/
-    def analyze_all_tweets_text_folder(self, analyzer):
-        tweets_path = os.path.dirname(__file__) + "/../data/tweets_text/"
-        for filename in os.listdir(tweets_path):
+    def analyze_all_tweets_text_folder(self, analyzer, tweet_text_path):
+        #tweets_path = os.path.dirname(__file__) + "/../data/tweets_text/"
+        for filename in os.listdir(tweet_text_path):
             num = filename.split('tweet_text_')[1].split('.')[0]
             print("analyzing : " + num.zfill(4))
-            tone_resp = self.analyze_json_file(analyzer, tweets_path + filename)
-            output_file = tweets_path + "/../analysis/tone_tweet_" + str(num).zfill(4) + ".json"
+            tone_resp = self.analyze_json_file(analyzer, tweet_text_path + filename)
+            output_file = tweet_text_path + "/../analysis/tone_tweet_" + str(num).zfill(4) + ".json"
             self.write_only_sentence_tone_to_file(tone_resp, output_file)
 
 
@@ -73,16 +73,17 @@ class MyToneAnalyzer:
         with open(newfilename, 'w') as f:
             f.write(new_df)
 
-    # Creates a new tone analysis ready json file of 90 tweets per file
+    # Creates a new tone analysis ready json file of 99 tweets per file
     # Saves it in /data/tweets_text
-    def send_all_tweets_to_text_json(self, input_filename):
+    def incremental_send_all_tweets_to_text_json(self, input_filename, data_path):
         num = 0
         start = 0
         stop = 99
         increment = 99
         df = pd.read_json(input_filename)
         while start < (len(df)):
-            newfilename = self.path_name("/../data/tweets_text/tweet_text" + "_" + str(num).zfill(4) + ".json")
+            #newfilename = self.path_name("/../data/tweets_text/tweet_text" + "_" + str(num).zfill(4) + ".json")
+            newfilename = data_path + "tweet_text_" + str(num).zfill(4) + ".json"
             subset = df[start:stop]['text']
             self.clean_text_write_to_json(subset, newfilename)
             start += increment
@@ -90,14 +91,15 @@ class MyToneAnalyzer:
             num += 1
 
 
-    def single_file_tone_analysis(self):
+    def create_single_file_tone_analysis(self, analysis_folder, output_path):
         count = 0
-        output_file = self.path_name("/../data/all_analysis.json")
-        dirFiles = os.listdir(self.path_name("/../data/analysis/"))
+        #output_file = self.path_name("/../data/all_analysis.json")
+        #dirFiles = os.listdir(self.path_name("/../data/analysis/"))
+        dirFiles = os.listdir(analysis_folder)
         dirFiles.sort()
         print(dirFiles)
 
-        with open(output_file, 'w') as outfile:
+        with open(output_path, 'w') as outfile:
             first = True
             for file in dirFiles:
                 if first:
@@ -106,16 +108,17 @@ class MyToneAnalyzer:
                 else:
                     outfile.write(',')
 
-                path = self.path_name("/../data/analysis/" + file)
+                #path = self.path_name("/../data/analysis/" + file)
+                path = analysis_folder + file
                 data = pd.read_json(path)
                 data['sentence_id'] = range(count, count+len(data))
                 count += len(data)
                 outfile.write(data.to_json(orient='records').strip()[1:-1])
             outfile.write(']')
 
-    def temp_file_cleanup(self):
-        analysis_path = self.path_name("/../data/analysis/")
-        tweets_text_path = self.path_name("/../data/tweets_text/")
+    def temp_file_cleanup(self, analysis_path, tweets_text_path):
+        #analysis_path = self.path_name("/../data/analysis/")
+        #tweets_text_path = self.path_name("/../data/tweets_text/")
         for the_file in os.listdir(analysis_path):
             file_path = os.path.join(analysis_path, the_file)
             try:
@@ -128,13 +131,12 @@ class MyToneAnalyzer:
             try:
                 if os.path.isfile(file_path):
                     os.unlink(file_path)
-                    # elif os.path.isdir(file_path): shutil.rmtree(file_path)
             except Exception as e:
                 print(e)
 
-    def attach_analysis_to_tweet(self):
-        analysis_path = os.path.dirname(__file__) + "/../data/all_analysis.json"
-        tweets_path = os.path.dirname(__file__) + "/../data/tweets.json"
+    def attach_analysis_to_tweet(self, analysis_path, tweets_path, merged_path):
+        #analysis_path = self.path_name("/../data/all_analysis.json")
+        #tweets_path = self.path_name("/../data/tweets.json")
 
         analysis = pd.read_json(analysis_path)
         tweets = pd.read_json(tweets_path)
@@ -149,8 +151,8 @@ class MyToneAnalyzer:
         cols[-9] = 'text'
         merged.columns = cols
         print(merged.columns)
-        output_file_path = os.path.dirname(__file__) + "/../data/merged_analysis.json"
-        with open(output_file_path, 'w') as file:
+        #output_file_path = self.path_name("/../data/merged_analysis.json")
+        with open(merged_path, 'w') as file:
             file.write(merged.to_json(orient='records'))
 
     def dump_json_to_file(self, data, filename):
@@ -162,16 +164,20 @@ class MyToneAnalyzer:
 
 def main():
     ta = MyToneAnalyzer()
-    analyzer = ta.create_connection('2018-02-24')
+    analyzer = ta.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], '2018-02-24')
 
     # Uncomment to read in a tweets.json file with all of your tweets and seperate them into
     # files with just the text and then analyze each tweet.
-    ta.send_all_tweets_to_text_json(ta.path_name("/../data/tweets.json"))
-    ta.send_all_tweets_to_text_json(ta.path_name("/../data/tweets.json"))
-    ta.analyze_all_tweets_text_folder(analyzer)
-    ta.single_file_tone_analysis()
-    ta.temp_file_cleanup()
-    ta.attach_analysis_to_tweet()
+    ta.incremental_send_all_tweets_to_text_json(ta.path_name("/../data/tweets.json"),
+                                                ta.path_name("/../data/tweets_text/"))
+    ta.analyze_all_tweets_text_folder(analyzer, ta.path_name("/../data/tweets_text/"))
+    ta.create_single_file_tone_analysis(ta.path_name("/../data/analysis/"),
+                                        ta.path_name("/../data/all_analysis.json"))
+    ta.temp_file_cleanup(ta.path_name("/../data/analysis/"),
+                         ta.path_name("/../data/tweets_text/"))
+    ta.attach_analysis_to_tweet(ta.path_name("/../data/all_analysis.json"),
+                                ta.path_name("/../data/tweets.json"),
+                                ta.path_name("/../data/merged_analysis.json"))
 
     '''
     resp = ta.analyze_json_file(analyzer, ta.path_name("/../data/tweets_text/tweet_text_0000.json"))
