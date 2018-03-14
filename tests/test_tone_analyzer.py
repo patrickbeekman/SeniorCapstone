@@ -2,6 +2,7 @@ import pytest
 import os
 import sys
 import json
+import numpy as np
 import pandas as pd
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + "/../src/")
@@ -19,18 +20,21 @@ def test_good_connection():
     assert tone is not None
 
 def test_bad_connection():
-    assert True
+    try:
+        tone = ta.create_connection("0000000", "11111111", now.strftime("%Y-%m-%d %H:%M"))
+        assert False
+    except Exception as e:
+        assert True
 
 
 def test_bad_json_file():
-    with pytest.raises(SystemExit) as e:
-        ta.analyze_json_file(analyzer, os.path.dirname(__file__) + "/bad_text.json")
-    assert e.type == SystemExit
+    resp = ta.analyze_json_file(analyzer, os.path.dirname(__file__) + "/bad_text.json")
+    assert resp is None
 
 
 def test_good_json_file():
     resp = ta.analyze_json_file(analyzer, os.path.dirname(__file__) + "/good_text.json")
-    assert resp != ""
+    assert resp is not None
 
 
 def test_dump_json_to_file():
@@ -43,4 +47,13 @@ def test_dump_json_to_file():
         new_data = json.load(json_data)
     os.remove(output_file)
     assert new_data is not None
+
+def test_only_write_sentence_to_file():
+    tone = ta.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], now.strftime("%Y-%m-%d %H:%M"))
+    resp = ta.analyze_json_file(analyzer, os.path.dirname(__file__) + "/good_text.json")
+    outfile = os.path.dirname(__file__) + "/temp.json"
+    ta.write_only_sentence_tone_to_file(resp, outfile)
+    data = pd.read_json(outfile)
+    os.remove(outfile)
+    assert list(data) != 'document_tone'
 

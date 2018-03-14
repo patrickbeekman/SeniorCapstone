@@ -29,7 +29,7 @@ class MyToneAnalyzer:
                 tone_resp = analyzer.tone(tone_json.read(), content_type='application/json')
             except WatsonException as e:
                 print("WatsonException", e)
-                exit(0)
+                return None
         return tone_resp
 
     def write_only_sentence_tone_to_file(self, resp, output_file):
@@ -47,6 +47,9 @@ class MyToneAnalyzer:
         except Exception as e:
             print(e)
 
+    def dump_json_to_file(self, data, filename):
+        with open(filename, 'w') as out:
+            json.dump(data, out)
 
     # analyzes all the tweet_text files in /data/tweets_text/ and saves the
     # analysis files to /data/analysis/
@@ -155,9 +158,6 @@ class MyToneAnalyzer:
         with open(merged_path, 'w') as file:
             file.write(merged.to_json(orient='records'))
 
-    def dump_json_to_file(self, data, filename):
-        with open(filename, 'w') as out:
-            json.dump(data, out)
 
     def path_name(self, filename):
         return os.path.dirname(__file__) + filename
