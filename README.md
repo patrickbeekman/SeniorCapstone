@@ -41,8 +41,9 @@ The bulk of the usage of the application in its current state is done through th
 4. Open the file ```tone_analyzer.py```
    1. Scroll to the main method at the bottom
    2. Edit the parameters of the create_connection() method call to use your username and password as string values. The third param is just for version purposes and can be changed if wanted.
-   3. One last thing we will have to do is change the first parameter of the ```incremental_send_all_tweets_to_text_json()``` method to be the path to your json file of the tweets from step 2.
-   4. Now we should be able to run the script and it will analyze the emotion of each tweet and merge the tone with the original json of all the tweets. This file will be very helpful for the data analysis next. If you didnt change anything else in the script it should be saved ```/project_root/data/merged_analysis.json```
+   3. We will have to do is change the first parameter of the ```incremental_send_all_tweets_to_text_json()``` method to be the path to your json file of the tweets from step 2.
+   4. Next also change the second parameter of the ```attach_analysis_to_tweet()``` method to the path of the json file from step 2.
+   5. Now we should be able to run the script and it will analyze the emotion of each tweet and merge the tone with the original json of all the tweets. This file will be very helpful for the data analysis next. If you didnt change anything else in the script it should be saved ```/project_root/data/merged_analysis.json```
 5. Open the file ```tweets_data_analysis.py```
    1. If you didn't change the filepath of the merged analysis then you can just run the script as is. Your plots will be created and saved to ```/project_root/data/plots/```
       * If you did change the filepath then edit the first parameter of the ```get_flattened_data()``` method call to be the new filepath.
