@@ -107,14 +107,14 @@ class TweetsDataAnalysis:
 def main():
     tda = TweetsDataAnalysis()
 
-    data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count'])
+    data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/gray_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count'])
 
     tda.convert_to_datetime(data)
-    # tda.max_favorites_of_tweets(data)
-    # tda.max_retweets_of_tweets(data)
-    # tda.graph_tweet_freq_per_month(data, 'my_freq_per_month.png')
-    # tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
-    # tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
+    tda.max_favorites_of_tweets(data)
+    tda.max_retweets_of_tweets(data)
+    tda.graph_tweet_freq_per_month(data, 'my_freq_per_month.png')
+    tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
+    #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
     tda.graph_pie_chart(data, 'my_tweets_pie_chart.png')
 
 

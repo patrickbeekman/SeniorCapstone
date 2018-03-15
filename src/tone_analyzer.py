@@ -168,7 +168,7 @@ def main():
 
     # Uncomment to read in a tweets.json file with all of your tweets and seperate them into
     # files with just the text and then analyze each tweet.
-    ta.incremental_send_all_tweets_to_text_json(ta.path_name("/../data/tweets.json"),
+    ta.incremental_send_all_tweets_to_text_json(ta.path_name("/../data/graysons_tweets.json"),
                                                 ta.path_name("/../data/tweets_text/"))
     ta.analyze_all_tweets_text_folder(analyzer, ta.path_name("/../data/tweets_text/"))
     ta.create_single_file_tone_analysis(ta.path_name("/../data/analysis/"),
@@ -176,8 +176,8 @@ def main():
     ta.temp_file_cleanup(ta.path_name("/../data/analysis/"),
                          ta.path_name("/../data/tweets_text/"))
     ta.attach_analysis_to_tweet(ta.path_name("/../data/all_analysis.json"),
-                                ta.path_name("/../data/tweets.json"),
-                                ta.path_name("/../data/merged_analysis.json"))
+                                ta.path_name("/../data/graysons_tweets.json"),
+                                ta.path_name("/../data/gray_merged_analysis.json"))
 
     '''
     resp = ta.analyze_json_file(analyzer, ta.path_name("/../data/tweets_text/tweet_text_0000.json"))

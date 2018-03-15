@@ -48,7 +48,7 @@ def test_dump_json_to_file():
     os.remove(output_file)
     assert new_data is not None
 
-def test_only_write_sentence_to_file():
+def test_write_only_sentence_to_file():
     tone = ta.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], now.strftime("%Y-%m-%d %H:%M"))
     resp = ta.analyze_json_file(analyzer, os.path.dirname(__file__) + "/good_text.json")
     outfile = os.path.dirname(__file__) + "/temp.json"
