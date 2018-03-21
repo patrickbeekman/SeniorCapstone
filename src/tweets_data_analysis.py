@@ -82,7 +82,7 @@ class TweetsDataAnalysis:
                         series[index] = 0
                         series.sort_index()
                 else:
-                    index = str(i)
+                    index = str(i+1)
                     try:
                         series[index]
                     except KeyError:
@@ -159,14 +159,16 @@ def main():
 
     data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/gray_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count'])
 
+    name = "grayson"
+
     tda.convert_to_datetime(data)
     tda.max_favorites_of_tweets(data)
     tda.max_retweets_of_tweets(data)
-    tda.graph_tweet_freq_per_month(data, 'leslies_per_month.png')
+    tda.graph_tweet_freq_per_month(data, name + 's_per_month.png')
     #tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
-    tda.graph_joy_vs_sad_percent_stacked(data, 'leslies_tweets_joy_vs_sad_stacked_bar.png', "@leslieroja_")
+    tda.graph_joy_vs_sad_percent_stacked(data, name + 's_tweets_joy_vs_sad_stacked_bar.png', "@grauson")
     #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
-    tda.graph_pie_chart(data, 'leslies_pie_chart.png')
+    tda.graph_pie_chart(data, name + 's_pie_chart.png')
 
 
 if __name__ == "__main__":
