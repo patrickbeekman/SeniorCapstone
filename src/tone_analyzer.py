@@ -3,7 +3,7 @@ import os
 import json
 import re
 from io import StringIO
-from datetime import datetime
+import datetime
 from watson_developer_cloud import ToneAnalyzerV3
 from watson_developer_cloud import WatsonException
 from watson_developer_cloud import WatsonInvalidArgument
@@ -19,8 +19,7 @@ class MyToneAnalyzer:
                 password=password,
                 version=version_num)
         except WatsonInvalidArgument as e:
-            print(e)
-            exit(0)
+            return None
         return tone_analyzer
 
     def analyze_json_file(self, analyzer, filename):
@@ -28,8 +27,8 @@ class MyToneAnalyzer:
             try:
                 tone_resp = analyzer.tone(tone_json.read(), content_type='application/json')
             except WatsonException as e:
-                print("WatsonException", e)
-                return None
+                print("WatsonException:", e)
+                exit(0)
         return tone_resp
 
     def write_only_sentence_tone_to_file(self, resp, output_file):
@@ -54,12 +53,15 @@ class MyToneAnalyzer:
     # analyzes all the tweet_text files in /data/tweets_text/ and saves the
     # analysis files to /data/analysis/
     def analyze_all_tweets_text_folder(self, analyzer, tweet_text_path):
+        if analyzer is None:
+            raise ConnectionError("Analyzer not connected")
+            return
         #tweets_path = os.path.dirname(__file__) + "/../data/tweets_text/"
         for filename in os.listdir(tweet_text_path):
             num = filename.split('tweet_text_')[1].split('.')[0]
             print("analyzing : " + num.zfill(4))
             tone_resp = self.analyze_json_file(analyzer, tweet_text_path + filename)
-            output_file = tweet_text_path + "/../analysis/tone_tweet_" + str(num).zfill(4) + ".json"
+            output_file = tweet_text_path + "../analysis/tone_tweet_" + str(num).zfill(4) + ".json"
             self.write_only_sentence_tone_to_file(tone_resp, output_file)
 
 
@@ -164,7 +166,7 @@ class MyToneAnalyzer:
 
 def main():
     ta = MyToneAnalyzer()
-    analyzer = ta.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], '2018-02-24')
+    analyzer = ta.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], datetime.datetime.now.strftime("%Y-%m-%d %H:%M"))
 
     # Uncomment to read in a tweets.json file with all of your tweets and seperate them into
     # files with just the text and then analyze each tweet.
