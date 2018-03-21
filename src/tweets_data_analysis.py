@@ -44,6 +44,32 @@ class TweetsDataAnalysis:
         plt.legend((p1[0], p2[0]), ('Joy', 'Sad'))
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
 
+    def graph_joy_vs_sad_percent_stacked(self, data, filename, twitter_name):
+        data.set_index(data["created_at"], inplace=True)
+        data["month"] = data['created_at'].apply(lambda x: x.strftime('%m'))
+        joy_counts = data['month'][data.tone_name == "Joy"].value_counts().sort_index()
+        sad_counts = data['month'][data.tone_name == "Sadness"].value_counts().sort_index()
+        months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+
+        # Based on https://python-graph-gallery.com/13-percent-stacked-barplot/
+        plt.figure(2)
+        ax = plt.subplot(111)
+        totals = [i + j for i, j in zip(joy_counts, sad_counts)]
+        greenBars = [i / j * 100 for i, j in zip(joy_counts, totals)]
+        redBars = [i / j * 100 for i, j in zip(sad_counts, totals)]
+
+        barWidth = 0.85
+        # Create green Bars
+        plt.bar(months, greenBars, color='#b5ffb9', edgecolor='white', width=barWidth, label="Joy")
+        # Create red Bars
+        plt.bar(months, redBars, bottom=greenBars, color='#f9bc86', edgecolor='white', width=barWidth, label="Sad")
+        plt.ylabel('# Tweets')
+        plt.title(twitter_name + '\'s tweets: Joy vs Sad by Month')
+        plt.xticks(months, ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
+        plt.legend()
+        plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
+
+
     def graph_other_emotions_per_month(self, data, filename):
         data["month"] = data['created_at'].apply(lambda x: x.strftime('%m'))
         analytical_counts = data['month'][data.tone_name == "Analytical"].value_counts().sort_index()
@@ -107,13 +133,14 @@ class TweetsDataAnalysis:
 def main():
     tda = TweetsDataAnalysis()
 
-    data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/gray_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count'])
+    data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count'])
 
     tda.convert_to_datetime(data)
     tda.max_favorites_of_tweets(data)
     tda.max_retweets_of_tweets(data)
     tda.graph_tweet_freq_per_month(data, 'my_freq_per_month.png')
-    tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
+    #tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
+    tda.graph_joy_vs_sad_percent_stacked(data, 'my_tweets_joy_vs_sad_stacked_bar.png', "@patrickbeekman")
     #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
     tda.graph_pie_chart(data, 'my_tweets_pie_chart.png')
 
