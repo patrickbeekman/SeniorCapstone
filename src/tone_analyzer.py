@@ -166,7 +166,7 @@ class MyToneAnalyzer:
 
 def main():
     ta = MyToneAnalyzer()
-    analyzer = ta.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], datetime.datetime.now.strftime("%Y-%m-%d %H:%M"))
+    analyzer = ta.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], '2018-02-24')
 
     # Uncomment to read in a tweets.json file with all of your tweets and seperate them into
     # files with just the text and then analyze each tweet.

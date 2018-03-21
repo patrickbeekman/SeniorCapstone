@@ -36,7 +36,7 @@ class TweepyGrabber:
 def main():
     grabber = TweepyGrabber()
     api = grabber.api_connect(os.environ['TWEET_PUB'], os.environ['TWEET_PRI'])
-    grabber.get_users_timeline(api, "patrickbeekman", "graysons_tweets.json")
+    grabber.get_users_timeline(api, "leslieroja_", "graysons_tweets.json")
 
 if __name__ == "__main__":
     main()
