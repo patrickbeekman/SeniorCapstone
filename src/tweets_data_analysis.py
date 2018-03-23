@@ -5,6 +5,8 @@ import os
 from pandas.io.json import json_normalize
 from datetime import datetime
 import matplotlib.pyplot as plt
+import tweepy
+import tweepy_grabber
 
 
 class TweetsDataAnalysis:
@@ -153,22 +155,37 @@ class TweetsDataAnalysis:
         data.created_at = data.created_at.astype('datetime64[ns]')
         return data
 
+    def exploring_geo_data(self, twitter_handle):
+        with open(os.path.dirname(__file__) + "/../data/" + twitter_handle + "_merged_analysis.json") as f:
+            normal_data = json.load(f)
+        normal_data = pd.DataFrame(normal_data)
+        count = 0
+        for r in normal_data['geo']:
+            if r is not None:
+                count+=1
+        print(count)
+        print(count/len(normal_data))
+
+        tweep = tweepy_grabber.TweepyGrabber()
+
+
 
 def main():
     tda = TweetsDataAnalysis()
 
-    data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/gray_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count'])
+    twitter_handle = "gray"
 
-    name = "grayson"
-
-    tda.convert_to_datetime(data)
-    tda.max_favorites_of_tweets(data)
-    tda.max_retweets_of_tweets(data)
-    tda.graph_tweet_freq_per_month(data, name + 's_per_month.png')
-    #tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
-    tda.graph_joy_vs_sad_percent_stacked(data, name + 's_tweets_joy_vs_sad_stacked_bar.png', "@grauson")
-    #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
-    tda.graph_pie_chart(data, name + 's_pie_chart.png')
+    tda.exploring_geo_data(twitter_handle)
+    # data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/" + twitter_handle + "_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count', 'geo_enabled']) #'geo', 'place'
+    #
+    # tda.convert_to_datetime(data)
+    # tda.max_favorites_of_tweets(data)
+    # tda.max_retweets_of_tweets(data)
+    # tda.graph_tweet_freq_per_month(data, twitter_handle + 's_per_month.png')
+    # #tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
+    # tda.graph_joy_vs_sad_percent_stacked(data, twitter_handle + 's_tweets_joy_vs_sad_stacked_bar.png', twitter_handle)
+    # #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
+    # tda.graph_pie_chart(data, twitter_handle + 's_pie_chart.png')
 
 
 if __name__ == "__main__":
