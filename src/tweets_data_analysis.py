@@ -182,6 +182,9 @@ def main():
 
     twitter_handle = "gray"
 
+    with open("./../data/followers/@sassy_buddha_followers.json") as file:
+        data = pd.read_json(file)
+
     tda.exploring_geo_data(twitter_handle)
     # data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/" + twitter_handle + "_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count', 'geo_enabled']) #'geo', 'place'
     #

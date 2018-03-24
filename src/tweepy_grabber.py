@@ -1,4 +1,5 @@
 import tweepy
+import pandas as pd
 import time
 import sys
 import os
@@ -57,17 +58,49 @@ class TweepyGrabber:
                 users.extend(self.api.lookup_users(ids[start:end]))
 
             except tweepy.RateLimitError:
-                print("RateLimitError...waiting 1000 seconds to continue")
-                time.sleep(1000)
+                print("RateLimitError...waiting 900 seconds to continue")
+                time.sleep(900)
                 users.extend(self.api.lookup_users(ids[start:end])._json)
 
         return users
 
+    def get_followers_of_followers(self, users, output_path):
+
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+        folder_files = os.listdir(output_path)
+
+        large_users = []
+        for user in users:
+            sn = user._json['screen_name']
+
+            # Dont get private users and don't get if json file already saved
+            if user._json['protected'] is True:
+                continue
+            for f in folder_files:
+                if f[1:f.find('_')] == sn:
+                    should_continue = True
+                    break
+            if should_continue:
+                should_continue = False
+                continue
+
+            print("collecting users from ", sn)
+            this_users = self.get_users_followers(sn)
+            out_filename = output_path + "@" + sn + "_followers.json"
+            with open(out_filename, 'w') as file:
+                json.dump([u._json for u in this_users], file)
+        return large_users
+
 def main():
     grabber = TweepyGrabber()
-    twitter_handle = "_sydalee"
+    twitter_handle = "patrickbeekman"
     #grabber.get_users_timeline(twitter_handle, "@" + twitter_handle + "_tweets.json")
-    followers = grabber.get_users_followers("patrickbeekman")
+    # followers = grabber.get_users_followers(twitter_handle)
+    # with open("./../data/followers/@patrickbeekman_followers.json", 'w') as file:
+    #     json.dump([u._json for u in followers], file)
+    followers = pd.read_json("./../data/followers/@patrickbeekman_followers.json")
+    large = grabber.get_followers_of_followers(followers, os.path.dirname(__file__) + "/../data/followers/")
     print("hi")
 
 if __name__ == "__main__":
