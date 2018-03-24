@@ -167,6 +167,13 @@ class TweetsDataAnalysis:
         print(count/len(normal_data))
 
         tweep = tweepy_grabber.TweepyGrabber()
+        followers = tweep.get_users_followers("patrickbeekman")
+        geo_count = 0
+        for user in followers:
+            if user._json['geo_enabled']:
+                geo_count+=1
+        print(geo_count)
+        print(geo_count/len(followers)*100)
 
 
 

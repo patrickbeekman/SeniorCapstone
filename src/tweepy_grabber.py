@@ -50,7 +50,6 @@ class TweepyGrabber:
             e = sys.exc_info()[0]
             print("Error: %s" % e)
 
-
         for start in range(0, len(ids), 100):
             end = start + 100
 
