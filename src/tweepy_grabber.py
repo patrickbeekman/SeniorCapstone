@@ -1,5 +1,6 @@
 import tweepy
 import time
+import sys
 import os
 import json
 
@@ -11,7 +12,7 @@ class TweepyGrabber:
 
     def api_connect(self, consumer_key, consumer_secret):
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-        api = tweepy.API(auth)
+        api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, compression=True)
         return api
 
     def get_users_timeline(self, screen_name, output_file_name):
@@ -38,13 +39,30 @@ class TweepyGrabber:
             json.dump([status._json for status in all_tweets], file)
 
     def get_users_followers(self, screen_name):
-        ids = []
-        for page in tweepy.Cursor(self.api.followers_ids, screen_name=screen_name).pages():
-            ids.extend(page)
-            time.sleep(5)
+        users = []
+        try:
+            ids = []
+            for page in tweepy.Cursor(self.api.followers_ids, screen_name=screen_name).pages():
+                ids.extend(page)
+        except tweepy.TweepError:
+            print("tweepy.TweepError=")
+        except:
+            e = sys.exc_info()[0]
+            print("Error: %s" % e)
 
-        followers = [user for user in self.api.lookup_users(user_ids=ids)]
-        return followers
+
+        for start in range(0, len(ids), 100):
+            end = start + 100
+
+            try:
+                users.extend(self.api.lookup_users(ids[start:end]))
+
+            except tweepy.RateLimitError:
+                print("RateLimitError...waiting 1000 seconds to continue")
+                time.sleep(1000)
+                users.extend(self.api.lookup_users(ids[start:end])._json)
+
+        return users
 
 def main():
     grabber = TweepyGrabber()
