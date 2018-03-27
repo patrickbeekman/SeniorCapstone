@@ -37,7 +37,7 @@ def test_bad_get_users_timeline():
 def test_user_not_exist_get_users_timeline():
     api = grabber.api_connect(os.environ['TWEET_PUB'], os.environ['TWEET_PRI'])
     try:
-        grabber.get_users_timeline(api, "ponlejkdls", "outfile.json")
+        grabber.get_users_timeline("ponlejkdls", "outfile.json")
         assert False
     except Exception:
         assert True
@@ -45,7 +45,7 @@ def test_user_not_exist_get_users_timeline():
 def test_success_get_users_timeline():
     api = grabber.api_connect(os.environ['TWEET_PUB'], os.environ['TWEET_PRI'])
     try:
-        grabber.get_users_timeline(api, "donaldglover", "donald.json")
+        grabber.get_users_timeline("donaldglover", "donald.json")
     except Exception:
         assert False
     outputfile = os.path.dirname(__file__) + "/../data/donald.json"

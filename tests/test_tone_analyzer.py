@@ -73,22 +73,22 @@ def test_bad_analyze_all_tweets_text_folder():
         assert e.type == SystemExit
 
 def test_good_analyze_all_tweets_text_folder():
-    test_folder = "./test_dir/"
+    test_folder = os.path.dirname(__file__) + "/test_dir/"
     try:
         os.mkdir(test_folder)
     except Exception as e:
         print(e)
     d = {'text': ["Happiness comes in a bottle. Hello old friend."]}
     new_df = pd.DataFrame(data=d).to_json(orient='records')[1:-1]
-    with open("./test_dir/tweet_text_01.json", 'w') as f:
+    with open(test_folder + "tweet_text_01.json", 'w') as f:
         f.write(new_df)
     d = {'text': ["Sadness is very sad. This is a second sentence."]}
     new_df = pd.DataFrame(data=d).to_json(orient='records')[1:-1]
-    with open("./test_dir/tweet_text_02.json", 'w') as f:
+    with open(test_folder + "tweet_text_02.json", 'w') as f:
         f.write(new_df)
     tone_good = ta.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], now.strftime("%Y-%m-%d %H:%M"))
     ta.analyze_all_tweets_text_folder(tone_good, test_folder)
-    filenames = os.listdir("./analysis")
+    filenames = os.listdir(test_folder + "../analysis/")
     assert len(filenames) > 0
 
 
