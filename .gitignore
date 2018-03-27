@@ -4,7 +4,4 @@ node_modules
 keys.txt
 credentials.json
 .cache
-*.json
-!/data/
 /data/*
-!/data/plots/
