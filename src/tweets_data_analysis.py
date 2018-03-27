@@ -155,47 +155,12 @@ class TweetsDataAnalysis:
         data.created_at = data.created_at.astype('datetime64[ns]')
         return data
 
-    def exploring_geo_data(self, twitter_handle):
-        with open(os.path.dirname(__file__) + "/../data/" + twitter_handle + "_merged_analysis.json") as f:
-            normal_data = json.load(f)
-        normal_data = pd.DataFrame(normal_data)
-        count = 0
-        for r in normal_data['geo']:
-            if r is not None:
-                count+=1
-        print(count)
-        print(count/len(normal_data))
-
-        tweep = tweepy_grabber.TweepyGrabber()
-        followers = tweep.get_users_followers("patrickbeekman")
-        geo_count = 0
-        for user in followers:
-            if user._json['geo_enabled']:
-                geo_count+=1
-        print(geo_count)
-        print(geo_count/len(followers)*100)
-
 
 
 def main():
     tda = TweetsDataAnalysis()
 
     twitter_handle = "gray"
-
-    with open("./../data/followers/@UberEng_followers.json") as file:
-        data = json.load(file)
-    geo_count = 0
-    for user in data:
-        try:
-            cords = user['status']['coordinates']
-            if cords is not None:
-                geo_count +=1
-                print(user['screen_name'] + " cords: " + str(cords))
-        except KeyError:
-            pass
-            #print("key error: no status")
-    print(geo_count)
-    print(geo_count / len(data) * 100)
 
     tda.exploring_geo_data(twitter_handle)
     # data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/" + twitter_handle + "_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count', 'geo_enabled']) #'geo', 'place'
