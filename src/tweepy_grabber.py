@@ -60,7 +60,7 @@ class TweepyGrabber:
             except tweepy.RateLimitError:
                 print("RateLimitError...waiting 900 seconds to continue")
                 time.sleep(900)
-                users.extend(self.api.lookup_users(ids[start:end])._json)
+                users.extend(self.api.lookup_users(ids[start:end]))
 
         return users
 
@@ -72,10 +72,10 @@ class TweepyGrabber:
 
         large_users = []
         for user in users:
-            sn = user._json['screen_name']
+            sn = user['screen_name']
 
             # Dont get private users and don't get if json file already saved
-            if user._json['protected'] is True:
+            if user['protected'] is True:
                 continue
             for f in folder_files:
                 if f[1:f.find('_')] == sn:
@@ -99,7 +99,9 @@ def main():
     # followers = grabber.get_users_followers(twitter_handle)
     # with open("./../data/followers/@patrickbeekman_followers.json", 'w') as file:
     #     json.dump([u._json for u in followers], file)
-    followers = pd.read_json("./../data/followers/@patrickbeekman_followers.json")
+    #followers = pd.read_json("./../data/followers/@patrickbeekman_followers.json")
+    with open("./../data/followers/@patrickbeekman_followers.json") as data_file:
+        followers = json.load(data_file)
     large = grabber.get_followers_of_followers(followers, os.path.dirname(__file__) + "/../data/followers/")
     print("hi")
 
