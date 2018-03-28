@@ -31,8 +31,7 @@ class MyToneAnalyzer:
             try:
                 tone_resp = self.analyzer.tone(tone_json.read(), content_type='application/json')
             except WatsonException as e:
-                print("WatsonException:", e)
-                exit(1)
+                raise WatsonException(e)
         return tone_resp
 
     def write_only_sentence_tone_to_file(self, resp, output_file):
@@ -64,7 +63,10 @@ class MyToneAnalyzer:
         for filename in os.listdir(tweet_text_path):
             num = filename.split('tweet_text_')[1].split('.')[0]
             print("analyzing : " + num.zfill(4))
-            tone_resp = self.analyze_json_file(tweet_text_path + filename)
+            try:
+                tone_resp = self.analyze_json_file(tweet_text_path + filename)
+            except WatsonException as e:
+                raise WatsonException(e)
             output_file = tweet_text_path + "../analysis/tone_tweet_" + str(num).zfill(4) + ".json"
             self.write_only_sentence_tone_to_file(tone_resp, output_file)
 
@@ -161,8 +163,10 @@ class MyToneAnalyzer:
         merged.columns = cols
         print(merged.columns)
         #output_file_path = self.path_name("/../data/merged_analysis.json")
-        with open(merged_path, 'w') as file:
+        with open(merged_path, 'w+') as file:
             file.write(merged.to_json(orient='records'))
+        os.chmod(merged_path, 0o777)
+        print("Merged analysis created!")
 
 
     def path_name(self, filename):

@@ -105,7 +105,7 @@ class TweepyGrabber:
         all_tweets = []
 
         print("Downloading max {0} tweets".format(max_tweets))
-        with open(output_file, 'w') as f:
+        with open(output_file, 'w+') as f:
             while tweet_count < max_tweets:
                 try:
                     if max_id <= 0:
@@ -133,9 +133,9 @@ class TweepyGrabber:
                     # Just exit if any error
                     print("some error : " + str(e))
                     break
-        with open(output_file, 'w') as file:
+        with open(output_file, 'w+') as file:
             json.dump([tweet._json for tweet in all_tweets], file)
-
+        os.chmod(output_file, 0o777)
 
 def main():
     grabber = TweepyGrabber()
