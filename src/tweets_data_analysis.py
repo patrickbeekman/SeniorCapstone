@@ -5,6 +5,8 @@ import os
 from pandas.io.json import json_normalize
 from datetime import datetime
 import matplotlib.pyplot as plt
+import tweepy
+import tweepy_grabber
 
 
 class TweetsDataAnalysis:
@@ -44,6 +46,51 @@ class TweetsDataAnalysis:
         plt.legend((p1[0], p2[0]), ('Joy', 'Sad'))
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
 
+    def graph_joy_vs_sad_percent_stacked(self, data, filename, twitter_name):
+        data.set_index(data["created_at"], inplace=True)
+        data["month"] = data['created_at'].apply(lambda x: x.strftime('%m'))
+        joy_counts = data['month'][data.tone_name == "Joy"].value_counts().sort_index()
+        sad_counts = data['month'][data.tone_name == "Sadness"].value_counts().sort_index()
+        months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        self.fill_series_with_zeros_if_data_missing(joy_counts)
+        self.fill_series_with_zeros_if_data_missing(sad_counts)
+
+        # Based on https://python-graph-gallery.com/13-percent-stacked-barplot/
+        plt.figure(2)
+        ax = plt.subplot(111)
+        totals = [i + j for i, j in zip(joy_counts, sad_counts)]
+        greenBars = [i / j * 100 for i, j in zip(joy_counts, totals)]
+        redBars = [i / j * 100 for i, j in zip(sad_counts, totals)]
+
+        barWidth = 0.85
+        # Create green Bars
+        plt.bar(months, greenBars, color='#b5ffb9', edgecolor='white', width=barWidth, label="Joy")
+        # Create red Bars
+        plt.bar(months, redBars, bottom=greenBars, color='#f9bc86', edgecolor='white', width=barWidth, label="Sad")
+        plt.ylabel('# Tweets')
+        plt.title(twitter_name + '\'s tweets: Joy vs Sad by Month')
+        plt.xticks(months, ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
+        plt.legend()
+        plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
+
+    def fill_series_with_zeros_if_data_missing(self, series):
+        if len(series != 12):
+            for i in range(12):
+                if i+1 < 10:
+                    index = '0' + str(i + 1)
+                    try:
+                        series[index]
+                    except KeyError:
+                        series[index] = 0
+                        series.sort_index()
+                else:
+                    index = str(i+1)
+                    try:
+                        series[index]
+                    except KeyError:
+                        series[index] = 0
+                        series.sort_index()
+
     def graph_other_emotions_per_month(self, data, filename):
         data["month"] = data['created_at'].apply(lambda x: x.strftime('%m'))
         analytical_counts = data['month'][data.tone_name == "Analytical"].value_counts().sort_index()
@@ -56,6 +103,11 @@ class TweetsDataAnalysis:
         months3 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
         months4 = [1+.2, 2+.2, 3+.2, 4+.2, 5+.2, 6+.2, 7+.2, 8+.2, 9+.2, 10+.2, 11+.2, 12+.2]
         months5 = [1+.4, 2+.4, 3+.4, 4+.4, 5+.4, 6+.4, 7+.4, 8+.4, 9+.4, 10+.4, 11+.4, 12+.4]
+        self.fill_series_with_zeros_if_data_missing(analytical_counts)
+        self.fill_series_with_zeros_if_data_missing(tentative_counts)
+        self.fill_series_with_zeros_if_data_missing(fear_counts)
+        self.fill_series_with_zeros_if_data_missing(confident_counts)
+        self.fill_series_with_zeros_if_data_missing(anger_counts)
 
         plt.figure(3)
         ax = plt.subplot(111)
@@ -104,18 +156,23 @@ class TweetsDataAnalysis:
         return data
 
 
+
 def main():
     tda = TweetsDataAnalysis()
 
-    data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count'])
+    twitter_handle = "gray"
 
-    tda.convert_to_datetime(data)
+    tda.exploring_geo_data(twitter_handle)
+    # data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/" + twitter_handle + "_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count', 'geo_enabled']) #'geo', 'place'
+    #
+    # tda.convert_to_datetime(data)
     # tda.max_favorites_of_tweets(data)
     # tda.max_retweets_of_tweets(data)
-    # tda.graph_tweet_freq_per_month(data, 'my_freq_per_month.png')
-    # tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
-    # tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
-    tda.graph_pie_chart(data, 'my_tweets_pie_chart.png')
+    # tda.graph_tweet_freq_per_month(data, twitter_handle + 's_per_month.png')
+    # #tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
+    # tda.graph_joy_vs_sad_percent_stacked(data, twitter_handle + 's_tweets_joy_vs_sad_stacked_bar.png', twitter_handle)
+    # #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
+    # tda.graph_pie_chart(data, twitter_handle + 's_pie_chart.png')
 
 
 if __name__ == "__main__":

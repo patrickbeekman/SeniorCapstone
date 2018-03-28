@@ -6,7 +6,7 @@ An exploratory tone analysis of twitter data and how the emotions and frequency 
 
 My Tweets: Happy vs Sad per month            |  Tones by percentage of all my tweets
 :-------------------------:|:-------------------------:
-![Happy vs Sad](/data/plots/my_tweets_joy_vs_sad_per_month.png)  |  ![Pie chart](/data/plots/my_tweets_pie_chart.png) 
+![Happy vs Sad](/data/plots/my_tweets_joy_vs_sad_stacked_bar.png)  |  ![Pie chart](/data/plots/my_tweets_pie_chart.png) 
 
 ## Installation
 
