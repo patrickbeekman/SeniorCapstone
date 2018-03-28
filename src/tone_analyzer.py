@@ -28,7 +28,7 @@ class MyToneAnalyzer:
                 tone_resp = analyzer.tone(tone_json.read(), content_type='application/json')
             except WatsonException as e:
                 print("WatsonException:", e)
-                exit(0)
+                exit(1)
         return tone_resp
 
     def write_only_sentence_tone_to_file(self, resp, output_file):
@@ -168,7 +168,7 @@ def main():
     ta = MyToneAnalyzer()
     analyzer = ta.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], '2018-02-24')
 
-    twitter_handle = "@_sydalee"
+    twitter_handle = "us_states/North_Carolina"
 
     # Uncomment to read in a tweets.json file with all of your tweets and seperate them into
     # files with just the text and then analyze each tweet.

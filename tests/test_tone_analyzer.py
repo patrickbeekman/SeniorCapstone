@@ -88,7 +88,9 @@ def test_good_analyze_all_tweets_text_folder():
         f.write(new_df)
     tone_good = ta.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], now.strftime("%Y-%m-%d %H:%M"))
     ta.analyze_all_tweets_text_folder(tone_good, test_folder)
-    filenames = os.listdir(test_folder + "../analysis/")
+    filenames = os.listdir(test_folder + "")
+    for f in filenames:
+        os.remove(test_folder + f)
+    os.rmdir(test_folder)
     assert len(filenames) > 0
-
 

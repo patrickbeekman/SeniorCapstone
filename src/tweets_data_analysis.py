@@ -122,7 +122,7 @@ class TweetsDataAnalysis:
         plt.legend((p1[0], p2[0], p3[0], p4[0], p5[0]), ('Analytical', 'Tentative', 'Fear', 'Confident', 'Anger'))
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
 
-    def graph_pie_chart(self, data, filename):
+    def graph_pie_chart(self, data, filename, twitter_name):
         total = len(data.index)
         joy_counts = len(data[data.tone_name == "Joy"])
         sad_counts = len(data[data.tone_name == "Sadness"])
@@ -136,7 +136,7 @@ class TweetsDataAnalysis:
         labels = 'Joy', 'Sadness', 'Analytical', 'Tentative', 'Fear', 'Confident', 'Anger'
 
         plt.figure(4)
-        plt.title('My Tweets Emotions Pie Chart')
+        plt.title(twitter_name + ' Emotions Pie Chart')
         plt.pie(sizes, labels=labels, autopct='%1.1f%%')
         plt.axis('equal')
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
@@ -157,22 +157,23 @@ class TweetsDataAnalysis:
 
 
 
+
+
 def main():
     tda = TweetsDataAnalysis()
 
-    twitter_handle = "gray"
+    twitter_handle = "North_Carolina"
 
-    tda.exploring_geo_data(twitter_handle)
-    # data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/" + twitter_handle + "_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count', 'geo_enabled']) #'geo', 'place'
-    #
-    # tda.convert_to_datetime(data)
-    # tda.max_favorites_of_tweets(data)
-    # tda.max_retweets_of_tweets(data)
-    # tda.graph_tweet_freq_per_month(data, twitter_handle + 's_per_month.png')
-    # #tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
-    # tda.graph_joy_vs_sad_percent_stacked(data, twitter_handle + 's_tweets_joy_vs_sad_stacked_bar.png', twitter_handle)
-    # #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
-    # tda.graph_pie_chart(data, twitter_handle + 's_pie_chart.png')
+    data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/us_states/" + twitter_handle + "_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count'])
+
+    tda.convert_to_datetime(data)
+    tda.max_favorites_of_tweets(data)
+    tda.max_retweets_of_tweets(data)
+    tda.graph_tweet_freq_per_month(data, twitter_handle + 's_per_month.png')
+    #tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
+    tda.graph_joy_vs_sad_percent_stacked(data, twitter_handle + 's_tweets_joy_vs_sad_stacked_bar.png', twitter_handle)
+    #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
+    tda.graph_pie_chart(data, twitter_handle + 's_pie_chart.png', twitter_handle)
 
 
 if __name__ == "__main__":

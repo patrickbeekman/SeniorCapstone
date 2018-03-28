@@ -5,6 +5,7 @@ sys.path.insert(0, myPath + "/../src/")
 import tweepy_grabber
 import tweepy
 import json
+import pytest
 
 grabber = tweepy_grabber.TweepyGrabber()
 
@@ -19,20 +20,10 @@ def test_good_api_connection():
 
 
 def test_bad_api_connection():
-    api = grabber.api_connect(os.environ['TWEET_PUB'], "000000000")
-    try:
-        api.user_timeline(screenname="patrickbeekman", count=200)
-        assert False
-    except tweepy.TweepError:
-        assert True
+    with pytest.raises(SystemExit) as e:
+        api = grabber.api_connect(os.environ['TWEET_PUB'], "000000000")
+        assert e.type == SystemExit
 
-def test_bad_get_users_timeline():
-    api = grabber.api_connect(os.environ['TWEET_PUB'], "000000000")
-    try:
-        grabber.get_users_timeline(api, "patrickbeekman", "outfile.json")
-        assert False
-    except Exception:
-        assert True
 
 def test_user_not_exist_get_users_timeline():
     api = grabber.api_connect(os.environ['TWEET_PUB'], os.environ['TWEET_PRI'])
@@ -41,6 +32,7 @@ def test_user_not_exist_get_users_timeline():
         assert False
     except Exception:
         assert True
+
 
 def test_success_get_users_timeline():
     api = grabber.api_connect(os.environ['TWEET_PUB'], os.environ['TWEET_PRI'])
