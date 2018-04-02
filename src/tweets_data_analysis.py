@@ -146,7 +146,6 @@ class TweetsDataAnalysis:
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
         plt.close()
 
-
     def get_flattened_data(self, filename, record_path, meta=[]):
         with open(filename) as f:
             data = json.load(f)
