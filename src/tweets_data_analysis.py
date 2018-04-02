@@ -27,6 +27,7 @@ class TweetsDataAnalysis:
         plt.figure(1)
         data['tone_name'].groupby(data.created_at.dt.month).count().plot(kind="bar", title='Count of tweets per month')
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
+        plt.close()
 
     def graph_joy_vs_sad_per_month(self, data, filename):
         data.set_index(data["created_at"], inplace=True)
@@ -45,6 +46,7 @@ class TweetsDataAnalysis:
         plt.xticks(months2, ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
         plt.legend((p1[0], p2[0]), ('Joy', 'Sad'))
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
+        plt.close()
 
     def graph_joy_vs_sad_percent_stacked(self, data, filename, twitter_name):
         data.set_index(data["created_at"], inplace=True)
@@ -72,6 +74,7 @@ class TweetsDataAnalysis:
         plt.xticks(months, ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
         plt.legend()
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
+        plt.close()
 
     def fill_series_with_zeros_if_data_missing(self, series):
         if len(series != 12):
@@ -121,8 +124,9 @@ class TweetsDataAnalysis:
         plt.xticks(months3, ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
         plt.legend((p1[0], p2[0], p3[0], p4[0], p5[0]), ('Analytical', 'Tentative', 'Fear', 'Confident', 'Anger'))
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
+        plt.close()
 
-    def graph_pie_chart(self, data, filename):
+    def graph_pie_chart(self, data, filename, twitter_name):
         total = len(data.index)
         joy_counts = len(data[data.tone_name == "Joy"])
         sad_counts = len(data[data.tone_name == "Sadness"])
@@ -136,11 +140,11 @@ class TweetsDataAnalysis:
         labels = 'Joy', 'Sadness', 'Analytical', 'Tentative', 'Fear', 'Confident', 'Anger'
 
         plt.figure(4)
-        plt.title('My Tweets Emotions Pie Chart')
+        plt.title(twitter_name + ' Emotions Pie Chart')
         plt.pie(sizes, labels=labels, autopct='%1.1f%%')
         plt.axis('equal')
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
-
+        plt.close()
 
     def get_flattened_data(self, filename, record_path, meta=[]):
         with open(filename) as f:
@@ -157,22 +161,23 @@ class TweetsDataAnalysis:
 
 
 
+
+
 def main():
     tda = TweetsDataAnalysis()
 
-    twitter_handle = "gray"
+    twitter_handle = "North_Carolina"
 
-    tda.exploring_geo_data(twitter_handle)
-    # data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/" + twitter_handle + "_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count', 'geo_enabled']) #'geo', 'place'
-    #
-    # tda.convert_to_datetime(data)
-    # tda.max_favorites_of_tweets(data)
-    # tda.max_retweets_of_tweets(data)
-    # tda.graph_tweet_freq_per_month(data, twitter_handle + 's_per_month.png')
-    # #tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
-    # tda.graph_joy_vs_sad_percent_stacked(data, twitter_handle + 's_tweets_joy_vs_sad_stacked_bar.png', twitter_handle)
-    # #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
-    # tda.graph_pie_chart(data, twitter_handle + 's_pie_chart.png')
+    data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/us_states/" + twitter_handle + "_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count', 'user'])
+
+    tda.convert_to_datetime(data)
+    tda.max_favorites_of_tweets(data)
+    tda.max_retweets_of_tweets(data)
+    tda.graph_tweet_freq_per_month(data, twitter_handle + 's_per_month.png')
+    #tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
+    tda.graph_joy_vs_sad_percent_stacked(data, twitter_handle + 's_tweets_joy_vs_sad_stacked_bar.png', twitter_handle)
+    #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
+    tda.graph_pie_chart(data, twitter_handle + 's_pie_chart.png', twitter_handle)
 
 
 if __name__ == "__main__":

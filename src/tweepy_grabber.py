@@ -12,7 +12,11 @@ class TweepyGrabber:
         self.api = self.api_connect(os.environ['TWEET_PUB'], os.environ['TWEET_PRI'])
 
     def api_connect(self, consumer_key, consumer_secret):
-        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+        try:
+            auth = tweepy.AppAuthHandler(consumer_key, consumer_secret)
+        except tweepy.TweepError as e:
+            print(e)
+            exit(1)
         api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, compression=True)
         return api
 
@@ -92,18 +96,56 @@ class TweepyGrabber:
                 json.dump([u._json for u in this_users], file)
         return large_users
 
+    def get_search_results(self, search_term, output_file, max_tweets=10000):
+        # Searching based on https://www.karambelkar.info/2015/01/how-to-use-twitters-search-rest-api-most-effectively./
+        tweets_per_query = 100
+        since_id = None
+        max_id = -1
+        tweet_count = 0
+        all_tweets = []
+
+        print("Downloading max {0} tweets".format(max_tweets))
+        with open(output_file, 'w+') as f:
+            while tweet_count < max_tweets:
+                try:
+                    if max_id <= 0:
+                        if not since_id:
+                            new_tweets = self.api.search(q=search_term, count=tweets_per_query)
+                        else:
+                            new_tweets = self.api.search(q=search_term, count=tweets_per_query,
+                                                    since_id=since_id)
+                    else:
+                        if not since_id:
+                            new_tweets = self.api.search(q=search_term, count=tweets_per_query,
+                                                    max_id=str(max_id - 1))
+                        else:
+                            new_tweets = self.api.search(q=search_term, count=tweets_per_query,
+                                                    max_id=str(max_id - 1),
+                                                    since_id=since_id)
+                    if not new_tweets:
+                        print("No more tweets found")
+                        break
+                    all_tweets.extend(new_tweets)
+                    tweet_count += len(new_tweets)
+                    print("Downloaded {0} tweets out of {1}".format(tweet_count, max_tweets))
+                    max_id = new_tweets[-1].id
+                except tweepy.TweepError as e:
+                    # Just exit if any error
+                    print("some error : " + str(e))
+                    break
+        with open(output_file, 'w+') as file:
+            json.dump([tweet._json for tweet in all_tweets], file)
+        os.chmod(output_file, 0o777)
+
 def main():
     grabber = TweepyGrabber()
     twitter_handle = "patrickbeekman"
     #grabber.get_users_timeline(twitter_handle, "@" + twitter_handle + "_tweets.json")
     # followers = grabber.get_users_followers(twitter_handle)
-    # with open("./../data/followers/@patrickbeekman_followers.json", 'w') as file:
-    #     json.dump([u._json for u in followers], file)
-    #followers = pd.read_json("./../data/followers/@patrickbeekman_followers.json")
-    with open("./../data/followers/@patrickbeekman_followers.json") as data_file:
-        followers = json.load(data_file)
-    large = grabber.get_followers_of_followers(followers, os.path.dirname(__file__) + "/../data/followers/")
-    print("hi")
+    search_term = "North Carolina"
+    outfile = os.path.dirname(__file__) + "/../data/us_states/" + search_term.replace(' ', '_') + "_tweets.json"
+    grabber.get_search_results(search_term, outfile)
+
 
 if __name__ == "__main__":
     main()

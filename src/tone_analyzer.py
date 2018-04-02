@@ -11,6 +11,10 @@ from watson_developer_cloud import WatsonInvalidArgument
 
 
 class MyToneAnalyzer:
+    analyzer = None
+
+    def __init__(self):
+        self.analyzer = self.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], '2018-02-24')
 
     def create_connection(self, username, password, version_num):
         try:
@@ -22,13 +26,12 @@ class MyToneAnalyzer:
             return None
         return tone_analyzer
 
-    def analyze_json_file(self, analyzer, filename):
+    def analyze_json_file(self, filename):
         with open(filename) as tone_json:
             try:
-                tone_resp = analyzer.tone(tone_json.read(), content_type='application/json')
+                tone_resp = self.analyzer.tone(tone_json.read(), content_type='application/json')
             except WatsonException as e:
-                print("WatsonException:", e)
-                exit(0)
+                raise WatsonException(e)
         return tone_resp
 
     def write_only_sentence_tone_to_file(self, resp, output_file):
@@ -52,15 +55,18 @@ class MyToneAnalyzer:
 
     # analyzes all the tweet_text files in /data/tweets_text/ and saves the
     # analysis files to /data/analysis/
-    def analyze_all_tweets_text_folder(self, analyzer, tweet_text_path):
-        if analyzer is None:
+    def analyze_all_tweets_text_folder(self, tweet_text_path):
+        if self.analyzer is None:
             raise ConnectionError("Analyzer not connected")
             return
         #tweets_path = os.path.dirname(__file__) + "/../data/tweets_text/"
         for filename in os.listdir(tweet_text_path):
             num = filename.split('tweet_text_')[1].split('.')[0]
             print("analyzing : " + num.zfill(4))
-            tone_resp = self.analyze_json_file(analyzer, tweet_text_path + filename)
+            try:
+                tone_resp = self.analyze_json_file(tweet_text_path + filename)
+            except WatsonException as e:
+                raise WatsonException(e)
             output_file = tweet_text_path + "../analysis/tone_tweet_" + str(num).zfill(4) + ".json"
             self.write_only_sentence_tone_to_file(tone_resp, output_file)
 
@@ -157,8 +163,10 @@ class MyToneAnalyzer:
         merged.columns = cols
         print(merged.columns)
         #output_file_path = self.path_name("/../data/merged_analysis.json")
-        with open(merged_path, 'w') as file:
+        with open(merged_path, 'w+') as file:
             file.write(merged.to_json(orient='records'))
+        os.chmod(merged_path, 0o777)
+        print("Merged analysis created!")
 
 
     def path_name(self, filename):
@@ -166,15 +174,14 @@ class MyToneAnalyzer:
 
 def main():
     ta = MyToneAnalyzer()
-    analyzer = ta.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], '2018-02-24')
 
-    twitter_handle = "@_sydalee"
+    twitter_handle = "us_states/North_Carolina"
 
     # Uncomment to read in a tweets.json file with all of your tweets and seperate them into
     # files with just the text and then analyze each tweet.
     ta.incremental_send_all_tweets_to_text_json(ta.path_name("/../data/" + twitter_handle + "_tweets.json"),
                                                 ta.path_name("/../data/tweets_text/"))
-    ta.analyze_all_tweets_text_folder(analyzer, ta.path_name("/../data/tweets_text/"))
+    ta.analyze_all_tweets_text_folder(ta.path_name("/../data/tweets_text/"))
     ta.create_single_file_tone_analysis(ta.path_name("/../data/analysis/"),
                                         ta.path_name("/../data/all_analysis.json"))
     ta.temp_file_cleanup(ta.path_name("/../data/analysis/"),
