@@ -20,7 +20,7 @@ class TweepyGrabber:
         api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, compression=True)
         return api
 
-    def get_users_timeline(self, screen_name, output_file_name):
+    def get_users_timeline(self, screen_name, output_file_path, max_tweets=10000):
         all_tweets = []
         try:
             new_tweets = self.api.user_timeline(screen_name=screen_name, count=200)
@@ -31,19 +31,18 @@ class TweepyGrabber:
         # the next 200 tweets
         oldest = all_tweets[-1].id - 1
         print("Downloaded ", len(all_tweets), " so far =)")
-
-        while len(new_tweets) > 0:
+        count = 0
+        while len(new_tweets) > 0 and count <= max_tweets:
             new_tweets = self.api.user_timeline(screen_name=screen_name, count=200, max_id=oldest)
             all_tweets.extend(new_tweets)
             oldest = all_tweets[-1].id - 1
+            count+=200
             print("Downloaded ", len(all_tweets), " so far =)")
 
-        json_file_path = os.path.dirname(__file__) + "/../data/" + output_file_name
-
-        with open(json_file_path, 'w') as file:
+        with open(output_file_path, 'w') as file:
             json.dump([status._json for status in all_tweets], file)
 
-    def get_users_followers(self, screen_name):
+    def get_users_followers(self, output_path, screen_name):
         users = []
         try:
             ids = []
@@ -66,6 +65,10 @@ class TweepyGrabber:
                 time.sleep(900)
                 users.extend(self.api.lookup_users(ids[start:end]))
 
+        out_filename = output_path + "@" + screen_name + "_followers.json"
+        with open(out_filename, 'w') as file:
+            json.dump([u._json for u in users], file)
+
         return users
 
     def get_followers_of_followers(self, users, output_path):
@@ -74,7 +77,6 @@ class TweepyGrabber:
             os.makedirs(output_path)
         folder_files = os.listdir(output_path)
 
-        large_users = []
         for user in users:
             sn = user['screen_name']
 
@@ -94,7 +96,6 @@ class TweepyGrabber:
             out_filename = output_path + "@" + sn + "_followers.json"
             with open(out_filename, 'w') as file:
                 json.dump([u._json for u in this_users], file)
-        return large_users
 
     def get_search_results(self, search_term, output_file, max_tweets=10000):
         # Searching based on https://www.karambelkar.info/2015/01/how-to-use-twitters-search-rest-api-most-effectively./

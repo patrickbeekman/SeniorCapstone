@@ -1,6 +1,7 @@
 import tweepy_grabber
 import tone_analyzer
 import tweets_data_analysis
+import pandas as pd
 from watson_developer_cloud import WatsonException
 import os
 
@@ -15,30 +16,64 @@ class Tweet_Driver:
         self.analyzer = tone_analyzer.MyToneAnalyzer()
         self.analysis = tweets_data_analysis.TweetsDataAnalysis()
 
+    def analyze_followers_of_followers(self, screen_name, data_folder):
+        data_path = os.path.dirname(__file__) + "/../data/" + data_folder + "/"
+        if not os.path.exists(data_path):
+            os.mkdir(data_path)
+        current_files = os.listdir(data_path)
+        current_terms = [f.split('_') for f in current_files]
+        excluded_terms = []
+        for s in current_terms:
+            if s[1] == "tweets.json" or s[1] == "merged":
+                try:
+                    excluded_terms.index(s[0])
+                except ValueError:
+                    excluded_terms.append(s[0])
+            else:
+                try:
+                    excluded_terms.index(s[0] + " " + s[1])
+                except ValueError:
+                    excluded_terms.append(s[0] + " " + s[1])
+
+        followers = self.grabber.get_users_followers(data_path, screen_name)
+        self.grabber.get_followers_of_followers(followers, data_path)
+
+        if not os.path.exists(data_path + "users_tweets/"):
+            os.mkdir(data_path + "users_tweets/")
+        # open up each file of followers accounts and grab 2000 of their tweets
+        for file in current_files:
+            with open(file) as f:
+                users_followers = pd.DataFrame(f)
+            for user in users_followers:
+                users_tweets_path = data_path + "users_tweets/" + user['screen_name'] + "_tweets.json"
+                self.grabber.get_users_timeline(user['screen_name'], users_tweets_path, max_tweets=2000)
+
+
+
     def analyze_search_term(self, data, data_folder):
         data_path = os.path.dirname(__file__) + "/../data/" + data_folder + "/"
         if not os.path.exists(data_path):
             os.mkdir(data_path)
         current_files = os.listdir(data_path)
-        current_states = [f.split('_') for f in current_files]
-        excluded_states = []
-        for s in current_states:
+        current_terms = [f.split('_') for f in current_files]
+        excluded_terms = []
+        for s in current_terms:
             if s[1] == "tweets.json" or s[1] == "merged":
                 try:
-                    excluded_states.index(s[0])
+                    excluded_terms.index(s[0])
                 except ValueError:
-                    excluded_states.append(s[0])
+                    excluded_terms.append(s[0])
             else:
                 try:
-                    excluded_states.index(s[0] + " " + s[1])
+                    excluded_terms.index(s[0] + " " + s[1])
                 except ValueError:
-                    excluded_states.append(s[0] + " " + s[1])
-        count = 3
+                    excluded_terms.append(s[0] + " " + s[1])
+
         for entry in data:
             try:
-                excluded_states.index(entry)
+                excluded_terms.index(entry)
             except ValueError:
-                excluded_states.append(entry)
+                excluded_terms.append(entry)
                 print("Starting: " + entry)
                 # tweepy_grabber stuff
                 search_query = entry
@@ -69,7 +104,6 @@ class Tweet_Driver:
                     os.path.dirname(__file__) + "/../data/" + data_folder + "/" + search_query.replace(' ', '_') + "_merged_analysis.json", 'tones',
                     ['text', 'created_at', 'favorite_count', 'retweet_count'])
 
-                count+=1
                 self.analysis.convert_to_datetime(data)
                 self.analysis.graph_pie_chart(data, search_query + 's_pie_chart.png', search_query)
                 # reset the tone analyzer which creates a new connection to the service
