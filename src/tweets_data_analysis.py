@@ -169,12 +169,21 @@ class TweetsDataAnalysis:
         nltk.download("stopwords")
         s = set(stopwords.words('english'))
         myWords = {'RT', 'I', '.', 'The', 'like', 'I\'m', 'My', 'This', 'get', 'It\'s', 'Who', 'What', 'Where', 'When',
-                 'Why', 'A'}
+                 'Why', 'A', '`'}
         s.update(myWords)
         text_notflat = [filter(lambda w: not w in s, tweet.split()) for tweet in df['text']]
         word_counter = Counter(chain.from_iterable(text_notflat))
-        print(word_counter)
-        print("hello")
+        most_common = word_counter.most_common(25)
+        words = list(zip(*most_common))[0]
+        values = list(zip(*most_common))[1]
+
+        indexes = np.arange(len(words))
+        width = 0.7
+        plt.bar(indexes, values, width)
+        plt.xticks(indexes + width * 0.5, words)
+        plt.xticks(rotation=90)
+        plt.show()
+        return word_counter
 
 
 
@@ -184,7 +193,7 @@ def main():
 
     twitter_handle = "North_Carolina"
 
-    data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/us_states/" + twitter_handle + "_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count', 'user'])
+    #data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/us_states/" + twitter_handle + "_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count', 'user'])
 
     # tda.convert_to_datetime(data)
     # tda.max_favorites_of_tweets(data)
