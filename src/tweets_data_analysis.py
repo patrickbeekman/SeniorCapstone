@@ -190,6 +190,19 @@ class TweetsDataAnalysis:
         return word_counter
 
 
+    def create_X_matrix(self, folder_path):
+        X = pd.DataFrame(columns=['screen_name', 'gender', 'joy', 'sadness', 'analytical',
+                                  'tentative', 'fear', 'confident', 'anger', 'tot_winter',
+                                  'tot_spring', 'tot_summer', 'tot_fall', 'tot_tweets'])
+        counter = 0
+        for file in os.listdir(folder_path):
+            df = pd.read_json(folder_path + file)
+            X.loc[counter]['tot_tweets'] = df['user'][0]['statuses_count']
+            X.loc[counter]['screen_name'] = df['user'][0]['screen_name']
+            counter+=1
+
+
+
 
 
 def main():
@@ -208,8 +221,8 @@ def main():
     # #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
     # tda.graph_pie_chart(data, twitter_handle + 's_pie_chart.png', twitter_handle)
 
-    tda.graph_word_count_for_user(os.path.dirname(__file__) + "/../data/pbFollowers/users_tweets/patrickbeekman_tweets.json")
-
+    # tda.graph_word_count_for_user(os.path.dirname(__file__) + "/../data/pbFollowers/users_tweets/patrickbeekman_tweets.json")
+    tda.create_X_matrix(os.path.dirname(__file__) + "/../data/pbFollowers/users_tweets/")
 
 if __name__ == "__main__":
     main()

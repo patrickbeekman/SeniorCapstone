@@ -26,7 +26,8 @@ class Tweet_Driver:
         followers_path = data_path + "followers/"
         if not os.path.exists(followers_path):
             os.mkdir(followers_path)
-        followers = self.grabber.get_users_followers(followers_path, screen_name)
+        if not os.path.exists(followers_path + screen_name + "_followers.json"):
+            followers = self.grabber.get_users_followers(followers_path, screen_name)
         #self.grabber.get_followers_of_followers(followers, followers_path)
 
         all_users_tweets_path = data_path + "users_tweets/"
@@ -38,9 +39,10 @@ class Tweet_Driver:
         for file in current_files:
             users_followers = pd.read_json(followers_path + file)
             for index, user in users_followers.iterrows():
-                if user['protected']:
-                    continue
                 user_tweets_path = all_users_tweets_path + user['screen_name'] + "_tweets.json"
+                if user['protected'] or os.path.exists(user_tweets_path):
+                    continue
+                print("Starting: " + user['screen_name'])
                 self.grabber.get_users_timeline(user['screen_name'], user_tweets_path, max_tweets=2000)
 
         # hi

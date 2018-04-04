@@ -29,7 +29,11 @@ class TweepyGrabber:
         all_tweets.extend(new_tweets)
         # get the tweet id of the last tweet grabbed to know where to start grabbing
         # the next 200 tweets
-        oldest = all_tweets[-1].id - 1
+        try:
+            oldest = all_tweets[-1].id - 1
+        except IndexError:
+            # If the user has no tweets then just return
+            return
         print("Downloaded ", len(all_tweets), " so far =)")
         count = 0
         while len(new_tweets) > 0 and count <= max_tweets:
