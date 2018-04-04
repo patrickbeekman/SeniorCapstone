@@ -163,7 +163,7 @@ class TweetsDataAnalysis:
         data.created_at = data.created_at.astype('datetime64[ns]')
         return data
 
-    def graph_word_count_for_user(self, file_path):
+    def graph_word_count_for_user(self, file_path, screen_name, save_path):
         df = pd.read_json(file_path)
         # Removing common words: https://stackoverflow.com/questions/9953619/technique-to-remove-common-wordsand-their-plural-versions-from-a-string
         nltk.download("stopwords")
@@ -173,16 +173,20 @@ class TweetsDataAnalysis:
         s.update(myWords)
         text_notflat = [filter(lambda w: not w in s, tweet.split()) for tweet in df['text']]
         word_counter = Counter(chain.from_iterable(text_notflat))
-        most_common = word_counter.most_common(25)
+        most_common = word_counter.most_common(50)
         words = list(zip(*most_common))[0]
         values = list(zip(*most_common))[1]
-
+        
         indexes = np.arange(len(words))
         width = 0.7
+        plt.clf()
         plt.bar(indexes, values, width)
         plt.xticks(indexes + width * 0.5, words)
         plt.xticks(rotation=90)
-        plt.show()
+        plt.tight_layout()
+        plt.title("Top Word Counts of " + screen_name)
+        plt.savefig(save_path)
+        plt.close()
         return word_counter
 
 
