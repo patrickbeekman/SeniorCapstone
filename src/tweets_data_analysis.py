@@ -7,6 +7,8 @@ from datetime import datetime
 from itertools import chain
 from collections import Counter
 import matplotlib.pyplot as plt
+import nltk
+from nltk.corpus import stopwords
 import tweepy
 import tweepy_grabber
 
@@ -161,14 +163,19 @@ class TweetsDataAnalysis:
         data.created_at = data.created_at.astype('datetime64[ns]')
         return data
 
-    def graph_word_count_from_folder(self, folder_path):
-        files_in_folder = os.listdir(folder_path)
-        running_counter = Counter()
-        for file in files_in_folder:
-            df = pd.read_json(folder_path + file)
-            text_notflat = [tweet.split() for tweet in df['text']]
-            running_counter = running_counter + Counter(chain.from_iterable(text_notflat))
-        print(running_counter)
+    def graph_word_count_for_user(self, file_path):
+        df = pd.read_json(file_path)
+        # Removing common words: https://stackoverflow.com/questions/9953619/technique-to-remove-common-wordsand-their-plural-versions-from-a-string
+        nltk.download("stopwords")
+        s = set(stopwords.words('english'))
+        myWords = {'RT', 'I', '.', 'The', 'like', 'I\'m', 'My', 'This', 'get', 'It\'s', 'Who', 'What', 'Where', 'When',
+                 'Why', 'A'}
+        s.update(myWords)
+        text_notflat = [filter(lambda w: not w in s, tweet.split()) for tweet in df['text']]
+        word_counter = Counter(chain.from_iterable(text_notflat))
+        print(word_counter)
+        print("hello")
+
 
 
 
@@ -188,7 +195,7 @@ def main():
     # #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
     # tda.graph_pie_chart(data, twitter_handle + 's_pie_chart.png', twitter_handle)
 
-    tda.graph_word_count_from_folder(os.path.dirname(__file__) + "/../data/pbFollowers/users_tweets/")
+    tda.graph_word_count_for_user(os.path.dirname(__file__) + "/../data/pbFollowers/users_tweets/patrickbeekman_tweets.json")
 
 
 if __name__ == "__main__":
