@@ -96,11 +96,11 @@ class MyToneAnalyzer:
         start = 0
         stop = 99
         increment = 99
-        try:
-            df = pd.read_json(input_filename)
-        except ValueError as e:
-            print("ValueError in Incremental_send_tweets", e)
-            return
+
+        if not os.path.exists(input_filename):
+            raise FileNotFoundError()
+
+        df = pd.read_json(input_filename)
 
         while start < (len(df)):
             #newfilename = self.path_name("/../data/tweets_text/tweet_text" + "_" + str(num).zfill(4) + ".json")
@@ -117,6 +117,8 @@ class MyToneAnalyzer:
         #output_file = self.path_name("/../data/all_analysis.json")
         #dirFiles = os.listdir(self.path_name("/../data/analysis/"))
         dirFiles = os.listdir(analysis_folder)
+        if not dirFiles:
+            raise FileNotFoundError
         dirFiles.sort()
         print(dirFiles)
 

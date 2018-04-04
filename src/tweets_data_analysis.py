@@ -131,15 +131,7 @@ class TweetsDataAnalysis:
         plt.close()
 
     def graph_pie_chart(self, data, filename, twitter_name):
-        total = len(data.index)
-        joy_counts = len(data[data.tone_name == "Joy"])
-        sad_counts = len(data[data.tone_name == "Sadness"])
-        analytical_counts = len(data[data.tone_name == "Analytical"])
-        tentative_counts = len(data[data.tone_name == "Tentative"])
-        fear_counts = len(data[data.tone_name == "Fear"])
-        confident_counts = len(data[data.tone_name == "Confident"])
-        anger_counts = len(data[data.tone_name == "Anger"])
-        sizes = [joy_counts, sad_counts, analytical_counts, tentative_counts, fear_counts, confident_counts, anger_counts]
+        sizes, total = self.get_tone_counts(data)
         sizes = [(x / total) * 100 for x in sizes]
         labels = 'Joy', 'Sadness', 'Analytical', 'Tentative', 'Fear', 'Confident', 'Anger'
 
@@ -189,17 +181,44 @@ class TweetsDataAnalysis:
         plt.close()
         return word_counter
 
+    '''
+        Gets the tone counts from a dataframe of tweets,
+        this also returns the totals so that you can caluclate percentages.
+        Returns: Joy, Sad, Analytical, Tentative, Fear, Confident, Anger
+    '''
+    def get_tone_counts(self, df):
+        total = df.shape[0]
+        joy_counts = len(df[df.tone_name == "Joy"])
+        sad_counts = len(df[df.tone_name == "Sadness"])
+        analytical_counts = len(df[df.tone_name == "Analytical"])
+        tentative_counts = len(df[df.tone_name == "Tentative"])
+        fear_counts = len(df[df.tone_name == "Fear"])
+        confident_counts = len(df[df.tone_name == "Confident"])
+        anger_counts = len(df[df.tone_name == "Anger"])
+        counts = [joy_counts, sad_counts, analytical_counts, tentative_counts, fear_counts, confident_counts, anger_counts]
+
+        return counts, total
 
     def create_X_matrix(self, folder_path):
-        X = pd.DataFrame(columns=['screen_name', 'joy', 'sadness', 'analytical',
+        X = pd.DataFrame(columns=['screen_name', 'joy', 'sad', 'analytical',
                                   'tentative', 'fear', 'confident', 'anger', 'tot_winter',
                                   'tot_spring', 'tot_summer', 'tot_fall', 'tot_tweets',
                                   'late_night', 'early_morning'])
         counter = 0
         for file in os.listdir(folder_path):
-            df = pd.read_json(folder_path + file)
+            df = self.get_flattened_data(folder_path + file, 'tones', ['created_at', 'text_x', 'favorite_count', 'retweet_count', 'user', 'source'])
+            X.loc[counter] = None
             X.loc[counter]['tot_tweets'] = df['user'][0]['statuses_count']
             X.loc[counter]['screen_name'] = df['user'][0]['screen_name']
+            counts, total = self.get_tone_counts(df)
+            tone_percentages = [(x / total) * 100 for x in counts]
+            X.loc[counter]['joy'] = tone_percentages[0]
+            X.loc[counter]['sad'] = tone_percentages[1]
+            X.loc[counter]['analytical'] = tone_percentages[2]
+            X.loc[counter]['tentative'] = tone_percentages[3]
+            X.loc[counter]['fear'] = tone_percentages[4]
+            X.loc[counter]['confident'] = tone_percentages[5]
+            X.loc[counter]['anger'] = tone_percentages[6]
             # analyze tone of each users tweets and attach back
             # determine how to find total number of tweets for season.
             # can I look at the tones for each season?
@@ -227,7 +246,7 @@ def main():
     # tda.graph_pie_chart(data, twitter_handle + 's_pie_chart.png', twitter_handle)
 
     # tda.graph_word_count_for_user(os.path.dirname(__file__) + "/../data/pbFollowers/users_tweets/patrickbeekman_tweets.json")
-    tda.create_X_matrix(os.path.dirname(__file__) + "/../data/pbFollowers/users_tweets/")
+    tda.create_X_matrix(os.path.dirname(__file__) + "/../data/pbFollowers/merged/")
 
 if __name__ == "__main__":
     main()

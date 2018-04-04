@@ -40,21 +40,29 @@ class Tweet_Driver:
             users_followers = pd.read_json(followers_path + file)
             for index, user in users_followers.iterrows():
                 user_tweets_path = all_users_tweets_path + user['screen_name'] + "_tweets.json"
-                if user['protected']: #or os.path.exists(user_tweets_path):
+                if user['protected']:
                     continue
-                print("Starting: " + user['screen_name'])
-                #self.grabber.get_users_timeline(user['screen_name'], user_tweets_path, max_tweets=2000)
 
-                self.analyzer.incremental_send_all_tweets_to_text_json(user_tweets_path,
-                                                                       data_path + "tweets_text/")
-                self.analyzer.analyze_all_tweets_text_folder(data_path + "tweets_text/")
-                self.analyzer.create_single_file_tone_analysis(data_path + "analysis/",
-                                                               data_path + "all_analysis.json")
-                self.analyzer.temp_file_cleanup(data_path + "analysis/",
-                                                data_path + "tweets_text/")
+                if not os.path.exists(user_tweets_path):
+                    self.grabber.get_users_timeline(user['screen_name'], user_tweets_path, max_tweets=2000)
+
+                if os.path.exists(data_path + "merged/" + user['screen_name'] + "_merged_analysis.json"):
+                    continue
+
+                print("Starting: " + user['screen_name'])
+                try:
+                    self.analyzer.incremental_send_all_tweets_to_text_json(user_tweets_path, data_path + "tweets_text/")
+                    self.analyzer.analyze_all_tweets_text_folder(data_path + "tweets_text/")
+                    self.analyzer.create_single_file_tone_analysis(data_path + "analysis/",
+                                                                   data_path + "all_analysis.json")
+                except FileNotFoundError:
+                    continue
+
                 self.analyzer.attach_analysis_to_tweet(data_path + "all_analysis.json",
                                                        user_tweets_path,
                                                        data_path + "merged/" + user['screen_name'] + "_merged_analysis.json")
+                self.analyzer.temp_file_cleanup(data_path + "analysis/",
+                                                data_path + "tweets_text/")
         # hi
 
 
