@@ -4,6 +4,8 @@ import json
 import os
 from pandas.io.json import json_normalize
 from datetime import datetime
+from itertools import chain
+from collections import Counter
 import matplotlib.pyplot as plt
 import tweepy
 import tweepy_grabber
@@ -159,7 +161,14 @@ class TweetsDataAnalysis:
         data.created_at = data.created_at.astype('datetime64[ns]')
         return data
 
-
+    def graph_word_count_from_folder(self, folder_path):
+        files_in_folder = os.listdir(folder_path)
+        running_counter = Counter()
+        for file in files_in_folder:
+            df = pd.read_json(folder_path + file)
+            text_notflat = [tweet.split() for tweet in df['text']]
+            running_counter = running_counter + Counter(chain.from_iterable(text_notflat))
+        print(running_counter)
 
 
 
@@ -170,14 +179,16 @@ def main():
 
     data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/us_states/" + twitter_handle + "_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count', 'user'])
 
-    tda.convert_to_datetime(data)
-    tda.max_favorites_of_tweets(data)
-    tda.max_retweets_of_tweets(data)
-    tda.graph_tweet_freq_per_month(data, twitter_handle + 's_per_month.png')
-    #tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
-    tda.graph_joy_vs_sad_percent_stacked(data, twitter_handle + 's_tweets_joy_vs_sad_stacked_bar.png', twitter_handle)
-    #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
-    tda.graph_pie_chart(data, twitter_handle + 's_pie_chart.png', twitter_handle)
+    # tda.convert_to_datetime(data)
+    # tda.max_favorites_of_tweets(data)
+    # tda.max_retweets_of_tweets(data)
+    # tda.graph_tweet_freq_per_month(data, twitter_handle + 's_per_month.png')
+    # #tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
+    # tda.graph_joy_vs_sad_percent_stacked(data, twitter_handle + 's_tweets_joy_vs_sad_stacked_bar.png', twitter_handle)
+    # #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
+    # tda.graph_pie_chart(data, twitter_handle + 's_pie_chart.png', twitter_handle)
+
+    tda.graph_word_count_from_folder(os.path.dirname(__file__) + "/../data/pbFollowers/users_tweets/")
 
 
 if __name__ == "__main__":

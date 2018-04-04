@@ -21,23 +21,29 @@ class Tweet_Driver:
         if not os.path.exists(data_path):
             os.mkdir(data_path)
 
-        #followers = self.grabber.get_users_followers(data_path, screen_name)
-        #self.grabber.get_followers_of_followers(followers, data_path)
+        # Collect the followers for the central user then collect all their followers
+        # and save them to the specified folder.
+        followers_path = data_path + "followers/"
+        if not os.path.exists(followers_path):
+            os.mkdir(followers_path)
+        followers = self.grabber.get_users_followers(followers_path, screen_name)
+        #self.grabber.get_followers_of_followers(followers, followers_path)
 
         all_users_tweets_path = data_path + "users_tweets/"
         if not os.path.exists(all_users_tweets_path):
             os.mkdir(all_users_tweets_path)
+
         # open up each file of followers accounts and grab 2000 of their tweets
-        current_files = os.listdir(data_path)
-        current_files.remove('users_tweets')
+        current_files = os.listdir(followers_path)
         for file in current_files:
-            users_followers = pd.read_json(data_path + file)
+            users_followers = pd.read_json(followers_path + file)
             for index, user in users_followers.iterrows():
                 if user['protected']:
                     continue
                 user_tweets_path = all_users_tweets_path + user['screen_name'] + "_tweets.json"
                 self.grabber.get_users_timeline(user['screen_name'], user_tweets_path, max_tweets=2000)
 
+        # hi
 
 
     def analyze_search_term(self, data, data_folder):
