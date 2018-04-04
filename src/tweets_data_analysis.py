@@ -191,14 +191,19 @@ class TweetsDataAnalysis:
 
 
     def create_X_matrix(self, folder_path):
-        X = pd.DataFrame(columns=['screen_name', 'gender', 'joy', 'sadness', 'analytical',
+        X = pd.DataFrame(columns=['screen_name', 'joy', 'sadness', 'analytical',
                                   'tentative', 'fear', 'confident', 'anger', 'tot_winter',
-                                  'tot_spring', 'tot_summer', 'tot_fall', 'tot_tweets'])
+                                  'tot_spring', 'tot_summer', 'tot_fall', 'tot_tweets',
+                                  'late_night', 'early_morning'])
         counter = 0
         for file in os.listdir(folder_path):
             df = pd.read_json(folder_path + file)
             X.loc[counter]['tot_tweets'] = df['user'][0]['statuses_count']
             X.loc[counter]['screen_name'] = df['user'][0]['screen_name']
+            # analyze tone of each users tweets and attach back
+            # determine how to find total number of tweets for season.
+            # can I look at the tones for each season?
+            # When looking at time of day for tweets take into account 'utc_offset'
             counter+=1
 
 
