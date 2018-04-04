@@ -65,7 +65,7 @@ class TweepyGrabber:
                 time.sleep(900)
                 users.extend(self.api.lookup_users(ids[start:end]))
 
-        out_filename = output_path + "@" + screen_name + "_followers.json"
+        out_filename = output_path + screen_name + "_followers.json"
         with open(out_filename, 'w') as file:
             json.dump([u._json for u in users], file)
 

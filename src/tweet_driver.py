@@ -20,33 +20,23 @@ class Tweet_Driver:
         data_path = os.path.dirname(__file__) + "/../data/" + data_folder + "/"
         if not os.path.exists(data_path):
             os.mkdir(data_path)
-        current_files = os.listdir(data_path)
-        current_terms = [f.split('_') for f in current_files]
-        excluded_terms = []
-        for s in current_terms:
-            if s[1] == "tweets.json" or s[1] == "merged":
-                try:
-                    excluded_terms.index(s[0])
-                except ValueError:
-                    excluded_terms.append(s[0])
-            else:
-                try:
-                    excluded_terms.index(s[0] + " " + s[1])
-                except ValueError:
-                    excluded_terms.append(s[0] + " " + s[1])
 
-        followers = self.grabber.get_users_followers(data_path, screen_name)
-        self.grabber.get_followers_of_followers(followers, data_path)
+        #followers = self.grabber.get_users_followers(data_path, screen_name)
+        #self.grabber.get_followers_of_followers(followers, data_path)
 
-        if not os.path.exists(data_path + "users_tweets/"):
-            os.mkdir(data_path + "users_tweets/")
+        all_users_tweets_path = data_path + "users_tweets/"
+        if not os.path.exists(all_users_tweets_path):
+            os.mkdir(all_users_tweets_path)
         # open up each file of followers accounts and grab 2000 of their tweets
+        current_files = os.listdir(data_path)
+        current_files.remove('users_tweets')
         for file in current_files:
-            with open(file) as f:
-                users_followers = pd.DataFrame(f)
-            for user in users_followers:
-                users_tweets_path = data_path + "users_tweets/" + user['screen_name'] + "_tweets.json"
-                self.grabber.get_users_timeline(user['screen_name'], users_tweets_path, max_tweets=2000)
+            users_followers = pd.read_json(data_path + file)
+            for index, user in users_followers.iterrows():
+                if user['protected']:
+                    continue
+                user_tweets_path = all_users_tweets_path + user['screen_name'] + "_tweets.json"
+                self.grabber.get_users_timeline(user['screen_name'], user_tweets_path, max_tweets=2000)
 
 
 
@@ -163,7 +153,8 @@ def main():
         'Wisconsin',
         'Wyoming'
     ]
-    driver.analyze_search_term(us_states, 'us_states')
+    #driver.analyze_search_term(us_states, 'us_states')
+    driver.analyze_followers_of_followers('patrickbeekman', 'pbFollowers')
 
 if __name__ == "__main__":
     main()
