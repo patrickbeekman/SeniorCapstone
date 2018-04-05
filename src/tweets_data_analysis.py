@@ -209,21 +209,57 @@ class TweetsDataAnalysis:
         morning = 0
         mid_day = 0
         late_night = 0
+        standardized_times = []
         for time in real_times:
             new_time = datetime.datetime.fromtimestamp(time + offset)
+            standardized_times.append(new_time)
             if 5 <= new_time.hour <= 11:
                 morning+=1
             elif 23 <= new_time.hour <= 24 or 0 <= new_time.hour <= 5:
                 late_night+=1
             else:
                 mid_day+=1
-        return morning, mid_day, late_night
+        return morning, mid_day, late_night, standardized_times
+
+    def count_sad_happy_four_seasons(self, tone_names, std_times):
+        seasons = {'spring_sad':0, 'summer_sad':0, 'fall_sad':0, 'winter_sad':0,
+                   'spring_joy':0, 'summer_joy':0, 'fall_joy':0, 'winter_joy':0}
+        for index, tone in tone_names.iteritems():
+            if tone != 'Joy' and tone != 'Sadness':
+                continue
+            month = pd.to_datetime(std_times.iloc[index]).month
+            if month in range(3, 5+1):
+                # spring
+                if tone == 'Joy':
+                    seasons['spring_joy'] += 1
+                elif tone == 'Sadness':
+                    seasons['spring_sad'] += 1
+            elif month in range(6, 8+1):
+                #summer
+                if tone == 'Joy':
+                    seasons['summer_joy'] += 1
+                elif tone == 'Sadness':
+                    seasons['summer_sad'] += 1
+            elif month in range(9, 11+1):
+                #fall
+                if tone == 'Joy':
+                    seasons['fall_joy'] += 1
+                elif tone == 'Sadness':
+                    seasons['fall_sad'] += 1
+            else:
+                #winter
+                if tone == 'Joy':
+                    seasons['winter_joy'] += 1
+                elif tone == 'Sadness':
+                    seasons['winter_sad'] += 1
+        return seasons
 
     def create_X_matrix(self, folder_path):
         X = pd.DataFrame(columns=['screen_name', 'joy', 'sad', 'analytical',
-                                  'tentative', 'fear', 'confident', 'anger', 'tot_winter',
-                                  'tot_spring', 'tot_summer', 'tot_fall', 'tot_tweets',
-                                  'morning', 'mid_day', 'late_night'])
+                                  'tentative', 'fear', 'confident', 'anger',
+                                  'tot_tweets', 'morning', 'mid_day', 'late_night',
+                                  'spring_sad', 'summer_sad', 'fall_sad', 'winter_sad',
+                                  'spring_joy', 'summer_joy', 'fall_joy', 'winter_joy'])
         counter = 0
         for file in os.listdir(folder_path):
             df = self.get_flattened_data(folder_path + file, 'tones', ['created_at', 'text_x', 'favorite_count', 'retweet_count', 'user', 'source'])
@@ -240,15 +276,23 @@ class TweetsDataAnalysis:
             X.loc[counter]['confident'] = tone_percentages[5]
             X.loc[counter]['anger'] = tone_percentages[6]
 
-            morning, mid_day, late_night = self.localising_time(df['created_at'], df['user'][0]['utc_offset'])
+            morning, mid_day, late_night, std_times = self.count_localised_time(df['created_at'], df['user'][0]['utc_offset'])
             X.loc[counter]['morning'] = morning
             X.loc[counter]['mid_day'] = mid_day
             X.loc[counter]['late_night'] = late_night
+            s = pd.Series(std_times, index=df.index, name='std_times')
+            X = pd.concat([X, s], axis=1)
+
+            seasons = self.count_sad_happy_four_seasons(df['tone_name'], s)
+            # attach the seasons to X
+
+
             # analyze tone of each users tweets and attach back
             # determine how to find total number of tweets for season.
             # can I look at the tones for each season?
             # When looking at time of day for tweets take into account 'utc_offset'
             counter+=1
+        return X
 
 
 
