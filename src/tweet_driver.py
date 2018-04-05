@@ -63,7 +63,7 @@ class Tweet_Driver:
                                                        data_path + "merged/" + user['screen_name'] + "_merged_analysis.json")
                 self.analyzer.temp_file_cleanup(data_path + "analysis/",
                                                 data_path + "tweets_text/")
-        # hi
+        X = self.analysis.create_X_matrix(data_path + "merged/")
 
 
     def analyze_search_term(self, data, data_folder):

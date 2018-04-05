@@ -204,12 +204,14 @@ class TweetsDataAnalysis:
         up the number of tweets occuring during the 3 periods of the day.
         morning=5-11, mid-day=11-23, night=23-5
     '''
-    def count_localised_time(self, times, offset):
+    def count_localised_time(self, times, file, offset=0):
         real_times = times / 1000
         morning = 0
         mid_day = 0
         late_night = 0
         standardized_times = []
+        if offset is None:
+            offset = 0
         for time in real_times:
             new_time = datetime.datetime.fromtimestamp(time + offset)
             standardized_times.append(new_time)
@@ -261,11 +263,23 @@ class TweetsDataAnalysis:
                                   'spring_sad', 'summer_sad', 'fall_sad', 'winter_sad',
                                   'spring_joy', 'summer_joy', 'fall_joy', 'winter_joy'])
         counter = 0
-        for file in os.listdir(folder_path):
-            df = self.get_flattened_data(folder_path + file, 'tones', ['created_at', 'text_x', 'favorite_count', 'retweet_count', 'user', 'source'])
+        all_files = os.listdir(folder_path)
+        tot_files = len(all_files)
+        for file in all_files:
+            print('{:.2%}'.format(counter/tot_files))
+            df = self.get_flattened_data(folder_path + file, 'tones', ['created_at', 'user', 'source'])
             X.loc[counter] = None
-            X.loc[counter]['tot_tweets'] = df['user'][0]['statuses_count']
-            X.loc[counter]['screen_name'] = df['user'][0]['screen_name']
+            try:
+                total = df['user'][0]['statuses_count']
+            except ValueError:
+                total = 0
+            try:
+                sn = df['user'][0]['screen_name']
+            except ValueError:
+                sn = None
+
+            X.loc[counter]['tot_tweets'] = total
+            X.loc[counter]['screen_name'] = sn
             counts, total = self.get_tone_counts(df)
             tone_percentages = [(x / total) * 100 for x in counts]
             X.loc[counter]['joy'] = tone_percentages[0]
@@ -276,16 +290,22 @@ class TweetsDataAnalysis:
             X.loc[counter]['confident'] = tone_percentages[5]
             X.loc[counter]['anger'] = tone_percentages[6]
 
-            morning, mid_day, late_night, std_times = self.count_localised_time(df['created_at'], df['user'][0]['utc_offset'])
+            morning, mid_day, late_night, std_times = self.count_localised_time(df['created_at'], file, df['user'][0]['utc_offset'])
             X.loc[counter]['morning'] = morning
             X.loc[counter]['mid_day'] = mid_day
             X.loc[counter]['late_night'] = late_night
             s = pd.Series(std_times, index=df.index, name='std_times')
-            X = pd.concat([X, s], axis=1)
 
             seasons = self.count_sad_happy_four_seasons(df['tone_name'], s)
             # attach the seasons to X
-
+            X.loc[counter]['spring_sad'] = seasons['spring_sad']
+            X.loc[counter]['summer_sad'] = seasons['summer_sad']
+            X.loc[counter]['fall_sad'] = seasons['fall_sad']
+            X.loc[counter]['winter_sad'] = seasons['winter_sad']
+            X.loc[counter]['spring_joy'] = seasons['spring_joy']
+            X.loc[counter]['summer_joy'] = seasons['summer_joy']
+            X.loc[counter]['fall_joy'] = seasons['fall_joy']
+            X.loc[counter]['winter_joy'] = seasons['winter_joy']
 
             # analyze tone of each users tweets and attach back
             # determine how to find total number of tweets for season.
