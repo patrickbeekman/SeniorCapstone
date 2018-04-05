@@ -3,7 +3,7 @@ import numpy as np
 import json
 import os
 from pandas.io.json import json_normalize
-from datetime import datetime
+import datetime
 from itertools import chain
 from collections import Counter
 import matplotlib.pyplot as plt
@@ -199,11 +199,31 @@ class TweetsDataAnalysis:
 
         return counts, total
 
+    '''
+        Converts the times to local time based on offset and then counts
+        up the number of tweets occuring during the 3 periods of the day.
+        morning=5-11, mid-day=11-23, night=23-5
+    '''
+    def count_localised_time(self, times, offset):
+        real_times = times / 1000
+        morning = 0
+        mid_day = 0
+        late_night = 0
+        for time in real_times:
+            new_time = datetime.datetime.fromtimestamp(time + offset)
+            if 5 <= new_time.hour <= 11:
+                morning+=1
+            elif 23 <= new_time.hour <= 24 or 0 <= new_time.hour <= 5:
+                late_night+=1
+            else:
+                mid_day+=1
+        return morning, mid_day, late_night
+
     def create_X_matrix(self, folder_path):
         X = pd.DataFrame(columns=['screen_name', 'joy', 'sad', 'analytical',
                                   'tentative', 'fear', 'confident', 'anger', 'tot_winter',
                                   'tot_spring', 'tot_summer', 'tot_fall', 'tot_tweets',
-                                  'late_night', 'early_morning'])
+                                  'morning', 'mid_day', 'late_night'])
         counter = 0
         for file in os.listdir(folder_path):
             df = self.get_flattened_data(folder_path + file, 'tones', ['created_at', 'text_x', 'favorite_count', 'retweet_count', 'user', 'source'])
@@ -219,6 +239,11 @@ class TweetsDataAnalysis:
             X.loc[counter]['fear'] = tone_percentages[4]
             X.loc[counter]['confident'] = tone_percentages[5]
             X.loc[counter]['anger'] = tone_percentages[6]
+
+            morning, mid_day, late_night = self.localising_time(df['created_at'], df['user'][0]['utc_offset'])
+            X.loc[counter]['morning'] = morning
+            X.loc[counter]['mid_day'] = mid_day
+            X.loc[counter]['late_night'] = late_night
             # analyze tone of each users tweets and attach back
             # determine how to find total number of tweets for season.
             # can I look at the tones for each season?
