@@ -256,7 +256,7 @@ class TweetsDataAnalysis:
                     seasons['winter_sad'] += 1
         return seasons
 
-    def create_X_matrix(self, folder_path):
+    def create_X_matrix(self, folder_path, output_file_path):
         X = pd.DataFrame(columns=['screen_name', 'joy', 'sad', 'analytical',
                                   'tentative', 'fear', 'confident', 'anger',
                                   'tot_tweets', 'morning', 'mid_day', 'late_night',
@@ -273,6 +273,8 @@ class TweetsDataAnalysis:
                 total = df['user'][0]['statuses_count']
             except ValueError:
                 total = 0
+            except IndexError:
+                continue
             try:
                 sn = df['user'][0]['screen_name']
             except ValueError:
@@ -312,9 +314,12 @@ class TweetsDataAnalysis:
             # can I look at the tones for each season?
             # When looking at time of day for tweets take into account 'utc_offset'
             counter+=1
+        X.to_pickle(output_file_path)
         return X
 
-
+    def create_boxplot(self, data_path):
+        df = pd.read_pickle(data_path)
+        print("hello")
 
 
 
@@ -335,7 +340,10 @@ def main():
     # tda.graph_pie_chart(data, twitter_handle + 's_pie_chart.png', twitter_handle)
 
     # tda.graph_word_count_for_user(os.path.dirname(__file__) + "/../data/pbFollowers/users_tweets/patrickbeekman_tweets.json")
-    tda.create_X_matrix(os.path.dirname(__file__) + "/../data/pbFollowers/merged/")
+    # tda.create_X_matrix(os.path.dirname(__file__) + "/../data/pbFollowers/merged/",
+    #                     os.path.dirname(__file__) + "/../data/pbFollowers/X_matrix.pkl")
+    tda.create_boxplot(os.path.dirname(__file__) + "/../data/pbFollowers/X_matrix.pkl")
+
 
 if __name__ == "__main__":
     main()

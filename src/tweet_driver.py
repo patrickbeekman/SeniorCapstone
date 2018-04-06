@@ -57,13 +57,17 @@ class Tweet_Driver:
                                                                    data_path + "all_analysis.json")
                 except FileNotFoundError:
                     continue
+                except WatsonException:
+                    print("WatsonError!!!!")
+                    self.analyzer = tone_analyzer.MyToneAnalyzer()
+                    continue
 
                 self.analyzer.attach_analysis_to_tweet(data_path + "all_analysis.json",
                                                        user_tweets_path,
                                                        data_path + "merged/" + user['screen_name'] + "_merged_analysis.json")
                 self.analyzer.temp_file_cleanup(data_path + "analysis/",
                                                 data_path + "tweets_text/")
-        X = self.analysis.create_X_matrix(data_path + "merged/")
+        #X = self.analysis.create_X_matrix(data_path + "merged/", data_path + "X_matrix.pkl")
 
 
     def analyze_search_term(self, data, data_folder):
