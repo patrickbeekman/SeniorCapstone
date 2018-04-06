@@ -283,14 +283,14 @@ class TweetsDataAnalysis:
             X.loc[counter]['tot_tweets'] = total
             X.loc[counter]['screen_name'] = sn
             counts, total = self.get_tone_counts(df)
-            tone_percentages = [(x / total) * 100 for x in counts]
-            X.loc[counter]['joy'] = tone_percentages[0]
-            X.loc[counter]['sad'] = tone_percentages[1]
-            X.loc[counter]['analytical'] = tone_percentages[2]
-            X.loc[counter]['tentative'] = tone_percentages[3]
-            X.loc[counter]['fear'] = tone_percentages[4]
-            X.loc[counter]['confident'] = tone_percentages[5]
-            X.loc[counter]['anger'] = tone_percentages[6]
+            #tone_percentages = [(x / total) * 100 for x in counts]
+            X.loc[counter]['joy'] = counts[0] #tone_percentages[0]
+            X.loc[counter]['sad'] = counts[1] #tone_percentages[1]
+            X.loc[counter]['analytical'] = counts[2] #tone_percentages[2]
+            X.loc[counter]['tentative'] = counts[3] #tone_percentages[3]
+            X.loc[counter]['fear'] = counts[4] #tone_percentages[4]
+            X.loc[counter]['confident'] = counts[5] #tone_percentages[5]
+            X.loc[counter]['anger'] = counts[6] #tone_percentages[6]
 
             morning, mid_day, late_night, std_times = self.count_localised_time(df['created_at'], file, df['user'][0]['utc_offset'])
             X.loc[counter]['morning'] = morning
@@ -317,8 +317,32 @@ class TweetsDataAnalysis:
         X.to_pickle(output_file_path)
         return X
 
-    def create_boxplot(self, data_path):
+    def create_boxplot(self, data_path, save_path):
         df = pd.read_pickle(data_path)
+        df = df.apply(pd.to_numeric, errors='ignore')
+        descriptive_stats = df.describe()
+        df_emotions = df[['joy', 'sad', 'analytical', 'tentative', 'fear', 'confident', 'anger']]
+        plt.figure()
+        df_emotions.plot.box()
+        plt.title("Emotions boxplots")
+        plt.savefig(save_path + "emotions_boxplot.png")
+        plt.clf()
+
+        df_time_of_day = df[['morning', 'mid_day', 'late_night']]
+        plt.figure()
+        df_time_of_day.plot.box()
+        plt.title("Time of day boxplots")
+        plt.savefig(save_path + "timeOfDay_boxplot.png")
+        plt.clf()
+
+        df_seasons = df[['spring_sad', 'spring_joy', 'summer_sad', 'summer_joy',
+                         'fall_sad', 'fall_joy', 'winter_sad', 'winter_joy']]
+        plt.figure()
+        df_seasons.plot.box()
+        plt.title("Joy/Sad broken down by season")
+        plt.xticks(rotation=90)
+        plt.tight_layout()
+        plt.savefig(save_path + "joy_sad_Seasons_boxplot.png")
         print("hello")
 
 
@@ -339,10 +363,11 @@ def main():
     # #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
     # tda.graph_pie_chart(data, twitter_handle + 's_pie_chart.png', twitter_handle)
 
-    # tda.graph_word_count_for_user(os.path.dirname(__file__) + "/../data/pbFollowers/users_tweets/patrickbeekman_tweets.json")
+    #tda.graph_word_count_for_user(os.path.dirname(__file__) + "/../data/pbFollowers/users_tweets/patrickbeekman_tweets.json")
     # tda.create_X_matrix(os.path.dirname(__file__) + "/../data/pbFollowers/merged/",
     #                     os.path.dirname(__file__) + "/../data/pbFollowers/X_matrix.pkl")
-    tda.create_boxplot(os.path.dirname(__file__) + "/../data/pbFollowers/X_matrix.pkl")
+    tda.create_boxplot(os.path.dirname(__file__) + "/../data/pbFollowers/X_matrix.pkl",
+                       os.path.dirname(__file__) + "/../data/pbFollowers/plots/")
 
 
 if __name__ == "__main__":
