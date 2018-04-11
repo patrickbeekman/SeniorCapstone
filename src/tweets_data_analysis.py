@@ -8,7 +8,9 @@ from itertools import chain
 from collections import Counter
 import matplotlib.pyplot as plt
 import nltk
+import random
 from nltk.corpus import stopwords
+from bokeh.plotting import figure, output_file, show
 import tweepy
 import tweepy_grabber
 
@@ -346,6 +348,51 @@ class TweetsDataAnalysis:
         print("hello")
 
 
+    def time_series_frequency_analysis(self):
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        dir_files = os.listdir(data_path)
+
+        counts_of_tweets = {}
+
+        for filename in dir_files:
+            df = pd.read_json(data_path + filename)
+            df = df.set_index(df['created_at'])
+            p = df.groupby(pd.TimeGrouper("D"))
+            freq_of_tweets = p['created_at'].count()
+            freq_dict = freq_of_tweets.to_dict()
+            for key, value in freq_dict.items():
+                try:
+                    counts_of_tweets[key.to_datetime()] += value
+                except KeyError:
+                    counts_of_tweets[key.to_datetime()] = value
+            # index like freq_dict.get(pd.Timestamp('2018-01-31'))
+
+        dates = np.fromiter(counts_of_tweets.keys(), dtype='datetime64[us]')
+        counts = np.fromiter(counts_of_tweets.values(), dtype=float)
+
+        # window_size = 30
+        # window = np.ones(window_size) / float(window_size)
+        # counts_avg = np.convolve(counts, window, 'same')
+
+        # output to static HTML file
+        tweet_freq_plot_path = data_path + "../plots/Tweet_freq_by_day.html"
+        output_file(tweet_freq_plot_path, title="Tweet frequency of my followers")
+
+        # create a new plot with a a datetime axis type
+        p = figure(width=800, height=350, x_axis_type="datetime")
+
+        # add renderers
+        p.circle(dates, counts, size=4, color='blue', alpha=0.8)
+        # p.line(dates, counts_avg, color='grey')
+
+        p.title.text = "Tweet Frequency of @patrickbeekman's followers"
+        p.xaxis.axis_label = 'Date'
+        p.yaxis.axis_label = '# of Tweets'
+
+        show(p)
+
+        print("hello")
+
 
 def main():
     tda = TweetsDataAnalysis()
@@ -366,8 +413,9 @@ def main():
     #tda.graph_word_count_for_user(os.path.dirname(__file__) + "/../data/pbFollowers/users_tweets/patrickbeekman_tweets.json")
     # tda.create_X_matrix(os.path.dirname(__file__) + "/../data/pbFollowers/merged/",
     #                     os.path.dirname(__file__) + "/../data/pbFollowers/X_matrix.pkl")
-    tda.create_boxplot(os.path.dirname(__file__) + "/../data/pbFollowers/X_matrix.pkl",
-                       os.path.dirname(__file__) + "/../data/pbFollowers/plots/")
+    # tda.create_boxplot(os.path.dirname(__file__) + "/../data/pbFollowers/X_matrix.pkl",
+    #                    os.path.dirname(__file__) + "/../data/pbFollowers/plots/")
+    tda.time_series_frequency_analysis()
 
 
 if __name__ == "__main__":
