@@ -11,6 +11,7 @@ import nltk
 import random
 from nltk.corpus import stopwords
 from bokeh.plotting import figure, output_file, show
+from bokeh.models import ColumnDataSource
 import tweepy
 import tweepy_grabber
 
@@ -391,8 +392,49 @@ class TweetsDataAnalysis:
 
         show(p)
 
-        print("hello")
+        print("Frequency of tweets graph created!")
 
+
+    def time_series_day_of_week_plot(self):
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        dir_files = os.listdir(data_path)
+
+        counts_of_tweets = {}
+
+        for filename in dir_files:
+            df = pd.read_json(data_path + filename)
+            df = df.set_index(df['created_at'])
+            temp = pd.DatetimeIndex(df['created_at'])
+            df['weekday'] = temp.weekday_name
+            p = df.groupby(df['weekday'])
+            freq_of_tweets = p['created_at'].count()
+            freq_dict = freq_of_tweets.to_dict()
+            for key, value in freq_dict.items():
+                try:
+                    counts_of_tweets[key] += value
+                except KeyError:
+                    counts_of_tweets[key] = value
+            # index like freq_dict.get(pd.Timestamp('2018-01-31'))
+
+        #dates = np.fromiter(counts_of_tweets.keys(), dtype=object)
+        #counts = np.fromiter(counts_of_tweets.values(), dtype=float)
+
+        # output to static HTML file
+        tweet_freq_plot_path = data_path + "../plots/Tweet_freq_day_of_week.html"
+        output_file(tweet_freq_plot_path)
+
+        days_of_week = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        counts_of_week = [counts_of_tweets[days_of_week[0]], counts_of_tweets[days_of_week[1]],
+                          counts_of_tweets[days_of_week[2]], counts_of_tweets[days_of_week[3]],
+                          counts_of_tweets[days_of_week[4]], counts_of_tweets[days_of_week[5]],
+                          counts_of_tweets[days_of_week[6]]]
+
+        source = ColumnDataSource(data=dict(days_of_week=days_of_week, counts_of_week=counts_of_week))
+        p = figure(x_range=days_of_week, plot_height=350, toolbar_location=None, title="Freq of Tweets by Day of Week")
+        p.vbar(x='days_of_week', top='counts_of_week', width=0.9, source=source,
+               line_color='white', fill_color=["#ff0000", "#ff4000", "#ff8000", "#ffbf00", "#ffsff00", "#bfff00", "#80ff00"])
+
+        show(p)
 
 def main():
     tda = TweetsDataAnalysis()
@@ -415,7 +457,10 @@ def main():
     #                     os.path.dirname(__file__) + "/../data/pbFollowers/X_matrix.pkl")
     # tda.create_boxplot(os.path.dirname(__file__) + "/../data/pbFollowers/X_matrix.pkl",
     #                    os.path.dirname(__file__) + "/../data/pbFollowers/plots/")
-    tda.time_series_frequency_analysis()
+
+
+    # tda.time_series_frequency_analysis()
+    tda.time_series_day_of_week_plot()
 
 
 if __name__ == "__main__":
