@@ -3,8 +3,14 @@ import numpy as np
 import json
 import os
 from pandas.io.json import json_normalize
-from datetime import datetime
+import datetime
+from itertools import chain
+from collections import Counter
 import matplotlib.pyplot as plt
+import nltk
+import random
+from nltk.corpus import stopwords
+from bokeh.plotting import figure, output_file, show
 import tweepy
 import tweepy_grabber
 
@@ -127,15 +133,7 @@ class TweetsDataAnalysis:
         plt.close()
 
     def graph_pie_chart(self, data, filename, twitter_name):
-        total = len(data.index)
-        joy_counts = len(data[data.tone_name == "Joy"])
-        sad_counts = len(data[data.tone_name == "Sadness"])
-        analytical_counts = len(data[data.tone_name == "Analytical"])
-        tentative_counts = len(data[data.tone_name == "Tentative"])
-        fear_counts = len(data[data.tone_name == "Fear"])
-        confident_counts = len(data[data.tone_name == "Confident"])
-        anger_counts = len(data[data.tone_name == "Anger"])
-        sizes = [joy_counts, sad_counts, analytical_counts, tentative_counts, fear_counts, confident_counts, anger_counts]
+        sizes, total = self.get_tone_counts(data)
         sizes = [(x / total) * 100 for x in sizes]
         labels = 'Joy', 'Sadness', 'Analytical', 'Tentative', 'Fear', 'Confident', 'Anger'
 
@@ -159,8 +157,241 @@ class TweetsDataAnalysis:
         data.created_at = data.created_at.astype('datetime64[ns]')
         return data
 
+    def graph_word_count_for_user(self, file_path, screen_name, save_path):
+        df = pd.read_json(file_path)
+        # Removing common words: https://stackoverflow.com/questions/9953619/technique-to-remove-common-wordsand-their-plural-versions-from-a-string
+        nltk.download("stopwords")
+        s = set(stopwords.words('english'))
+        myWords = {'RT', 'I', '.', 'The', 'like', 'I\'m', 'My', 'This', 'get', 'It\'s', 'Who', 'What', 'Where', 'When',
+                 'Why', 'A', '`'}
+        s.update(myWords)
+        text_notflat = [filter(lambda w: not w in s, tweet.split()) for tweet in df['text']]
+        word_counter = Counter(chain.from_iterable(text_notflat))
+        most_common = word_counter.most_common(50)
+        words = list(zip(*most_common))[0]
+        values = list(zip(*most_common))[1]
+        
+        indexes = np.arange(len(words))
+        width = 0.7
+        plt.clf()
+        plt.bar(indexes, values, width)
+        plt.xticks(indexes + width * 0.5, words)
+        plt.xticks(rotation=90)
+        plt.tight_layout()
+        plt.title("Top Word Counts of " + screen_name)
+        plt.savefig(save_path)
+        plt.close()
+        return word_counter
+
+    '''
+        Gets the tone counts from a dataframe of tweets,
+        this also returns the totals so that you can caluclate percentages.
+        Returns: Joy, Sad, Analytical, Tentative, Fear, Confident, Anger
+    '''
+    def get_tone_counts(self, df):
+        total = df.shape[0]
+        joy_counts = len(df[df.tone_name == "Joy"])
+        sad_counts = len(df[df.tone_name == "Sadness"])
+        analytical_counts = len(df[df.tone_name == "Analytical"])
+        tentative_counts = len(df[df.tone_name == "Tentative"])
+        fear_counts = len(df[df.tone_name == "Fear"])
+        confident_counts = len(df[df.tone_name == "Confident"])
+        anger_counts = len(df[df.tone_name == "Anger"])
+        counts = [joy_counts, sad_counts, analytical_counts, tentative_counts, fear_counts, confident_counts, anger_counts]
+
+        return counts, total
+
+    '''
+        Converts the times to local time based on offset and then counts
+        up the number of tweets occuring during the 3 periods of the day.
+        morning=5-11, mid-day=11-23, night=23-5
+    '''
+    def count_localised_time(self, times, file, offset=0):
+        real_times = times / 1000
+        morning = 0
+        mid_day = 0
+        late_night = 0
+        standardized_times = []
+        if offset is None:
+            offset = 0
+        for time in real_times:
+            new_time = datetime.datetime.fromtimestamp(time + offset)
+            standardized_times.append(new_time)
+            if 5 <= new_time.hour <= 11:
+                morning+=1
+            elif 23 <= new_time.hour <= 24 or 0 <= new_time.hour <= 5:
+                late_night+=1
+            else:
+                mid_day+=1
+        return morning, mid_day, late_night, standardized_times
+
+    def count_sad_happy_four_seasons(self, tone_names, std_times):
+        seasons = {'spring_sad':0, 'summer_sad':0, 'fall_sad':0, 'winter_sad':0,
+                   'spring_joy':0, 'summer_joy':0, 'fall_joy':0, 'winter_joy':0}
+        for index, tone in tone_names.iteritems():
+            if tone != 'Joy' and tone != 'Sadness':
+                continue
+            month = pd.to_datetime(std_times.iloc[index]).month
+            if month in range(3, 5+1):
+                # spring
+                if tone == 'Joy':
+                    seasons['spring_joy'] += 1
+                elif tone == 'Sadness':
+                    seasons['spring_sad'] += 1
+            elif month in range(6, 8+1):
+                #summer
+                if tone == 'Joy':
+                    seasons['summer_joy'] += 1
+                elif tone == 'Sadness':
+                    seasons['summer_sad'] += 1
+            elif month in range(9, 11+1):
+                #fall
+                if tone == 'Joy':
+                    seasons['fall_joy'] += 1
+                elif tone == 'Sadness':
+                    seasons['fall_sad'] += 1
+            else:
+                #winter
+                if tone == 'Joy':
+                    seasons['winter_joy'] += 1
+                elif tone == 'Sadness':
+                    seasons['winter_sad'] += 1
+        return seasons
+
+    def create_X_matrix(self, folder_path, output_file_path):
+        X = pd.DataFrame(columns=['screen_name', 'joy', 'sad', 'analytical',
+                                  'tentative', 'fear', 'confident', 'anger',
+                                  'tot_tweets', 'morning', 'mid_day', 'late_night',
+                                  'spring_sad', 'summer_sad', 'fall_sad', 'winter_sad',
+                                  'spring_joy', 'summer_joy', 'fall_joy', 'winter_joy'])
+        counter = 0
+        all_files = os.listdir(folder_path)
+        tot_files = len(all_files)
+        for file in all_files:
+            print('{:.2%}'.format(counter/tot_files))
+            df = self.get_flattened_data(folder_path + file, 'tones', ['created_at', 'user', 'source'])
+            X.loc[counter] = None
+            try:
+                total = df['user'][0]['statuses_count']
+            except ValueError:
+                total = 0
+            except IndexError:
+                continue
+            try:
+                sn = df['user'][0]['screen_name']
+            except ValueError:
+                sn = None
+
+            X.loc[counter]['tot_tweets'] = total
+            X.loc[counter]['screen_name'] = sn
+            counts, total = self.get_tone_counts(df)
+            #tone_percentages = [(x / total) * 100 for x in counts]
+            X.loc[counter]['joy'] = counts[0] #tone_percentages[0]
+            X.loc[counter]['sad'] = counts[1] #tone_percentages[1]
+            X.loc[counter]['analytical'] = counts[2] #tone_percentages[2]
+            X.loc[counter]['tentative'] = counts[3] #tone_percentages[3]
+            X.loc[counter]['fear'] = counts[4] #tone_percentages[4]
+            X.loc[counter]['confident'] = counts[5] #tone_percentages[5]
+            X.loc[counter]['anger'] = counts[6] #tone_percentages[6]
+
+            morning, mid_day, late_night, std_times = self.count_localised_time(df['created_at'], file, df['user'][0]['utc_offset'])
+            X.loc[counter]['morning'] = morning
+            X.loc[counter]['mid_day'] = mid_day
+            X.loc[counter]['late_night'] = late_night
+            s = pd.Series(std_times, index=df.index, name='std_times')
+
+            seasons = self.count_sad_happy_four_seasons(df['tone_name'], s)
+            # attach the seasons to X
+            X.loc[counter]['spring_sad'] = seasons['spring_sad']
+            X.loc[counter]['summer_sad'] = seasons['summer_sad']
+            X.loc[counter]['fall_sad'] = seasons['fall_sad']
+            X.loc[counter]['winter_sad'] = seasons['winter_sad']
+            X.loc[counter]['spring_joy'] = seasons['spring_joy']
+            X.loc[counter]['summer_joy'] = seasons['summer_joy']
+            X.loc[counter]['fall_joy'] = seasons['fall_joy']
+            X.loc[counter]['winter_joy'] = seasons['winter_joy']
+
+            # analyze tone of each users tweets and attach back
+            # determine how to find total number of tweets for season.
+            # can I look at the tones for each season?
+            # When looking at time of day for tweets take into account 'utc_offset'
+            counter+=1
+        X.to_pickle(output_file_path)
+        return X
+
+    def create_boxplot(self, data_path, save_path):
+        df = pd.read_pickle(data_path)
+        df = df.apply(pd.to_numeric, errors='ignore')
+        descriptive_stats = df.describe()
+        df_emotions = df[['joy', 'sad', 'analytical', 'tentative', 'fear', 'confident', 'anger']]
+        plt.figure()
+        df_emotions.plot.box()
+        plt.title("Emotions boxplots")
+        plt.savefig(save_path + "emotions_boxplot.png")
+        plt.clf()
+
+        df_time_of_day = df[['morning', 'mid_day', 'late_night']]
+        plt.figure()
+        df_time_of_day.plot.box()
+        plt.title("Time of day boxplots")
+        plt.savefig(save_path + "timeOfDay_boxplot.png")
+        plt.clf()
+
+        df_seasons = df[['spring_sad', 'spring_joy', 'summer_sad', 'summer_joy',
+                         'fall_sad', 'fall_joy', 'winter_sad', 'winter_joy']]
+        plt.figure()
+        df_seasons.plot.box()
+        plt.title("Joy/Sad broken down by season")
+        plt.xticks(rotation=90)
+        plt.tight_layout()
+        plt.savefig(save_path + "joy_sad_Seasons_boxplot.png")
+        print("hello")
 
 
+    def time_series_frequency_analysis(self):
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        dir_files = os.listdir(data_path)
+
+        counts_of_tweets = {}
+
+        for filename in dir_files:
+            df = pd.read_json(data_path + filename)
+            df = df.set_index(df['created_at'])
+            p = df.groupby(pd.TimeGrouper("D"))
+            freq_of_tweets = p['created_at'].count()
+            freq_dict = freq_of_tweets.to_dict()
+            for key, value in freq_dict.items():
+                try:
+                    counts_of_tweets[key.to_datetime()] += value
+                except KeyError:
+                    counts_of_tweets[key.to_datetime()] = value
+            # index like freq_dict.get(pd.Timestamp('2018-01-31'))
+
+        dates = np.fromiter(counts_of_tweets.keys(), dtype='datetime64[us]')
+        counts = np.fromiter(counts_of_tweets.values(), dtype=float)
+
+        # window_size = 30
+        # window = np.ones(window_size) / float(window_size)
+        # counts_avg = np.convolve(counts, window, 'same')
+
+        # output to static HTML file
+        tweet_freq_plot_path = data_path + "../plots/Tweet_freq_by_day.html"
+        output_file(tweet_freq_plot_path, title="Tweet frequency of my followers")
+
+        # create a new plot with a a datetime axis type
+        p = figure(width=800, height=350, x_axis_type="datetime")
+
+        # add renderers
+        p.circle(dates, counts, size=4, color='blue', alpha=0.8)
+        # p.line(dates, counts_avg, color='grey')
+
+        p.title.text = "Tweet Frequency of @patrickbeekman's followers"
+        p.xaxis.axis_label = 'Date'
+        p.yaxis.axis_label = '# of Tweets'
+
+        show(p)
+
+        print("hello")
 
 
 def main():
@@ -168,16 +399,23 @@ def main():
 
     twitter_handle = "North_Carolina"
 
-    data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/us_states/" + twitter_handle + "_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count', 'user'])
+    #data = tda.get_flattened_data(os.path.dirname(__file__) + "/../data/us_states/" + twitter_handle + "_merged_analysis.json", 'tones', ['text', 'created_at', 'favorite_count', 'retweet_count', 'user'])
 
-    tda.convert_to_datetime(data)
-    tda.max_favorites_of_tweets(data)
-    tda.max_retweets_of_tweets(data)
-    tda.graph_tweet_freq_per_month(data, twitter_handle + 's_per_month.png')
-    #tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
-    tda.graph_joy_vs_sad_percent_stacked(data, twitter_handle + 's_tweets_joy_vs_sad_stacked_bar.png', twitter_handle)
-    #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
-    tda.graph_pie_chart(data, twitter_handle + 's_pie_chart.png', twitter_handle)
+    # tda.convert_to_datetime(data)
+    # tda.max_favorites_of_tweets(data)
+    # tda.max_retweets_of_tweets(data)
+    # tda.graph_tweet_freq_per_month(data, twitter_handle + 's_per_month.png')
+    # #tda.graph_joy_vs_sad_per_month(data, 'my_tweets_joy_vs_sad_per_month.png')
+    # tda.graph_joy_vs_sad_percent_stacked(data, twitter_handle + 's_tweets_joy_vs_sad_stacked_bar.png', twitter_handle)
+    # #tda.graph_other_emotions_per_month(data, 'my_tweets_other_emotions_per_month.png')
+    # tda.graph_pie_chart(data, twitter_handle + 's_pie_chart.png', twitter_handle)
+
+    #tda.graph_word_count_for_user(os.path.dirname(__file__) + "/../data/pbFollowers/users_tweets/patrickbeekman_tweets.json")
+    # tda.create_X_matrix(os.path.dirname(__file__) + "/../data/pbFollowers/merged/",
+    #                     os.path.dirname(__file__) + "/../data/pbFollowers/X_matrix.pkl")
+    # tda.create_boxplot(os.path.dirname(__file__) + "/../data/pbFollowers/X_matrix.pkl",
+    #                    os.path.dirname(__file__) + "/../data/pbFollowers/plots/")
+    tda.time_series_frequency_analysis()
 
 
 if __name__ == "__main__":

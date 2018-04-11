@@ -26,8 +26,10 @@ class MyToneAnalyzer:
             return None
         return tone_analyzer
 
-    def analyze_json_file(self, filename):
-        with open(filename) as tone_json:
+    def analyze_json_file(self, file_path):
+        if not os.path.isfile(file_path):
+            raise FileNotFoundError("File does not exist.")
+        with open(file_path) as tone_json:
             try:
                 tone_resp = self.analyzer.tone(tone_json.read(), content_type='application/json')
             except WatsonException as e:
@@ -67,6 +69,9 @@ class MyToneAnalyzer:
                 tone_resp = self.analyze_json_file(tweet_text_path + filename)
             except WatsonException as e:
                 raise WatsonException(e)
+            except FileNotFoundError as e2:
+                print(e2)
+                return
             output_file = tweet_text_path + "../analysis/tone_tweet_" + str(num).zfill(4) + ".json"
             self.write_only_sentence_tone_to_file(tone_resp, output_file)
 
@@ -91,7 +96,12 @@ class MyToneAnalyzer:
         start = 0
         stop = 99
         increment = 99
+
+        if not os.path.exists(input_filename):
+            raise FileNotFoundError()
+
         df = pd.read_json(input_filename)
+
         while start < (len(df)):
             #newfilename = self.path_name("/../data/tweets_text/tweet_text" + "_" + str(num).zfill(4) + ".json")
             newfilename = data_path + "tweet_text_" + str(num).zfill(4) + ".json"
@@ -107,6 +117,8 @@ class MyToneAnalyzer:
         #output_file = self.path_name("/../data/all_analysis.json")
         #dirFiles = os.listdir(self.path_name("/../data/analysis/"))
         dirFiles = os.listdir(analysis_folder)
+        if not dirFiles:
+            raise FileNotFoundError
         dirFiles.sort()
         print(dirFiles)
 
@@ -149,8 +161,12 @@ class MyToneAnalyzer:
         #analysis_path = self.path_name("/../data/all_analysis.json")
         #tweets_path = self.path_name("/../data/tweets.json")
 
-        analysis = pd.read_json(analysis_path)
-        tweets = pd.read_json(tweets_path)
+        try:
+            analysis = pd.read_json(analysis_path)
+            tweets = pd.read_json(tweets_path)
+        except FileNotFoundError as e:
+            print(e, analysis_path, tweets_path)
+            return
         tweets['sentence_id'] = range(0, len(tweets))
 
         merged = pd.merge(left=tweets, right=analysis, left_on='sentence_id', right_on='sentence_id')

@@ -1,6 +1,7 @@
 import tweepy_grabber
 import tone_analyzer
 import tweets_data_analysis
+import pandas as pd
 from watson_developer_cloud import WatsonException
 import os
 
@@ -15,30 +16,84 @@ class Tweet_Driver:
         self.analyzer = tone_analyzer.MyToneAnalyzer()
         self.analysis = tweets_data_analysis.TweetsDataAnalysis()
 
+    def analyze_followers_of_followers(self, screen_name, data_folder):
+        data_path = os.path.dirname(__file__) + "/../data/" + data_folder + "/"
+        if not os.path.exists(data_path):
+            os.mkdir(data_path)
+
+        # Collect the followers for the central user then collect all their followers
+        # and save them to the specified folder.
+        followers_path = data_path + "followers/"
+        if not os.path.exists(followers_path):
+            os.mkdir(followers_path)
+        if not os.path.exists(followers_path + screen_name + "_followers.json"):
+            followers = self.grabber.get_users_followers(followers_path, screen_name)
+        #self.grabber.get_followers_of_followers(followers, followers_path)
+
+        all_users_tweets_path = data_path + "users_tweets/"
+        if not os.path.exists(all_users_tweets_path):
+            os.mkdir(all_users_tweets_path)
+
+        # open up each file of followers accounts and grab 2000 of their tweets
+        current_files = os.listdir(followers_path)
+        for file in current_files:
+            users_followers = pd.read_json(followers_path + file)
+            for index, user in users_followers.iterrows():
+                user_tweets_path = all_users_tweets_path + user['screen_name'] + "_tweets.json"
+                if user['protected']:
+                    continue
+
+                if not os.path.exists(user_tweets_path):
+                    self.grabber.get_users_timeline(user['screen_name'], user_tweets_path, max_tweets=2000)
+
+                if os.path.exists(data_path + "merged/" + user['screen_name'] + "_merged_analysis.json"):
+                    continue
+
+                print("Starting: " + user['screen_name'])
+                try:
+                    self.analyzer.incremental_send_all_tweets_to_text_json(user_tweets_path, data_path + "tweets_text/")
+                    self.analyzer.analyze_all_tweets_text_folder(data_path + "tweets_text/")
+                    self.analyzer.create_single_file_tone_analysis(data_path + "analysis/",
+                                                                   data_path + "all_analysis.json")
+                except FileNotFoundError:
+                    continue
+                except WatsonException:
+                    print("WatsonError!!!!")
+                    self.analyzer = tone_analyzer.MyToneAnalyzer()
+                    continue
+
+                self.analyzer.attach_analysis_to_tweet(data_path + "all_analysis.json",
+                                                       user_tweets_path,
+                                                       data_path + "merged/" + user['screen_name'] + "_merged_analysis.json")
+                self.analyzer.temp_file_cleanup(data_path + "analysis/",
+                                                data_path + "tweets_text/")
+        #X = self.analysis.create_X_matrix(data_path + "merged/", data_path + "X_matrix.pkl")
+
+
     def analyze_search_term(self, data, data_folder):
         data_path = os.path.dirname(__file__) + "/../data/" + data_folder + "/"
         if not os.path.exists(data_path):
             os.mkdir(data_path)
         current_files = os.listdir(data_path)
-        current_states = [f.split('_') for f in current_files]
-        excluded_states = []
-        for s in current_states:
+        current_terms = [f.split('_') for f in current_files]
+        excluded_terms = []
+        for s in current_terms:
             if s[1] == "tweets.json" or s[1] == "merged":
                 try:
-                    excluded_states.index(s[0])
+                    excluded_terms.index(s[0])
                 except ValueError:
-                    excluded_states.append(s[0])
+                    excluded_terms.append(s[0])
             else:
                 try:
-                    excluded_states.index(s[0] + " " + s[1])
+                    excluded_terms.index(s[0] + " " + s[1])
                 except ValueError:
-                    excluded_states.append(s[0] + " " + s[1])
-        count = 3
+                    excluded_terms.append(s[0] + " " + s[1])
+
         for entry in data:
             try:
-                excluded_states.index(entry)
+                excluded_terms.index(entry)
             except ValueError:
-                excluded_states.append(entry)
+                excluded_terms.append(entry)
                 print("Starting: " + entry)
                 # tweepy_grabber stuff
                 search_query = entry
@@ -69,11 +124,12 @@ class Tweet_Driver:
                     os.path.dirname(__file__) + "/../data/" + data_folder + "/" + search_query.replace(' ', '_') + "_merged_analysis.json", 'tones',
                     ['text', 'created_at', 'favorite_count', 'retweet_count'])
 
-                count+=1
                 self.analysis.convert_to_datetime(data)
                 self.analysis.graph_pie_chart(data, search_query + 's_pie_chart.png', search_query)
                 # reset the tone analyzer which creates a new connection to the service
                 self.analyzer = tone_analyzer.MyToneAnalyzer()
+
+
 
 def main():
     driver = Tweet_Driver()
@@ -129,7 +185,10 @@ def main():
         'Wisconsin',
         'Wyoming'
     ]
-    driver.analyze_search_term(us_states, 'us_states')
+    #driver.analyze_search_term(us_states, 'us_states')
+    #driver.analyze_followers_of_followers('patrickbeekman', 'pbFollowers')
+    analysis_path = os.path.dirname(__file__) + "/../data/pbFollowers/"
+    driver.analyzer.create_single_file_tone_analysis(analysis_path + "merged/", analysis_path + "single_file_merged.json")
 
 if __name__ == "__main__":
     main()
