@@ -11,7 +11,14 @@ import nltk
 import random
 from nltk.corpus import stopwords
 from bokeh.plotting import figure, output_file, show
-from bokeh.models import ColumnDataSource
+from bokeh.models import (
+    ColumnDataSource,
+    HoverTool,
+    LinearColorMapper,
+    BasicTicker,
+    PrintfTickFormatter,
+    ColorBar,
+)
 import tweepy
 import tweepy_grabber
 
@@ -430,11 +437,19 @@ class TweetsDataAnalysis:
                           counts_of_tweets[days_of_week[6]]]
 
         source = ColumnDataSource(data=dict(days_of_week=days_of_week, counts_of_week=counts_of_week))
-        p = figure(x_range=days_of_week, plot_height=350, toolbar_location=None, title="Freq of Tweets by Day of Week")
+
+        hover = HoverTool(tooltips=[
+            ('days_of_week', '@days_of_week'),
+            ('counts_of_week', '@counts_of_week'),
+        ])
+
+        p = figure(x_range=days_of_week, plot_height=350, toolbar_location=None, title="Freq of Tweets by Day of Week", tools=[hover])
         p.vbar(x='days_of_week', top='counts_of_week', width=0.9, source=source,
                line_color='white', fill_color=["#ff0000", "#ff4000", "#ff8000", "#ffbf00", "#ffsff00", "#bfff00", "#80ff00"])
 
         show(p)
+
+
 
 def main():
     tda = TweetsDataAnalysis()
