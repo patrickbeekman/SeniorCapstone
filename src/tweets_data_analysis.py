@@ -14,6 +14,7 @@ from nltk.corpus import stopwords
 from bokeh.plotting import figure, output_file, show
 from bokeh.models.annotations import Title
 from bokeh.models.glyphs import VBar
+from bokeh.layouts import gridplot
 from bokeh.transform import factor_cmap
 from bokeh.models import (
     ColumnDataSource,
@@ -457,16 +458,31 @@ class TweetsDataAnalysis:
         show(p)
 
 
-    def tweets_per_hour_plot(self, emotion=None):
+    def tweets_per_hour_plot(self, emotion=None, color="#b3de69"):
         data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
         dir_files = os.listdir(data_path)
 
         counts_of_tweets = {}
 
         for filename in dir_files:
-            df = pd.read_json(data_path + filename)
-            df['offset'] = df['user'][0]['utc_offset']
-            df['std_time'] = df['created_at'] + pd.TimedeltaIndex(df['offset'], unit='s')
+            #df = pd.read_json(data_path + filename)
+            df = self.get_flattened_data(data_path+filename, 'tones', ['user', 'created_at'])
+            if emotion is not None:
+                try:
+                    df = df[df.tone_name == emotion]
+                except AttributeError:
+                    continue
+            df['created_at'] = df['created_at']/1000
+            offset = 0
+            try:
+                offset = df['user'][0]['utc_offset']
+            except (IndexError, KeyError):
+                offset = 0
+            if offset is None:
+                offset = 0
+            #df['std_time'] = df['created_at'] + pd.TimedeltaIndex(df['offset'], unit='s')
+            df['std_time'] = df['created_at'] + offset
+            df['std_time'] = [datetime.datetime.fromtimestamp(x) for x in df['std_time']]
             df = df.set_index(df['std_time'])
             temp = pd.DatetimeIndex(df['std_time'])
             df['hour'] = temp.hour
@@ -485,7 +501,8 @@ class TweetsDataAnalysis:
 
         # output to static HTML file
         hourly_freq_plot_path = data_path + "../plots/Hourly_freq_plot.html"
-        output_file(hourly_freq_plot_path)
+        if emotion is None:
+            output_file(hourly_freq_plot_path)
 
         source = ColumnDataSource(data=dict(hours=hours, numTweets=numTweets))
 
@@ -499,7 +516,7 @@ class TweetsDataAnalysis:
         plot = Plot(x_range=xdr, y_range=ydr, plot_width=500, plot_height=500,
                     h_symmetry=False, v_symmetry=False, min_border=0, tools=[hover])
 
-        glyph = VBar(x="hours", top="numTweets", bottom=0, width=0.5, fill_color="#b3de69")
+        glyph = VBar(x="hours", top="numTweets", bottom=0, width=0.5, fill_color=color)
         plot.add_glyph(source, glyph)
 
         xaxis = LinearAxis()
@@ -509,12 +526,34 @@ class TweetsDataAnalysis:
         plot.add_layout(yaxis, 'left')
 
         t = Title()
-        t.text = "Number of Tweets by Hour"
+        if emotion is not None:
+            t.text = "(" + emotion + ") Number of Tweets by Hour"
+        else:
+            t.text = "(all emotions) Number of Tweets by Hour"
         plot.title = t
         plot.xaxis.axis_label = 'Hours'
         plot.yaxis.axis_label = 'Number of Tweets'
 
-        show(plot)
+        if emotion is not None:
+            return plot
+        else:
+            show(plot)
+
+
+    def hourly_plot_by_emotion(self):
+
+        emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
+        colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
+
+        plots = []
+        for index, emotion in enumerate(emotions):
+            plots.append(self.tweets_per_hour_plot(emotion=emotion, color=colors[index]))
+
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        output_file(data_path + "multiple_emotions_by_hour.html")
+
+        grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
+        show(grid)
 
 
     def plot_heatmap(self):
@@ -562,7 +601,8 @@ def main():
 
     # tda.time_series_frequency_analysis()
     # tda.time_series_day_of_week_plot()
-    tda.tweets_per_hour_plot()
+    # tda.tweets_per_hour_plot()
+    tda.hourly_plot_by_emotion()
     # tda.plot_heatmap()
 
 
