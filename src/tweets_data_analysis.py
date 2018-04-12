@@ -11,10 +11,16 @@ import nltk
 import random
 from nltk.corpus import stopwords
 from bokeh.plotting import figure, output_file, show
+from bokeh.models.annotations import Title
+from bokeh.models.glyphs import VBar
+from bokeh.transform import factor_cmap
 from bokeh.models import (
     ColumnDataSource,
     HoverTool,
+    DataRange1d,
+    LinearAxis,
     LinearColorMapper,
+    Plot,
     BasicTicker,
     PrintfTickFormatter,
     ColorBar,
@@ -450,6 +456,82 @@ class TweetsDataAnalysis:
         show(p)
 
 
+    def tweets_per_hour_plot(self):
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        dir_files = os.listdir(data_path)
+
+        counts_of_tweets = {}
+
+        for filename in dir_files:
+            df = pd.read_json(data_path + filename)
+            df = df.set_index(df['created_at'])
+            temp = pd.DatetimeIndex(df['created_at'])
+            df['hour'] = temp.hour
+            p = df.groupby(df['hour'])
+            freq_of_tweets = p['created_at'].count()
+            freq_dict = freq_of_tweets.to_dict()
+            for key, value in freq_dict.items():
+                try:
+                    counts_of_tweets[key] += value
+                except KeyError:
+                    counts_of_tweets[key] = value
+
+        hours = np.fromiter(counts_of_tweets.keys(), dtype=float)
+        numTweets = np.fromiter(counts_of_tweets.values(), dtype=float)
+
+        # output to static HTML file
+        hourly_freq_plot_path = data_path + "../plots/Hourly_freq_plot.html"
+        output_file(hourly_freq_plot_path)
+
+        source = ColumnDataSource(data=dict(hours=hours, numTweets=numTweets))
+
+        hover = HoverTool(tooltips=[
+            ('hours', '@hours'),
+            ('numTweets', '@numTweets'),
+        ])
+
+        xdr = DataRange1d()
+        ydr = DataRange1d()
+        plot = Plot(x_range=xdr, y_range=ydr, plot_width=500, plot_height=500,
+                    h_symmetry=False, v_symmetry=False, min_border=0, tools=[hover])
+
+        glyph = VBar(x="hours", top="numTweets", bottom=0, width=0.5, fill_color="#b3de69")
+        plot.add_glyph(source, glyph)
+
+        xaxis = LinearAxis()
+        plot.add_layout(xaxis, 'below')
+
+        yaxis = LinearAxis()
+        plot.add_layout(yaxis, 'left')
+
+        t = Title()
+        t.text = "Number of Tweets by Hour"
+        plot.title = t
+        plot.xaxis.axis_label = 'Hours'
+        plot.yaxis.axis_label = 'Number of Tweets'
+
+        show(plot)
+
+
+    def plot_heatmap(self):
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        dir_files = os.listdir(data_path)
+        data = pd.read_csv(data_path+"../unemployment_data.csv")
+
+        data['Year'] = data['Year'].astype(str)
+        data = data.set_index('Year')
+        data.drop('Annual', axis=1, inplace=True)
+        data.columns.name = 'Month'
+
+        years = list(data.index)
+        months = list(data.columns)
+
+        # reshape to 1D array or rates with a month and year for each row.
+        df = pd.DataFrame(data.stack(), columns=['rate']).reset_index()
+
+        print("hello")
+
+
 
 def main():
     tda = TweetsDataAnalysis()
@@ -475,7 +557,9 @@ def main():
 
 
     # tda.time_series_frequency_analysis()
-    tda.time_series_day_of_week_plot()
+    # tda.time_series_day_of_week_plot()
+    tda.tweets_per_hour_plot()
+    # tda.plot_heatmap()
 
 
 if __name__ == "__main__":
