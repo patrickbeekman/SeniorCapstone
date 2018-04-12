@@ -457,7 +457,7 @@ class TweetsDataAnalysis:
         show(p)
 
 
-    def tweets_per_hour_plot(self):
+    def tweets_per_hour_plot(self, emotion=None):
         data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
         dir_files = os.listdir(data_path)
 
@@ -480,6 +480,7 @@ class TweetsDataAnalysis:
                     counts_of_tweets[key] = value
 
         hours = np.fromiter(counts_of_tweets.keys(), dtype=float)
+        hours+=1
         numTweets = np.fromiter(counts_of_tweets.values(), dtype=float)
 
         # output to static HTML file
