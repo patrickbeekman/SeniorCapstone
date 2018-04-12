@@ -4,6 +4,7 @@ import json
 import os
 from pandas.io.json import json_normalize
 import datetime
+import time
 from itertools import chain
 from collections import Counter
 import matplotlib.pyplot as plt
@@ -464,11 +465,13 @@ class TweetsDataAnalysis:
 
         for filename in dir_files:
             df = pd.read_json(data_path + filename)
-            df = df.set_index(df['created_at'])
-            temp = pd.DatetimeIndex(df['created_at'])
+            df['offset'] = df['user'][0]['utc_offset']
+            df['std_time'] = df['created_at'] + pd.TimedeltaIndex(df['offset'], unit='s')
+            df = df.set_index(df['std_time'])
+            temp = pd.DatetimeIndex(df['std_time'])
             df['hour'] = temp.hour
             p = df.groupby(df['hour'])
-            freq_of_tweets = p['created_at'].count()
+            freq_of_tweets = p['std_time'].count()
             freq_dict = freq_of_tweets.to_dict()
             for key, value in freq_dict.items():
                 try:
