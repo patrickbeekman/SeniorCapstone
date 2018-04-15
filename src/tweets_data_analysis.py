@@ -680,7 +680,7 @@ class TweetsDataAnalysis:
         grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
         show(grid)
 
-    def word_choice_by_emotion_barchart(self, emotion):
+    def word_choice_by_emotion_barchart(self, emotion, color='#b3de69'):
         data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
         dir_files = os.listdir(data_path)
 
@@ -699,7 +699,7 @@ class TweetsDataAnalysis:
             #nltk.download("stopwords")
             s = set(stopwords.words('english'))
             myWords = {'RT', 'I', '.', 'The', 'like', 'I\'m', 'My', 'This', 'get', 'It\'s', 'Who', 'What', 'Where', 'When',
-                     'Why', 'A', '`', '&amp;', '-'}
+                     'Why', 'A', '`', '&amp;', '-', 'If', 'go', 'got', '@MrLeonardKim'}
             s.update(myWords)
             try:
                 text_notflat = [filter(lambda w: not w in s, tweet.split()) for tweet in df_subset['text_x']]
@@ -727,8 +727,8 @@ class TweetsDataAnalysis:
         #print(sorted_x)
         #print(len(sorted_x))
 
-        hourly_freq_plot_path = data_path + "../plots/emotion_word_count_plot.html"
-        output_file(hourly_freq_plot_path)
+        # hourly_freq_plot_path = data_path + "../plots/emotion_word_count_plot.html"
+        # output_file(hourly_freq_plot_path)
 
         hover = HoverTool(tooltips=[
             ('words', '@words'),
@@ -743,14 +743,29 @@ class TweetsDataAnalysis:
         p = figure(x_range=words, y_range=(0, max(amounts)+100), plot_height=350, title=emotion + " Word Counts",
                    toolbar_location=None, tools=[hover])
 
-        p.vbar(x='words', top='amounts', width=0.9, source=source)
+        p.vbar(x='words', top='amounts', width=0.9, source=source, color=color)
 
         p.xgrid.grid_line_color = None
         p.legend.orientation = "horizontal"
         p.legend.location = "top_center"
-        p.xaxis.major_label_orientation = math.pi / 2
+        p.xaxis.major_label_orientation = math.pi / 5
 
-        show(p)
+        return p
+        #show(p)
+
+    def grid_plot_each_emotion_word_count(self):
+        emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
+        colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
+
+        plots = []
+        for index, emotion in enumerate(emotions):
+            plots.append(self.word_choice_by_emotion_barchart(emotion=emotion, color=colors[index]))
+
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        output_file(data_path + "multiple_emotions_word_counts.html")
+
+        grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
+        show(grid)
 
 
     def plot_heatmap(self):
@@ -803,7 +818,8 @@ def main():
     # tda.plot_heatmap()
     # tda.normalized_num_favs_retweets_by_hour(normalize=True)
     # tda.normalized_favs_rts_plot_by_emotion()
-    tda.word_choice_by_emotion_barchart('Joy')
+    # tda.word_choice_by_emotion_barchart('Joy')
+    tda.grid_plot_each_emotion_word_count()
 
 
 if __name__ == "__main__":
