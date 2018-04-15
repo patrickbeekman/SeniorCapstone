@@ -562,7 +562,6 @@ class TweetsDataAnalysis:
 
         counts_of_favs = {}
         counts_of_rts = {}
-        total_count = 0
 
         for filename in dir_files:
             # df = pd.read_json(data_path + filename)
@@ -584,9 +583,13 @@ class TweetsDataAnalysis:
             df['created_at'] = df['created_at']/1000
             offset = 0
             try:
-                offset = df['user'][0]['utc_offset']
+                offset = df['user'].iloc[0]['utc_offset']
             except (IndexError, KeyError):
                 offset = 0
+            try:
+                fllwrs = df['user'].iloc[0]['followers_count']
+            except (IndexError, KeyError):
+                fllwrs = 1
             if offset is None:
                 offset = 0
             #df['std_time'] = df['created_at'] + pd.TimedeltaIndex(df['offset'], unit='s')
@@ -595,10 +598,14 @@ class TweetsDataAnalysis:
             df = df.set_index(df['std_time'])
             temp = pd.DatetimeIndex(df['std_time'])
             df['hour'] = temp.hour
-            total_count += df['favorite_count'].count()
             p = df.groupby(df['hour'])
-            fav_counts = p['favorite_count'].sum().to_dict()
-            rt_counts = p['retweet_count'].sum().to_dict()
+            fav_counts = (p['favorite_count'].sum()/fllwrs).to_dict()
+            rt_counts = (p['retweet_count'].sum()/fllwrs).to_dict()
+            try:
+                if rt_counts[18] > 10:
+                    print("stop")
+            except KeyError:
+                print("okay...")
             for key, value in fav_counts.items():
                 if math.isnan(value):
                     continue
@@ -631,8 +638,8 @@ class TweetsDataAnalysis:
 
         fig = figure(plot_width=500, plot_height=500)
 
-        fig.line([x[0] for x in favs], [y[1]/total_count for y in favs], line_width=3, line_color='#e0b61d')
-        fig.line([x[0] for x in rts], [y[1]/total_count for y in rts], line_width=3, line_color='#20a014')
+        fig.line([x[0] for x in favs], [y[1] for y in favs], line_width=3, line_color='#e0b61d')
+        fig.line([x[0] for x in rts], [y[1] for y in rts], line_width=3, line_color='#20a014')
 
         show(fig)
 
