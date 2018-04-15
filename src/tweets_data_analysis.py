@@ -636,7 +636,8 @@ class TweetsDataAnalysis:
         ])
 
         fig = figure(plot_width=500, plot_height=500, tools=[hover],
-                     title='Number of Favorites and Retweet\'s by Hour (Normalized by # of Followers)')
+                     title='Number of Fav\'s and RT\'s by Hour (Normalized by # of Followers)',
+                     x_axis_label='Hours', y_axis_label='Normalized amount of Fav\'s/RT\'s')
 
         fig.line(x='hours', y='favorites', source=favs_source, line_width=3,
                  line_color='#e0b61d', legend='Favorites')
