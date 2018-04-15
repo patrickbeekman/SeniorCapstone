@@ -556,7 +556,7 @@ class TweetsDataAnalysis:
         grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
         show(grid)
 
-    def average_num_favs_retweets_by_hour(self, emotion=None):
+    def normalized_num_favs_retweets_by_hour(self, emotion=None):
         data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
         dir_files = os.listdir(data_path)
 
@@ -635,17 +635,39 @@ class TweetsDataAnalysis:
             ('retweets', '@retweets'),
         ])
 
-        fig = figure(plot_width=500, plot_height=500, tools=[hover],
-                     title='Number of Fav\'s and RT\'s by Hour (Normalized by # of Followers)',
+        if emotion is None:
+            title = 'Number of Fav\'s and RT\'s by Hour (Normalized by # of Followers)'
+        else:
+            title = '(' + emotion + ') Number of Fav\'s/RT\'s by Hour (Normalized by # of Followers)'
+
+        fig = figure(plot_width=500, plot_height=500, tools=[hover], title=title,
                      x_axis_label='Hours', y_axis_label='Normalized amount of Fav\'s/RT\'s')
 
         fig.line(x='hours', y='favorites', source=favs_source, line_width=3,
                  line_color='#e0b61d', legend='Favorites')
         fig.line(x='hours', y='retweets', source=rts_source, line_width=3,
                  line_color='#20a014', legend='Retweets')
+        fig.legend.location = "top_left"
 
-        show(fig)
+        if emotion is None:
+            show(fig)
+        else:
+            return fig
 
+    def normalized_favs_rts_plot_by_emotion(self):
+
+        emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
+        #colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
+
+        plots = []
+        for emotion in emotions:
+            plots.append(self.normalized_num_favs_retweets_by_hour(emotion=emotion))
+
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        output_file(data_path + "favs_rts_multiple_emotions_by_hour.html")
+
+        grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
+        show(grid)
 
 
     def plot_heatmap(self):
@@ -696,7 +718,8 @@ def main():
     # tda.tweets_per_hour_plot()
     #tda.hourly_plot_by_emotion()
     # tda.plot_heatmap()
-    tda.average_num_favs_retweets_by_hour()
+    # tda.normalized_num_favs_retweets_by_hour()
+    tda.normalized_favs_rts_plot_by_emotion()
 
 
 if __name__ == "__main__":
