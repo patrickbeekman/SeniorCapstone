@@ -163,7 +163,7 @@ class TweetsDataAnalysis:
     def get_flattened_data(self, filename, record_path, meta=[]):
         with open(filename) as f:
             data = json.load(f)
-        data_flattened = pd.io.json.json_normalize(data, record_path=record_path, meta=meta)
+        data_flattened = pd.io.json.json_normalize(data, record_path=record_path, meta=meta, errors='ignore')
         #print(data_flattened.head())
         return data_flattened
 
@@ -500,8 +500,8 @@ class TweetsDataAnalysis:
         numTweets = np.fromiter(counts_of_tweets.values(), dtype=float)
 
         # output to static HTML file
-        hourly_freq_plot_path = data_path + "../plots/Hourly_freq_plot.html"
         if emotion is None:
+            hourly_freq_plot_path = data_path + "../plots/Hourly_freq_plot.html"
             output_file(hourly_freq_plot_path)
 
         source = ColumnDataSource(data=dict(hours=hours, numTweets=numTweets))
@@ -555,6 +555,81 @@ class TweetsDataAnalysis:
         grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
         show(grid)
 
+    def average_num_favs_retweets_by_hour(self, emotion=None):
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        dir_files = os.listdir(data_path)
+
+        counts_of_favs = {}
+        counts_of_rts = {}
+
+        for filename in dir_files:
+            # df = pd.read_json(data_path + filename)
+            df = self.get_flattened_data(data_path+filename, 'tones', ['user', 'text', 'text_x', 'created_at', 'favorite_count', 'retweet_count'])
+            if len(df) == 0:
+                continue
+            try:
+                df = df[df.text_x.str.startswith('RT') == False]
+            except AttributeError:
+                try:
+                    df = df[df.text.str.startswith('RT') == False]
+                except AttributeError:
+                    continue
+            if emotion is not None:
+                try:
+                    df = df[df.tone_name == emotion]
+                except AttributeError:
+                    continue
+            df['created_at'] = df['created_at']/1000
+            offset = 0
+            try:
+                offset = df['user'][0]['utc_offset']
+            except (IndexError, KeyError):
+                offset = 0
+            if offset is None:
+                offset = 0
+            #df['std_time'] = df['created_at'] + pd.TimedeltaIndex(df['offset'], unit='s')
+            df['std_time'] = df['created_at'] + offset
+            df['std_time'] = [datetime.datetime.fromtimestamp(x) for x in df['std_time']]
+            df = df.set_index(df['std_time'])
+            temp = pd.DatetimeIndex(df['std_time'])
+            df['hour'] = temp.hour
+            p = df.groupby(df['hour'])
+            fav_counts = p['favorite_count'].sum().to_dict()
+            rt_counts = p['retweet_count'].sum().to_dict()
+            for key, value in fav_counts.items():
+                try:
+                    counts_of_favs[key] += value
+                except KeyError:
+                    counts_of_favs[key] = value
+            for key2, value2 in rt_counts.items():
+                try:
+                    counts_of_rts[key2] += value2
+                except KeyError:
+                    counts_of_rts[key2] = value2
+
+        # hours = np.fromiter(counts_of_favs.keys(), dtype=float)
+        # hours+=1
+        # favs = np.fromiter(counts_of_favs.values(), dtype=float)
+        # rts = np.fromiter(counts_of_rts.values(), dtype=float)
+
+        favs = np.array(list(counts_of_favs.items()), dtype=float)
+        favs = sorted(favs, key=lambda x: x[0])
+        rts = np.array(list(counts_of_rts.items()), dtype=float)
+        rts = sorted(rts, key=lambda x: x[0])
+
+        # output to static HTML file
+        if emotion is None:
+            hourly_freq_plot_path = data_path + "../plots/Hourly_favs_rts_plot.html"
+            output_file(hourly_freq_plot_path)
+
+        fig = figure(plot_width=500, plot_height=500)
+
+        fig.line([x[0] for x in favs], [y[1] for y in favs], line_width=3, line_color='#e0b61d')
+        #fig.line(rts[0], rts[1], line_width=3, line_color='#20a014')
+
+        show(fig)
+
+
 
     def plot_heatmap(self):
         data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
@@ -602,8 +677,9 @@ def main():
     # tda.time_series_frequency_analysis()
     # tda.time_series_day_of_week_plot()
     # tda.tweets_per_hour_plot()
-    tda.hourly_plot_by_emotion()
+    #tda.hourly_plot_by_emotion()
     # tda.plot_heatmap()
+    tda.average_num_favs_retweets_by_hour()
 
 
 if __name__ == "__main__":
