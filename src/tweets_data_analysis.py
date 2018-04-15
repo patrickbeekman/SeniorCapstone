@@ -601,11 +601,6 @@ class TweetsDataAnalysis:
             p = df.groupby(df['hour'])
             fav_counts = (p['favorite_count'].sum()/fllwrs).to_dict()
             rt_counts = (p['retweet_count'].sum()/fllwrs).to_dict()
-            try:
-                if rt_counts[18] > 10:
-                    print("stop")
-            except KeyError:
-                print("okay...")
             for key, value in fav_counts.items():
                 if math.isnan(value):
                     continue
@@ -620,11 +615,6 @@ class TweetsDataAnalysis:
                     counts_of_rts[key2] += value2
                 except KeyError:
                     counts_of_rts[key2] = value2
-
-        # hours = np.fromiter(counts_of_favs.keys(), dtype=float)
-        # hours+=1
-        # favs = np.fromiter(counts_of_favs.values(), dtype=float)
-        # rts = np.fromiter(counts_of_rts.values(), dtype=float)
 
         favs = np.array(list(counts_of_favs.items()), dtype=float)
         favs = sorted(favs, key=lambda x: x[0])
