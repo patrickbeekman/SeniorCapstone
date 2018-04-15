@@ -562,6 +562,7 @@ class TweetsDataAnalysis:
 
         counts_of_favs = {}
         counts_of_rts = {}
+        total_count = 0
 
         for filename in dir_files:
             # df = pd.read_json(data_path + filename)
@@ -594,6 +595,7 @@ class TweetsDataAnalysis:
             df = df.set_index(df['std_time'])
             temp = pd.DatetimeIndex(df['std_time'])
             df['hour'] = temp.hour
+            total_count += df['favorite_count'].count()
             p = df.groupby(df['hour'])
             fav_counts = p['favorite_count'].sum().to_dict()
             rt_counts = p['retweet_count'].sum().to_dict()
@@ -629,8 +631,8 @@ class TweetsDataAnalysis:
 
         fig = figure(plot_width=500, plot_height=500)
 
-        fig.line([x[0] for x in favs], [y[1] for y in favs], line_width=3, line_color='#e0b61d')
-        fig.line([x[0] for x in rts], [y[1] for y in rts], line_width=3, line_color='#20a014')
+        fig.line([x[0] for x in favs], [y[1]/total_count for y in favs], line_width=3, line_color='#e0b61d')
+        fig.line([x[0] for x in rts], [y[1]/total_count for y in rts], line_width=3, line_color='#20a014')
 
         show(fig)
 
