@@ -724,10 +724,33 @@ class TweetsDataAnalysis:
                     most_common_words[words[i]] = values[i]
 
         sorted_x = sorted(most_common_words.items(), key=operator.itemgetter(1), reverse=True)
-        print(sorted_x)
-        print(len(sorted_x))
+        #print(sorted_x)
+        #print(len(sorted_x))
 
-        
+        hourly_freq_plot_path = data_path + "../plots/emotion_word_count_plot.html"
+        output_file(hourly_freq_plot_path)
+
+        hover = HoverTool(tooltips=[
+            ('words', '@words'),
+            ('amounts', '@amounts'),
+        ])
+
+        words = [x[0] for x in sorted_x[:25]]
+        amounts = [x[1] for x in sorted_x[:25]]
+
+        source = ColumnDataSource(data=dict(words=words, amounts=amounts))
+
+        p = figure(x_range=words, y_range=(0, max(amounts)+100), plot_height=350, title=emotion + " Word Counts",
+                   toolbar_location=None, tools=[hover])
+
+        p.vbar(x='words', top='amounts', width=0.9, source=source)
+
+        p.xgrid.grid_line_color = None
+        p.legend.orientation = "horizontal"
+        p.legend.location = "top_center"
+        p.xaxis.major_label_orientation = math.pi / 2
+
+        show(p)
 
 
     def plot_heatmap(self):
