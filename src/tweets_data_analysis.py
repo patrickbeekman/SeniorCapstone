@@ -11,6 +11,7 @@ from collections import Counter
 import matplotlib.pyplot as plt
 import nltk
 import random
+import operator
 from nltk.corpus import stopwords
 from bokeh.plotting import figure, output_file, show
 from bokeh.models.annotations import Title
@@ -556,7 +557,7 @@ class TweetsDataAnalysis:
         grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
         show(grid)
 
-    def normalized_num_favs_retweets_by_hour(self, emotion=None):
+    def normalized_num_favs_retweets_by_hour(self, emotion=None, normalize=True):
         data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
         dir_files = os.listdir(data_path)
 
@@ -599,6 +600,8 @@ class TweetsDataAnalysis:
             temp = pd.DatetimeIndex(df['std_time'])
             df['hour'] = temp.hour
             p = df.groupby(df['hour'])
+            if not normalize:
+                fllwrs = 1
             fav_counts = (p['favorite_count'].sum()/fllwrs).to_dict()
             rt_counts = (p['retweet_count'].sum()/fllwrs).to_dict()
             for key, value in fav_counts.items():
@@ -623,7 +626,10 @@ class TweetsDataAnalysis:
 
         # output to static HTML file
         if emotion is None:
-            hourly_freq_plot_path = data_path + "../plots/Hourly_favs_rts_plot.html"
+            if normalize:
+                hourly_freq_plot_path = data_path + "../plots/Normalized_Hourly_favs_rts_plot.html"
+            else:
+                hourly_freq_plot_path = data_path + "../plots/Hourly_favs_rts_plot.html"
             output_file(hourly_freq_plot_path)
 
         favs_source = ColumnDataSource(dict(hours=[x[0] for x in favs], favorites=[y[1] for y in favs]))
@@ -635,13 +641,18 @@ class TweetsDataAnalysis:
             ('retweets', '@retweets'),
         ])
 
-        if emotion is None:
-            title = 'Number of Fav\'s and RT\'s by Hour (Normalized by # of Followers)'
+        if normalize:
+            normText = '(Normalized by # of Followers)'
         else:
-            title = '(' + emotion + ') Number of Fav\'s/RT\'s by Hour (Normalized by # of Followers)'
+            normText = ''
+
+        if emotion is None:
+            title = 'Number of Fav\'s and RT\'s by Hour' + normText
+        else:
+            title = '(' + emotion + ') Number of Fav\'s/RT\'s by Hour ' + normText
 
         fig = figure(plot_width=500, plot_height=500, tools=[hover], title=title,
-                     x_axis_label='Hours', y_axis_label='Normalized amount of Fav\'s/RT\'s')
+                     x_axis_label='Hours', y_axis_label=normText + ' Amount of Fav\'s/RT\'s')
 
         fig.line(x='hours', y='favorites', source=favs_source, line_width=3,
                  line_color='#e0b61d', legend='Favorites')
@@ -668,6 +679,55 @@ class TweetsDataAnalysis:
 
         grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
         show(grid)
+
+    def word_choice_by_emotion_barchart(self, emotion):
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        dir_files = os.listdir(data_path)
+
+        most_common_words = {}
+
+        for filename in dir_files:
+            df = self.get_flattened_data(data_path+filename, 'tones', ['user', 'text', 'text_x', 'created_at', 'favorite_count', 'retweet_count'])
+            try:
+                df = df[df.tone_name == emotion]
+            except AttributeError:
+                continue
+            df = df.sort_values(by=['favorite_count', 'retweet_count'], ascending=False)
+            df_subset = df[:np.min([len(df), 250])]
+            # Somehow sort the tweets by favorite count
+            # Removing common words: https://stackoverflow.com/questions/9953619/technique-to-remove-common-wordsand-their-plural-versions-from-a-string
+            #nltk.download("stopwords")
+            s = set(stopwords.words('english'))
+            myWords = {'RT', 'I', '.', 'The', 'like', 'I\'m', 'My', 'This', 'get', 'It\'s', 'Who', 'What', 'Where', 'When',
+                     'Why', 'A', '`', '&amp;', '-'}
+            s.update(myWords)
+            try:
+                text_notflat = [filter(lambda w: not w in s, tweet.split()) for tweet in df_subset['text_x']]
+            except AttributeError:
+                try:
+                    text_notflat = [filter(lambda w: not w in s, tweet.split()) for tweet in df_subset['text']]
+                except AttributeError:
+                    continue
+            word_counter = Counter(chain.from_iterable(text_notflat))
+            most_common = word_counter.most_common(100)
+            try:
+                words = list(zip(*most_common))[0]
+                values = list(zip(*most_common))[1]
+            except IndexError:
+                continue
+            for i in range(len(words)):
+                if math.isnan(values[i]):
+                    continue
+                try:
+                    most_common_words[words[i]] += values[i]
+                except KeyError:
+                    most_common_words[words[i]] = values[i]
+
+        sorted_x = sorted(most_common_words.items(), key=operator.itemgetter(1), reverse=True)
+        print(sorted_x)
+        print(len(sorted_x))
+
+        
 
 
     def plot_heatmap(self):
@@ -718,8 +778,9 @@ def main():
     # tda.tweets_per_hour_plot()
     #tda.hourly_plot_by_emotion()
     # tda.plot_heatmap()
-    # tda.normalized_num_favs_retweets_by_hour()
-    tda.normalized_favs_rts_plot_by_emotion()
+    # tda.normalized_num_favs_retweets_by_hour(normalize=True)
+    # tda.normalized_favs_rts_plot_by_emotion()
+    tda.word_choice_by_emotion_barchart('Joy')
 
 
 if __name__ == "__main__":
