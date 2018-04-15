@@ -626,10 +626,22 @@ class TweetsDataAnalysis:
             hourly_freq_plot_path = data_path + "../plots/Hourly_favs_rts_plot.html"
             output_file(hourly_freq_plot_path)
 
-        fig = figure(plot_width=500, plot_height=500)
+        favs_source = ColumnDataSource(dict(hours=[x[0] for x in favs], favorites=[y[1] for y in favs]))
+        rts_source = ColumnDataSource(dict(hours=[x[0] for x in rts], retweets=[y[1] for y in rts]))
 
-        fig.line([x[0] for x in favs], [y[1] for y in favs], line_width=3, line_color='#e0b61d')
-        fig.line([x[0] for x in rts], [y[1] for y in rts], line_width=3, line_color='#20a014')
+        hover = HoverTool(tooltips=[
+            ('hours', '@hours'),
+            ('favorites', '@favorites'),
+            ('retweets', '@retweets'),
+        ])
+
+        fig = figure(plot_width=500, plot_height=500, tools=[hover],
+                     title='Number of Favorites and Retweet\'s by Hour (Normalized by # of Followers)')
+
+        fig.line(x='hours', y='favorites', source=favs_source, line_width=3,
+                 line_color='#e0b61d', legend='Favorites')
+        fig.line(x='hours', y='retweets', source=rts_source, line_width=3,
+                 line_color='#20a014', legend='Retweets')
 
         show(fig)
 
