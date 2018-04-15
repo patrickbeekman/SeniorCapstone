@@ -5,6 +5,7 @@ import os
 from pandas.io.json import json_normalize
 import datetime
 import time
+import math
 from itertools import chain
 from collections import Counter
 import matplotlib.pyplot as plt
@@ -597,11 +598,15 @@ class TweetsDataAnalysis:
             fav_counts = p['favorite_count'].sum().to_dict()
             rt_counts = p['retweet_count'].sum().to_dict()
             for key, value in fav_counts.items():
+                if math.isnan(value):
+                    continue
                 try:
                     counts_of_favs[key] += value
                 except KeyError:
                     counts_of_favs[key] = value
             for key2, value2 in rt_counts.items():
+                if math.isnan(value2):
+                    continue
                 try:
                     counts_of_rts[key2] += value2
                 except KeyError:
@@ -625,7 +630,7 @@ class TweetsDataAnalysis:
         fig = figure(plot_width=500, plot_height=500)
 
         fig.line([x[0] for x in favs], [y[1] for y in favs], line_width=3, line_color='#e0b61d')
-        #fig.line(rts[0], rts[1], line_width=3, line_color='#20a014')
+        fig.line([x[0] for x in rts], [y[1] for y in rts], line_width=3, line_color='#20a014')
 
         show(fig)
 
