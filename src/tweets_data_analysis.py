@@ -417,7 +417,8 @@ class TweetsDataAnalysis:
         p.xaxis.axis_label = 'Date'
         p.yaxis.axis_label = '# of Tweets'
 
-        show(p)
+        #show(p)
+        return p
 
         print("Frequency of tweets graph created!")
 
@@ -467,7 +468,8 @@ class TweetsDataAnalysis:
         p.vbar(x='days_of_week', top='counts_of_week', width=0.9, source=source,
                line_color='white', fill_color=["#ff0000", "#ff4000", "#ff8000", "#ffbf00", "#ffsff00", "#bfff00", "#80ff00"])
 
-        show(p)
+        #show(p)
+        return p
 
 
     def tweets_per_hour_plot(self, emotion=None, color="#b3de69"):
@@ -565,7 +567,8 @@ class TweetsDataAnalysis:
         output_file(data_path + "multiple_emotions_by_hour.html")
 
         grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
-        show(grid)
+        #show(grid)
+        return grid
 
     def normalized_num_favs_retweets_by_hour(self, emotion=None, normalize=True):
         data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
@@ -688,7 +691,8 @@ class TweetsDataAnalysis:
         output_file(data_path + "favs_rts_multiple_emotions_by_hour.html")
 
         grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
-        show(grid)
+        #show(grid)
+        return grid
 
     def word_choice_by_emotion_barchart(self, emotion, color='#b3de69'):
         data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
@@ -775,7 +779,8 @@ class TweetsDataAnalysis:
         output_file(data_path + "multiple_emotions_word_counts.html")
 
         grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
-        show(grid)
+        #show(grid)
+        return grid
 
 
     def plot_heatmap(self):
