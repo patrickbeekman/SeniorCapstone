@@ -1,5 +1,8 @@
 <html>
-<head>
+<title>Determing how to get the most favorites on Twitter</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link
     href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.15.min.css"
     rel="stylesheet" type="text/css">
@@ -9,12 +12,29 @@
 
 <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.15.min.js"></script>
 <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.15.min.js"></script>
-</head>
-<H1>Bokeh plots!</H1>
-<body>
-Hello, {{ name }}
-</body>
-{{ tweet_freq_script|safe }}
-{{ tweet_freq_div|safe }}
+
+<H1 align="center">How to Maximize your tweet potential</H1>
+
+<!-- Page content -->
+<div class="w3-content w3-padding-large w3-margin-top" id="portfolio">
+
+  <!-- Plots (Portfolio) -->
+    <div>
+        {{ tweet_freq_script|safe }}
+        {{ tweet_freq_div|safe }}
+    </div>
+
+  <!-- Contact -->
+  <div class="w3-light-grey w3-padding-large w3-padding-32 w3-margin-top" id="contact">
+    <h3 class="w3-center">Contact</h3>
+    <hr>
+      <p>Patrick Beekman ~ Appalachian State University</p>
+      <p>Senior Computer Science</p>
+
+  </div>
+
+<!-- End page content -->
+</div>
+
 </html>
 
