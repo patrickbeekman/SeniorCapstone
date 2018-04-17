@@ -186,9 +186,9 @@ def main():
         'Wyoming'
     ]
     #driver.analyze_search_term(us_states, 'us_states')
-    #driver.analyze_followers_of_followers('patrickbeekman', 'pbFollowers')
+    driver.analyze_followers_of_followers('patrickbeekman', 'pbFollowers')
     analysis_path = os.path.dirname(__file__) + "/../data/pbFollowers/"
-    driver.analyzer.create_single_file_tone_analysis(analysis_path + "merged/", analysis_path + "single_file_merged.json")
+    #driver.analyzer.create_single_file_tone_analysis(analysis_path + "merged/", analysis_path + "single_file_merged.json")
 
 if __name__ == "__main__":
     main()

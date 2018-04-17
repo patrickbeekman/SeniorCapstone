@@ -4,13 +4,31 @@ import json
 import os
 from pandas.io.json import json_normalize
 import datetime
+import time
+import math
 from itertools import chain
 from collections import Counter
 import matplotlib.pyplot as plt
 import nltk
 import random
+import operator
 from nltk.corpus import stopwords
 from bokeh.plotting import figure, output_file, show
+from bokeh.models.annotations import Title
+from bokeh.models.glyphs import VBar
+from bokeh.layouts import gridplot
+from bokeh.transform import factor_cmap
+from bokeh.models import (
+    ColumnDataSource,
+    HoverTool,
+    DataRange1d,
+    LinearAxis,
+    LinearColorMapper,
+    Plot,
+    BasicTicker,
+    PrintfTickFormatter,
+    ColorBar,
+)
 import tweepy
 import tweepy_grabber
 
@@ -147,7 +165,7 @@ class TweetsDataAnalysis:
     def get_flattened_data(self, filename, record_path, meta=[]):
         with open(filename) as f:
             data = json.load(f)
-        data_flattened = pd.io.json.json_normalize(data, record_path=record_path, meta=meta)
+        data_flattened = pd.io.json.json_normalize(data, record_path=record_path, meta=meta, errors='ignore')
         #print(data_flattened.head())
         return data_flattened
 
@@ -369,6 +387,8 @@ class TweetsDataAnalysis:
 
         dates = np.fromiter(counts_of_tweets.keys(), dtype='datetime64[us]')
         counts = np.fromiter(counts_of_tweets.values(), dtype=float)
+        real_dates = [str(x)[:10] for x in dates]
+
 
         # window_size = 30
         # window = np.ones(window_size) / float(window_size)
@@ -378,11 +398,19 @@ class TweetsDataAnalysis:
         tweet_freq_plot_path = data_path + "../plots/Tweet_freq_by_day.html"
         output_file(tweet_freq_plot_path, title="Tweet frequency of my followers")
 
+        source = ColumnDataSource(data=dict(dates=dates, tweet_counts=counts, real_date=real_dates))
+
+        hover = HoverTool(tooltips=[
+            ('date', '@real_date'),
+            ('tweet_counts', '@tweet_counts'),
+        ])
+
         # create a new plot with a a datetime axis type
-        p = figure(width=800, height=350, x_axis_type="datetime")
+        p = figure(width=800, height=350, x_axis_type="datetime", tools=[hover, 'box_zoom', 'pan', 'wheel_zoom', 'reset'])
 
         # add renderers
-        p.circle(dates, counts, size=4, color='blue', alpha=0.8)
+        #p.circle(dates, counts, size=4, color='blue', alpha=0.8)
+        p.circle(x='dates', y='tweet_counts', size=6, source=source, color='blue', alpha=0.6)
         # p.line(dates, counts_avg, color='grey')
 
         p.title.text = "Tweet Frequency of @patrickbeekman's followers"
@@ -391,7 +419,383 @@ class TweetsDataAnalysis:
 
         show(p)
 
+        print("Frequency of tweets graph created!")
+
+
+    def time_series_day_of_week_plot(self):
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        dir_files = os.listdir(data_path)
+
+        counts_of_tweets = {}
+
+        for filename in dir_files:
+            df = pd.read_json(data_path + filename)
+            df = df.set_index(df['created_at'])
+            temp = pd.DatetimeIndex(df['created_at'])
+            df['weekday'] = temp.weekday_name
+            p = df.groupby(df['weekday'])
+            freq_of_tweets = p['created_at'].count()
+            freq_dict = freq_of_tweets.to_dict()
+            for key, value in freq_dict.items():
+                try:
+                    counts_of_tweets[key] += value
+                except KeyError:
+                    counts_of_tweets[key] = value
+            # index like freq_dict.get(pd.Timestamp('2018-01-31'))
+
+        #dates = np.fromiter(counts_of_tweets.keys(), dtype=object)
+        #counts = np.fromiter(counts_of_tweets.values(), dtype=float)
+
+        # output to static HTML file
+        tweet_freq_plot_path = data_path + "../plots/Tweet_freq_day_of_week.html"
+        output_file(tweet_freq_plot_path)
+
+        days_of_week = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        counts_of_week = [counts_of_tweets[days_of_week[0]], counts_of_tweets[days_of_week[1]],
+                          counts_of_tweets[days_of_week[2]], counts_of_tweets[days_of_week[3]],
+                          counts_of_tweets[days_of_week[4]], counts_of_tweets[days_of_week[5]],
+                          counts_of_tweets[days_of_week[6]]]
+
+        source = ColumnDataSource(data=dict(days_of_week=days_of_week, counts_of_week=counts_of_week))
+
+        hover = HoverTool(tooltips=[
+            ('days_of_week', '@days_of_week'),
+            ('counts_of_week', '@counts_of_week'),
+        ])
+
+        p = figure(x_range=days_of_week, plot_height=350, toolbar_location=None, title="Freq of Tweets by Day of Week", tools=[hover])
+        p.vbar(x='days_of_week', top='counts_of_week', width=0.9, source=source,
+               line_color='white', fill_color=["#ff0000", "#ff4000", "#ff8000", "#ffbf00", "#ffsff00", "#bfff00", "#80ff00"])
+
+        show(p)
+
+
+    def tweets_per_hour_plot(self, emotion=None, color="#b3de69"):
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        dir_files = os.listdir(data_path)
+
+        counts_of_tweets = {}
+
+        for filename in dir_files:
+            #df = pd.read_json(data_path + filename)
+            df = self.get_flattened_data(data_path+filename, 'tones', ['user', 'created_at'])
+            if emotion is not None:
+                try:
+                    df = df[df.tone_name == emotion]
+                except AttributeError:
+                    continue
+            df['created_at'] = df['created_at']/1000
+            offset = 0
+            try:
+                offset = df['user'][0]['utc_offset']
+            except (IndexError, KeyError):
+                offset = 0
+            if offset is None:
+                offset = 0
+            #df['std_time'] = df['created_at'] + pd.TimedeltaIndex(df['offset'], unit='s')
+            df['std_time'] = df['created_at'] + offset
+            df['std_time'] = [datetime.datetime.fromtimestamp(x) for x in df['std_time']]
+            df = df.set_index(df['std_time'])
+            temp = pd.DatetimeIndex(df['std_time'])
+            df['hour'] = temp.hour
+            p = df.groupby(df['hour'])
+            freq_of_tweets = p['std_time'].count()
+            freq_dict = freq_of_tweets.to_dict()
+            for key, value in freq_dict.items():
+                try:
+                    counts_of_tweets[key] += value
+                except KeyError:
+                    counts_of_tweets[key] = value
+
+        hours = np.fromiter(counts_of_tweets.keys(), dtype=float)
+        hours+=1
+        numTweets = np.fromiter(counts_of_tweets.values(), dtype=float)
+
+        # output to static HTML file
+        if emotion is None:
+            hourly_freq_plot_path = data_path + "../plots/Hourly_freq_plot.html"
+            output_file(hourly_freq_plot_path)
+
+        source = ColumnDataSource(data=dict(hours=hours, numTweets=numTweets))
+
+        hover = HoverTool(tooltips=[
+            ('hours', '@hours'),
+            ('numTweets', '@numTweets'),
+        ])
+
+        xdr = DataRange1d()
+        ydr = DataRange1d()
+        plot = Plot(x_range=xdr, y_range=ydr, plot_width=500, plot_height=500,
+                    h_symmetry=False, v_symmetry=False, min_border=0, tools=[hover])
+
+        glyph = VBar(x="hours", top="numTweets", bottom=0, width=0.5, fill_color=color)
+        plot.add_glyph(source, glyph)
+
+        xaxis = LinearAxis()
+        plot.add_layout(xaxis, 'below')
+
+        yaxis = LinearAxis()
+        plot.add_layout(yaxis, 'left')
+
+        t = Title()
+        if emotion is not None:
+            t.text = "(" + emotion + ") Number of Tweets by Hour"
+        else:
+            t.text = "(all emotions) Number of Tweets by Hour"
+        plot.title = t
+        plot.xaxis.axis_label = 'Hours'
+        plot.yaxis.axis_label = 'Number of Tweets'
+
+        if emotion is not None:
+            return plot
+        else:
+            show(plot)
+
+
+    def hourly_plot_by_emotion(self):
+
+        emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
+        colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
+
+        plots = []
+        for index, emotion in enumerate(emotions):
+            plots.append(self.tweets_per_hour_plot(emotion=emotion, color=colors[index]))
+
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        output_file(data_path + "multiple_emotions_by_hour.html")
+
+        grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
+        show(grid)
+
+    def normalized_num_favs_retweets_by_hour(self, emotion=None, normalize=True):
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        dir_files = os.listdir(data_path)
+
+        counts_of_favs = {}
+        counts_of_rts = {}
+
+        for filename in dir_files:
+            # df = pd.read_json(data_path + filename)
+            df = self.get_flattened_data(data_path+filename, 'tones', ['user', 'text', 'text_x', 'created_at', 'favorite_count', 'retweet_count'])
+            if len(df) == 0:
+                continue
+            try:
+                df = df[df.text_x.str.startswith('RT') == False]
+            except AttributeError:
+                try:
+                    df = df[df.text.str.startswith('RT') == False]
+                except AttributeError:
+                    continue
+            if emotion is not None:
+                try:
+                    df = df[df.tone_name == emotion]
+                except AttributeError:
+                    continue
+            df['created_at'] = df['created_at']/1000
+            offset = 0
+            try:
+                offset = df['user'].iloc[0]['utc_offset']
+            except (IndexError, KeyError):
+                offset = 0
+            try:
+                fllwrs = df['user'].iloc[0]['followers_count']
+            except (IndexError, KeyError):
+                fllwrs = 1
+            if offset is None:
+                offset = 0
+            #df['std_time'] = df['created_at'] + pd.TimedeltaIndex(df['offset'], unit='s')
+            df['std_time'] = df['created_at'] + offset
+            df['std_time'] = [datetime.datetime.fromtimestamp(x) for x in df['std_time']]
+            df = df.set_index(df['std_time'])
+            temp = pd.DatetimeIndex(df['std_time'])
+            df['hour'] = temp.hour
+            p = df.groupby(df['hour'])
+            if not normalize:
+                fllwrs = 1
+            fav_counts = (p['favorite_count'].sum()/fllwrs).to_dict()
+            rt_counts = (p['retweet_count'].sum()/fllwrs).to_dict()
+            for key, value in fav_counts.items():
+                if math.isnan(value):
+                    continue
+                try:
+                    counts_of_favs[key] += value
+                except KeyError:
+                    counts_of_favs[key] = value
+            for key2, value2 in rt_counts.items():
+                if math.isnan(value2):
+                    continue
+                try:
+                    counts_of_rts[key2] += value2
+                except KeyError:
+                    counts_of_rts[key2] = value2
+
+        favs = np.array(list(counts_of_favs.items()), dtype=float)
+        favs = sorted(favs, key=lambda x: x[0])
+        rts = np.array(list(counts_of_rts.items()), dtype=float)
+        rts = sorted(rts, key=lambda x: x[0])
+
+        # output to static HTML file
+        if emotion is None:
+            if normalize:
+                hourly_freq_plot_path = data_path + "../plots/Normalized_Hourly_favs_rts_plot.html"
+            else:
+                hourly_freq_plot_path = data_path + "../plots/Hourly_favs_rts_plot.html"
+            output_file(hourly_freq_plot_path)
+
+        favs_source = ColumnDataSource(dict(hours=[x[0] for x in favs], favorites=[y[1] for y in favs]))
+        rts_source = ColumnDataSource(dict(hours=[x[0] for x in rts], retweets=[y[1] for y in rts]))
+
+        hover = HoverTool(tooltips=[
+            ('hours', '@hours'),
+            ('favorites', '@favorites'),
+            ('retweets', '@retweets'),
+        ])
+
+        if normalize:
+            normText = '(Normalized by # of Followers)'
+        else:
+            normText = ''
+
+        if emotion is None:
+            title = 'Number of Fav\'s and RT\'s by Hour' + normText
+        else:
+            title = '(' + emotion + ') Number of Fav\'s/RT\'s by Hour ' + normText
+
+        fig = figure(plot_width=500, plot_height=500, tools=[hover], title=title,
+                     x_axis_label='Hours', y_axis_label=normText + ' Amount of Fav\'s/RT\'s')
+
+        fig.line(x='hours', y='favorites', source=favs_source, line_width=3,
+                 line_color='#e0b61d', legend='Favorites')
+        fig.line(x='hours', y='retweets', source=rts_source, line_width=3,
+                 line_color='#20a014', legend='Retweets')
+        fig.legend.location = "top_left"
+
+        if emotion is None:
+            show(fig)
+        else:
+            return fig
+
+    def normalized_favs_rts_plot_by_emotion(self):
+
+        emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
+        #colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
+
+        plots = []
+        for emotion in emotions:
+            plots.append(self.normalized_num_favs_retweets_by_hour(emotion=emotion))
+
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        output_file(data_path + "favs_rts_multiple_emotions_by_hour.html")
+
+        grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
+        show(grid)
+
+    def word_choice_by_emotion_barchart(self, emotion, color='#b3de69'):
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        dir_files = os.listdir(data_path)
+
+        most_common_words = {}
+
+        for filename in dir_files:
+            df = self.get_flattened_data(data_path+filename, 'tones', ['user', 'text', 'text_x', 'created_at', 'favorite_count', 'retweet_count'])
+            try:
+                df = df[df.tone_name == emotion]
+            except AttributeError:
+                continue
+            df = df.sort_values(by=['favorite_count', 'retweet_count'], ascending=False)
+            df_subset = df[:np.min([len(df), 250])]
+            # Somehow sort the tweets by favorite count
+            # Removing common words: https://stackoverflow.com/questions/9953619/technique-to-remove-common-wordsand-their-plural-versions-from-a-string
+            #nltk.download("stopwords")
+            s = set(stopwords.words('english'))
+            myWords = {'RT', 'I', '.', 'The', 'like', 'I\'m', 'My', 'This', 'get', 'It\'s', 'Who', 'What', 'Where', 'When',
+                     'Why', 'A', '`', '&amp;', '-', 'If', 'go', 'got', '@MrLeonardKim'}
+            s.update(myWords)
+            try:
+                text_notflat = [filter(lambda w: not w in s, tweet.split()) for tweet in df_subset['text_x']]
+            except AttributeError:
+                try:
+                    text_notflat = [filter(lambda w: not w in s, tweet.split()) for tweet in df_subset['text']]
+                except AttributeError:
+                    continue
+            word_counter = Counter(chain.from_iterable(text_notflat))
+            most_common = word_counter.most_common(100)
+            try:
+                words = list(zip(*most_common))[0]
+                values = list(zip(*most_common))[1]
+            except IndexError:
+                continue
+            for i in range(len(words)):
+                if math.isnan(values[i]):
+                    continue
+                try:
+                    most_common_words[words[i]] += values[i]
+                except KeyError:
+                    most_common_words[words[i]] = values[i]
+
+        sorted_x = sorted(most_common_words.items(), key=operator.itemgetter(1), reverse=True)
+        #print(sorted_x)
+        #print(len(sorted_x))
+
+        # hourly_freq_plot_path = data_path + "../plots/emotion_word_count_plot.html"
+        # output_file(hourly_freq_plot_path)
+
+        hover = HoverTool(tooltips=[
+            ('words', '@words'),
+            ('amounts', '@amounts'),
+        ])
+
+        words = [x[0] for x in sorted_x[:25]]
+        amounts = [x[1] for x in sorted_x[:25]]
+
+        source = ColumnDataSource(data=dict(words=words, amounts=amounts))
+
+        p = figure(x_range=words, y_range=(0, max(amounts)+100), plot_height=350, title=emotion + " Word Counts",
+                   toolbar_location=None, tools=[hover])
+
+        p.vbar(x='words', top='amounts', width=0.9, source=source, color=color)
+
+        p.xgrid.grid_line_color = None
+        p.legend.orientation = "horizontal"
+        p.legend.location = "top_center"
+        p.xaxis.major_label_orientation = math.pi / 5
+
+        return p
+        #show(p)
+
+    def grid_plot_each_emotion_word_count(self):
+        emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
+        colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
+
+        plots = []
+        for index, emotion in enumerate(emotions):
+            plots.append(self.word_choice_by_emotion_barchart(emotion=emotion, color=colors[index]))
+
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        output_file(data_path + "multiple_emotions_word_counts.html")
+
+        grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
+        show(grid)
+
+
+    def plot_heatmap(self):
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        dir_files = os.listdir(data_path)
+        data = pd.read_csv(data_path+"../unemployment_data.csv")
+
+        data['Year'] = data['Year'].astype(str)
+        data = data.set_index('Year')
+        data.drop('Annual', axis=1, inplace=True)
+        data.columns.name = 'Month'
+
+        years = list(data.index)
+        months = list(data.columns)
+
+        # reshape to 1D array or rates with a month and year for each row.
+        df = pd.DataFrame(data.stack(), columns=['rate']).reset_index()
+
         print("hello")
+
 
 
 def main():
@@ -415,7 +819,17 @@ def main():
     #                     os.path.dirname(__file__) + "/../data/pbFollowers/X_matrix.pkl")
     # tda.create_boxplot(os.path.dirname(__file__) + "/../data/pbFollowers/X_matrix.pkl",
     #                    os.path.dirname(__file__) + "/../data/pbFollowers/plots/")
+
+
     tda.time_series_frequency_analysis()
+    # tda.time_series_day_of_week_plot()
+    # tda.tweets_per_hour_plot()
+    #tda.hourly_plot_by_emotion()
+    # tda.plot_heatmap()
+    # tda.normalized_num_favs_retweets_by_hour(normalize=True)
+    # tda.normalized_favs_rts_plot_by_emotion()
+    # tda.word_choice_by_emotion_barchart('Joy')
+    # tda.grid_plot_each_emotion_word_count()
 
 
 if __name__ == "__main__":
