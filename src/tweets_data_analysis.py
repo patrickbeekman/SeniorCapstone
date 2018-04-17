@@ -387,6 +387,8 @@ class TweetsDataAnalysis:
 
         dates = np.fromiter(counts_of_tweets.keys(), dtype='datetime64[us]')
         counts = np.fromiter(counts_of_tweets.values(), dtype=float)
+        real_dates = [str(x)[:10] for x in dates]
+
 
         # window_size = 30
         # window = np.ones(window_size) / float(window_size)
@@ -396,11 +398,19 @@ class TweetsDataAnalysis:
         tweet_freq_plot_path = data_path + "../plots/Tweet_freq_by_day.html"
         output_file(tweet_freq_plot_path, title="Tweet frequency of my followers")
 
+        source = ColumnDataSource(data=dict(dates=dates, tweet_counts=counts, real_date=real_dates))
+
+        hover = HoverTool(tooltips=[
+            ('date', '@real_date'),
+            ('tweet_counts', '@tweet_counts'),
+        ])
+
         # create a new plot with a a datetime axis type
-        p = figure(width=800, height=350, x_axis_type="datetime")
+        p = figure(width=800, height=350, x_axis_type="datetime", tools=[hover, 'box_zoom', 'pan', 'wheel_zoom', 'reset'])
 
         # add renderers
-        p.circle(dates, counts, size=4, color='blue', alpha=0.8)
+        #p.circle(dates, counts, size=4, color='blue', alpha=0.8)
+        p.circle(x='dates', y='tweet_counts', size=6, source=source, color='blue', alpha=0.6)
         # p.line(dates, counts_avg, color='grey')
 
         p.title.text = "Tweet Frequency of @patrickbeekman's followers"
@@ -811,7 +821,7 @@ def main():
     #                    os.path.dirname(__file__) + "/../data/pbFollowers/plots/")
 
 
-    # tda.time_series_frequency_analysis()
+    tda.time_series_frequency_analysis()
     # tda.time_series_day_of_week_plot()
     # tda.tweets_per_hour_plot()
     #tda.hourly_plot_by_emotion()
@@ -819,7 +829,7 @@ def main():
     # tda.normalized_num_favs_retweets_by_hour(normalize=True)
     # tda.normalized_favs_rts_plot_by_emotion()
     # tda.word_choice_by_emotion_barchart('Joy')
-    tda.grid_plot_each_emotion_word_count()
+    # tda.grid_plot_each_emotion_word_count()
 
 
 if __name__ == "__main__":
