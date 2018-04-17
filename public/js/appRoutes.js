@@ -16,8 +16,8 @@
 
         // nerds page that will use the NerdController
         .when('/nerds', {
-            templateUrl: 'views/nerd.html',
-            controller: 'NerdController'
+            templateUrl: 'views/Tweet_freq_by_day.html',
+            controller: 'BokehNerdController'
         });
 
     $locationProvider.html5Mode(true);

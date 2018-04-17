@@ -16,6 +16,7 @@ from nltk.corpus import stopwords
 from bokeh.plotting import figure, output_file, show
 from bokeh.models.annotations import Title
 from bokeh.models.glyphs import VBar
+from bokeh.embed import components
 from bokeh.layouts import gridplot
 from bokeh.transform import factor_cmap
 from bokeh.models import (
@@ -417,7 +418,10 @@ class TweetsDataAnalysis:
         p.xaxis.axis_label = 'Date'
         p.yaxis.axis_label = '# of Tweets'
 
-        show(p)
+        script, div = components(p)
+        print(script)
+        print(div)
+        #show(p)
 
         print("Frequency of tweets graph created!")
 

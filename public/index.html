@@ -17,6 +17,13 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-route.js"></script>
 
+    <!-- Loading bokeh stuff -->
+    <link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.12.15.min.css" type="text/css" />
+
+    <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-0.12.15.min.js"></script>
+    <script type="text/javascript">
+        Bokeh.set_log_level("info");
+    </script>
 
     <!-- JS -->
     <script src="libs/angular/angular.min.js"></script>
@@ -48,6 +55,7 @@
 
     <!-- ANGULAR DYNAMIC CONTENT -->
     <div ng-view></div>
+
 
 </div>
 </body>
