@@ -14,31 +14,56 @@
 <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.15.min.js"></script>
 
 <H1 align="center">How to Maximize your tweet potential</H1>
+<h3 align="center">When and What to tweet about</h3>
+<p align="center">An analysis by Patrick Beekman</p>
 
 <!-- Page content -->
 <div class="w3-content w3-padding-large w3-margin-top" id="portfolio">
 
-  <!-- Plots -->
+    <h4><u>Intro</u></h4>
+    <p>This is my intro text.</p>
+
+    <h4><u>Analysis</u></h4>
+    <!-- Plots -->
     <div align="center">
         {{ tweet_freq_script|safe }}
         {{ tweet_freq_div|safe }}
     </div>
+    <p>As you can see by the plot above.</p>
+    <img src="img/days_of_week.png" alt="daysOfWeek" width="603" height="346" class="w3-image" align="center">
+    <p>As you can see by the plot above.</p>
     <div align="center">
         {{ unNormalized_FavsRTs_script|safe }}
         {{ unNormalized_FavsRTs_div|safe }}
     </div>
+    <p>As you can see by the plot above.</p>
     <div align="center">
         {{ normalized_FavsRTs_script|safe }}
         {{ normalized_FavsRTs_div|safe }}
     </div>
+    <p>As you can see by the plot above.</p>
+    <div align="center">
+        {{ norm_FavsRTs_emotion_script|safe }}
+        {{ norm_FavsRTs_emotion_div|safe }}
+    </div>
+    <p>As you can see by the plot above.</p>
     <div align="center">
         {{ tweets_hourly_script|safe }}
         {{ tweets_hourly_div|safe }}
     </div>
+    <p>As you can see by the plot above.</p>
     <div align="center">
         {{ hourly_emotion_script|safe }}
         {{ hourly_emotion_div|safe }}
     </div>
+    <p>As you can see by the plot above.</p>
+    <div align="center">
+        {{ emotions_word_ct_script|safe }}
+        {{ emotions_word_ct_div|safe }}
+    </div>
+
+    <h4><u>Conclusion</u></h4>
+    <p>conclusion stuff</p>
 
   <!-- Contact -->
   <div class="w3-light-grey w3-padding-large w3-padding-32 w3-margin-top" id="contact">
