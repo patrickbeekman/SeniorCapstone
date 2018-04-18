@@ -579,7 +579,7 @@ class TweetsDataAnalysis:
         #show(grid)
         return grid
 
-    def normalized_num_favs_retweets_by_hour(self, emotion=None, normalize=True):
+    def normalized_num_favs_retweets_by_hour(self, emotion=None, normalize=True, DayOfWeek=None):
         data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
         dir_files = os.listdir(data_path)
 
@@ -620,6 +620,9 @@ class TweetsDataAnalysis:
             df['std_time'] = [datetime.datetime.fromtimestamp(x) for x in df['std_time']]
             df = df.set_index(df['std_time'])
             temp = pd.DatetimeIndex(df['std_time'])
+            if DayOfWeek is not None:
+                df = df[temp.dayofweek == DayOfWeek]
+                temp = temp[temp.dayofweek == DayOfWeek]
             df['hour'] = temp.hour
             p = df.groupby(df['hour'])
             if not normalize:
@@ -669,7 +672,11 @@ class TweetsDataAnalysis:
             normText = ''
 
         if emotion is None:
-            title = 'Number of Fav\'s and RT\'s by Hour' + normText
+            if DayOfWeek is None:
+                title = 'Number of Fav\'s and RT\'s by Hour' + normText
+            else:
+                calendar_days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+                title = "(" + calendar_days[DayOfWeek] + ") Number Fav\'s and RT\'s by Hour " + normText
         else:
             title = '(' + emotion + ') Number of Fav\'s/RT\'s by Hour ' + normText
 
@@ -683,25 +690,41 @@ class TweetsDataAnalysis:
         fig.legend.location = "top_left"
 
         if emotion is None:
-            show(fig)
+            #show(fig)
             return fig
         else:
             return fig
 
-    def normalized_favs_rts_plot_by_emotion(self):
+    def normalized_favs_rts_plot_by_emotion(self, normalize=True):
 
         emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
         #colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
 
         plots = []
         for emotion in emotions:
-            plots.append(self.normalized_num_favs_retweets_by_hour(emotion=emotion))
+            plots.append(self.normalized_num_favs_retweets_by_hour(normalize=normalize, emotion=emotion))
 
         data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
-        output_file(data_path + "favs_rts_multiple_emotions_by_hour.html")
+        if normalize:
+            output_file(data_path + "Norm_favs_rts_multiple_emotions_by_hour.html")
+        else:
+            output_file(data_path + "NoNorm_favs_rts_multiple_emotions_by_hour.html")
 
         grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
         #show(grid)
+        return grid
+
+    def normalized_favs_rts_plot_by_dayOfWeek(self):
+
+        plots = []
+        for day in range(7):
+            plots.append(self.normalized_num_favs_retweets_by_hour(DayOfWeek=day))
+
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        output_file(data_path + "favs_rts_daysOfWeek_by_hour.html")
+
+        grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
+        show(grid)
         return grid
 
     def word_choice_by_emotion_barchart(self, emotion, color='#b3de69'):
@@ -925,13 +948,15 @@ def main():
 
 
     #x = tda.time_series_frequency_analysis()
-    tda.create_components_to_json()
+    # tda.create_components_to_json()
     print("helo")
     #tda.time_series_day_of_week_plot()
     # tda.tweets_per_hour_plot()
     # tda.hourly_plot_by_emotion()
     # tda.plot_heatmap()
     # tda.normalized_num_favs_retweets_by_hour(normalize=True)
+    #tda.normalized_num_favs_retweets_by_hour(DayOfWeek=0)
+    tda.normalized_favs_rts_plot_by_dayOfWeek()
     # tda.normalized_favs_rts_plot_by_emotion()
     # tda.word_choice_by_emotion_barchart('Joy')
     # tda.grid_plot_each_emotion_word_count()
