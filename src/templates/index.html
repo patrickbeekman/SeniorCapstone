@@ -18,10 +18,26 @@
 <!-- Page content -->
 <div class="w3-content w3-padding-large w3-margin-top" id="portfolio">
 
-  <!-- Plots (Portfolio) -->
-    <div>
+  <!-- Plots -->
+    <div align="center">
         {{ tweet_freq_script|safe }}
         {{ tweet_freq_div|safe }}
+    </div>
+    <div align="center">
+        {{ unNormalized_FavsRTs_script|safe }}
+        {{ unNormalized_FavsRTs_div|safe }}
+    </div>
+    <div align="center">
+        {{ normalized_FavsRTs_script|safe }}
+        {{ normalized_FavsRTs_div|safe }}
+    </div>
+    <div align="center">
+        {{ tweets_hourly_script|safe }}
+        {{ tweets_hourly_div|safe }}
+    </div>
+    <div align="center">
+        {{ hourly_emotion_script|safe }}
+        {{ hourly_emotion_div|safe }}
     </div>
 
   <!-- Contact -->

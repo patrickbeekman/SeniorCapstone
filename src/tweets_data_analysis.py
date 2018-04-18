@@ -3,6 +3,7 @@ import numpy as np
 import json
 import os
 from pandas.io.json import json_normalize
+import pickle
 import datetime
 import time
 import math
@@ -15,6 +16,7 @@ import operator
 from nltk.corpus import stopwords
 from bokeh.plotting import figure, output_file, show
 from bokeh.models.annotations import Title
+from bokeh.embed import components
 from bokeh.models.glyphs import VBar
 from bokeh.layouts import gridplot
 from bokeh.transform import factor_cmap
@@ -457,16 +459,18 @@ class TweetsDataAnalysis:
                           counts_of_tweets[days_of_week[4]], counts_of_tweets[days_of_week[5]],
                           counts_of_tweets[days_of_week[6]]]
 
-        source = ColumnDataSource(data=dict(days_of_week=days_of_week, counts_of_week=counts_of_week))
+        fill_color = ["#ff0000", "#ff4000", "#ff8000", "#ffbf00", "#ffsff00", "#bfff00", "#80ff00"]
+
+        source = ColumnDataSource(data=dict(days_of_week=days_of_week, counts_of_week=counts_of_week, fill_color=fill_color))
 
         hover = HoverTool(tooltips=[
             ('days_of_week', '@days_of_week'),
             ('counts_of_week', '@counts_of_week'),
         ])
 
-        p = figure(x_range=days_of_week, plot_height=350, toolbar_location=None, title="Freq of Tweets by Day of Week", tools=[hover])
+        p = figure(x_range='days_of_week', plot_height=350, toolbar_location=None, title="Freq of Tweets by Day of Week", tools=[hover])
         p.vbar(x='days_of_week', top='counts_of_week', width=0.9, source=source,
-               line_color='white', fill_color=["#ff0000", "#ff4000", "#ff8000", "#ffbf00", "#ffsff00", "#bfff00", "#80ff00"])
+               line_color='white', fill_color='fill_color')
 
         #show(p)
         return p
@@ -486,7 +490,11 @@ class TweetsDataAnalysis:
                     df = df[df.tone_name == emotion]
                 except AttributeError:
                     continue
-            df['created_at'] = df['created_at']/1000
+            try:
+                df['created_at'] = df['created_at']/1000
+            except TypeError:
+                print("\'Created_at\' error where it is somehow a dict")
+                continue
             offset = 0
             try:
                 offset = df['user'][0]['utc_offset']
@@ -552,6 +560,7 @@ class TweetsDataAnalysis:
             return plot
         else:
             show(plot)
+            return plot
 
 
     def hourly_plot_by_emotion(self):
@@ -675,6 +684,7 @@ class TweetsDataAnalysis:
 
         if emotion is None:
             show(fig)
+            return fig
         else:
             return fig
 
@@ -801,6 +811,89 @@ class TweetsDataAnalysis:
 
         print("hello")
 
+    def create_components_to_json(self):
+        data_path = os.path.dirname(__file__) + "/../data/"
+        dict_components = {}
+        try:
+            with open(data_path + 'plot_components.p', 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
+
+        # Time series frequency analysis
+        try:
+            dict_components['time_series_script']
+        except KeyError:
+            print("Starting Time Series Frequency Analysis")
+            s1, d1 = components(self.time_series_frequency_analysis())
+            dict_components['time_series_script'] = s1
+            dict_components['time_series_div'] = d1
+
+        # Tweets per hour
+        try:
+            dict_components['tweets_hour_script']
+        except KeyError:
+            print("Starting Tweets Per Hour")
+            s2, d2 = components(self.tweets_per_hour_plot())
+            dict_components['tweets_hour_script'] = s2
+            dict_components['tweets_hour_div'] = d2
+
+        # Hourly plot of emotion
+        try:
+            dict_components['hourly_emotion_script']
+        except KeyError:
+            print("Starting Hourly plot by emotion")
+            s3, d3 = components(self.hourly_plot_by_emotion())
+            dict_components['hourly_emotion_script'] = s3
+            dict_components['hourly_emotion_div'] = d3
+
+        # UnNormalized favs/rts by hour
+        try:
+            dict_components['unNormalized_FavsRTs_script']
+        except KeyError:
+            print("Starting Unormalized number of favorites and retweets")
+            s4, d4 = components(self.normalized_num_favs_retweets_by_hour(normalize=False))
+            dict_components['unNormalized_FavsRTs_script'] = s4
+            dict_components['unNormalized_FavsRTs_div'] = d4
+
+        # Normalized favs/rts by hour
+        try:
+            dict_components['normalized_FavsRTs_script']
+        except KeyError:
+            print("Starting Normalized number of favorites and retweets")
+            s5, d5 = components(self.normalized_num_favs_retweets_by_hour(normalize=True))
+            dict_components['normalized_FavsRTs_script'] = s5
+            dict_components['normalized_FavsRTs_div'] = d5
+
+        # Normalized favs/rts by emotion
+        try:
+            dict_components['norm_FavsRTs_emotion_script']
+        except KeyError:
+            print("Starting Normalized favs/rts by emotion")
+            s6, d6 = components(self.normalized_favs_rts_plot_by_emotion())
+            dict_components['norm_FavsRTs_emotion_script'] = s6
+            dict_components['norm_FavsRTs_emotion_div'] = d6
+
+        # Word count by emotion
+        try:
+            dict_components['emotions_word_ct_script']
+        except KeyError:
+            print("Starting word count by emotion")
+            s7, d7 = components(self.grid_plot_each_emotion_word_count())
+            dict_components['emotions_word_ct_script'] = s7
+            dict_components['emotions_word_ct_div'] = d7
+
+        # Tweets by day of week
+        try:
+            dict_components['days_of_week_script']
+        except KeyError:
+            print("Starting Days of week plot")
+            s8, d8 = components(self.time_series_day_of_week_plot())
+            dict_components['days_of_week_script'] = s8
+            dict_components['days_of_week_div'] = d8
+
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def main():
@@ -826,10 +919,12 @@ def main():
     #                    os.path.dirname(__file__) + "/../data/pbFollowers/plots/")
 
 
-    tda.time_series_frequency_analysis()
-    # tda.time_series_day_of_week_plot()
+    #x = tda.time_series_frequency_analysis()
+    tda.create_components_to_json()
+    print("helo")
+    #tda.time_series_day_of_week_plot()
     # tda.tweets_per_hour_plot()
-    #tda.hourly_plot_by_emotion()
+    # tda.hourly_plot_by_emotion()
     # tda.plot_heatmap()
     # tda.normalized_num_favs_retweets_by_hour(normalize=True)
     # tda.normalized_favs_rts_plot_by_emotion()
