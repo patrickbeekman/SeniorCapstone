@@ -714,14 +714,17 @@ class TweetsDataAnalysis:
         #show(grid)
         return grid
 
-    def normalized_favs_rts_plot_by_dayOfWeek(self):
+    def normalized_favs_rts_plot_by_dayOfWeek(self, normalize=True):
 
         plots = []
         for day in range(7):
-            plots.append(self.normalized_num_favs_retweets_by_hour(DayOfWeek=day))
+            plots.append(self.normalized_num_favs_retweets_by_hour(normalize=normalize, DayOfWeek=day))
 
         data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
-        output_file(data_path + "favs_rts_daysOfWeek_by_hour.html")
+        if normalize:
+            output_file(data_path + "Normalized_favs_rts_daysOfWeek_by_hour.html")
+        else:
+            output_file(data_path + "NoNorm_favs_rts_daysOfWeek_by_hour.html")
 
         grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
         show(grid)
@@ -920,6 +923,22 @@ class TweetsDataAnalysis:
             dict_components['days_of_week_script'] = s8
             dict_components['days_of_week_div'] = d8
 
+        try:
+            dict_components['favs_RTS_by_DoW_script']
+        except KeyError:
+            print("Starting Favs/RTs by day of week")
+            s9, d9 = components(self.normalized_favs_rts_plot_by_dayOfWeek(normalize=False))
+            dict_components['favs_RTs_by_DoW_script'] = s9
+            dict_components['favs_RTs_by_DoW_div'] = d9
+
+        try:
+            dict_components['favs_RTs_by_DoW_normalized_script']
+        except KeyError:
+            print("Starting Favs/RTs Normalized by day of week")
+            s10, d10 = components(self.normalized_favs_rts_plot_by_dayOfWeek())
+            dict_components['favs_RTs_by_DoW_normalized_script'] = s10
+            dict_components['favs_RTs_by_DoW_normalized_div'] = d10
+
         with open(data_path + "plot_components.p", 'wb') as fp:
             pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -948,7 +967,7 @@ def main():
 
 
     #x = tda.time_series_frequency_analysis()
-    # tda.create_components_to_json()
+    tda.create_components_to_json()
     print("helo")
     #tda.time_series_day_of_week_plot()
     # tda.tweets_per_hour_plot()
@@ -956,7 +975,7 @@ def main():
     # tda.plot_heatmap()
     # tda.normalized_num_favs_retweets_by_hour(normalize=True)
     #tda.normalized_num_favs_retweets_by_hour(DayOfWeek=0)
-    tda.normalized_favs_rts_plot_by_dayOfWeek()
+    #tda.normalized_favs_rts_plot_by_dayOfWeek()
     # tda.normalized_favs_rts_plot_by_emotion()
     # tda.word_choice_by_emotion_barchart('Joy')
     # tda.grid_plot_each_emotion_word_count()
