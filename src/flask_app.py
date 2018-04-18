@@ -5,7 +5,7 @@ import pickle
 import os
 import tweets_data_analysis
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="/home/patt/Documents/senior_year/SeniorCapstone/src/templates/img")
 
 # Index page, no args
 @app.route('/')

@@ -36,13 +36,25 @@
 
     <h4><u>Analysis</u></h4>
     <!-- Plots -->
-    <div align="center">
-        {{ tweet_freq_script|safe }}
-        {{ tweet_freq_div|safe }}
-    </div>
-    <p>As you can see by the plot above.</p>
+    <p>
+        When to tweet is an important part of getting people to see your tweets. I created a bargraph
+        of the amount of tweets during each day of the week (shown below) to see if there was an ideal
+        day to tweet when there is more activity happening. Looking at the graph we can see that throughout
+        the week it seems to be about the same amount of activity but it drops off during the weekend. There
+        are about 4000-5000 less tweets on the weekends compared to weekdays this is about a 16% decrease
+        in twitter activity on the weekends. So if you are looking to get more eyes on your tweets you may
+        want to consider tweeting on a weekday.
+    </p>
     <img src="img/days_of_week.png" alt="daysOfWeek" width="603" height="346" class="w3-image" align="center">
-    <p>As you can see by the plot above.</p>
+    <p>
+        Just knowing what day of the week to possibly tweet on is not enough to get your tweet seen.
+        A more important indicator of tweet exposure is the amount of favorites and retweets you get
+        on your tweets. The more retweets the further exposure you have with your tweets, the more favorites
+        the more people enjoy your tweets and are likely to retweet or share with friends. The plot below
+        looks at the number of favorites and retweets grouped by hour for any particular day.
+
+        CREATE PLOT: unNormalized favs/RTS by hour broken up by day of week
+    </p>
     <div align="center">
         {{ unNormalized_FavsRTs_script|safe }}
         {{ unNormalized_FavsRTs_div|safe }}
@@ -71,6 +83,10 @@
     <div align="center">
         {{ emotions_word_ct_script|safe }}
         {{ emotions_word_ct_div|safe }}
+    </div>
+        <div align="center">
+        {{ tweet_freq_script|safe }}
+        {{ tweet_freq_div|safe }}
     </div>
 
     <h4><u>Conclusion</u></h4>
