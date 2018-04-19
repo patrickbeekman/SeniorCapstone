@@ -15,7 +15,7 @@ def index():
 
     # Create all of my plots
     #tweet_freq_script, tweet_freq_div = components(tweet_freq)
-    data_path = os.path.dirname(__file__) + "/../data/"
+    data_path = "./../data/"
     with open(data_path + 'plot_components.p', 'rb') as fp:
         plot_components = pickle.load(fp)
 

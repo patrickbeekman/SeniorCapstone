@@ -64,7 +64,7 @@
         For a better informative view we can break it down by day of week to see when
         favorites and retweets are happening over time for each day(<a href="#favsRTs_DoW">as seen below</a>).
         Looking through the days we can see that each appears to have a distinct hour where there is a peak in
-        favorites/retweets. For example Sunday:19(7pm), Monday:9(9am) Tuesday:20(8pm), 21(9pm) Wednesday:19(7pm),22(10pm)...etc.
+        favorites/retweets. For example Sunday:19(7pm), Monday:9(9am) Tuesday:20(8pm), 21(9pm) Wednesday:19(7pm), 22(10pm)...etc.
         There seems to be a general trend over the days that points to a peak in activity around hours 16 to 19, but the more
         interesting information is the peaks at the other times of day. Take a look at the graph for Friday, the largest
         peak for the day is at noon which is different than other days. It should be kept in mind when tweeting on fridays
@@ -93,8 +93,7 @@
         {{ normalized_FavsRTs_div|safe }}
     </div>
     <p>
-        Now that we have normalized the data to reduce the peaks we can get a better idea of how the favorites and retweets
-        are distributed over time. Using these new plots we have a more accurate representation of when users are online
+        Now that we have normalized the data to reduce the peaks we can get a better idea of how the favorites and retweets are distributed over time. The new normalized value represents the average amount of favorites or retweets for that hour. Using these new plots we have a more accurate representation of when users are online
         and interacting(favoriting and retweeting) with tweets. Lets take a look at Sunday, in the non-normalized version
         there are two large peaks of favorites at hours 19(7pm) and 21(9pm) which drones out the rest of the data. With such large outlier
         data points its hard to see the daily trend. With the normalized view of Sunday we can see there is a wider peak
@@ -106,12 +105,28 @@
         getting more favorites and retweets. Looking at the Tuesday normalized plot (below) there is a big peak in retweets,
         the largest in any of the graphs and may be an ideal time to tweet if you are looking to get retweets.
     </p>
+    <p>
+        Something interesting to note is that while Sunday <a href="#daysOfWeek">has the least amount of overall tweets</a> it has
+        the highest consistent peaks of favorites out of any day. It also has the highest consistent peak of retweets. <b>It
+        appears that Sunday from hour 13-19(3pm-7pm) is an ideal time of day to tweet at</b>.
+    </p>
     <div align="center">
         {{ favs_RTs_by_DoW_normalized_script|safe }}
         {{ favs_RTs_by_DoW_normalized_div|safe }}
     </div>
     <p>
-        Hello
+        Now that we have a general idea of the times and days of the week to tweet at you should probably figure out what
+        to tweet about to reach the largest audience and maximize the amount of favorites and retweets you receive. One
+        way to look at what you should be tweeting is to think in terms of the emotions illicited by your tweet. I used
+        IBM Watson's tone analyzer to find the tone of each users tweet. I then took this data and graphed the favorites
+        and retweets received by that tweet split by the emotion, I also normalized for similar reasons stated above.
+    </p>
+    <p>
+        Something interesting to note in the graphs is the increase in favorites for the sad and angry tweets around
+        midnight. None of the other emotions have a relative peak late at night except for these two emotions, except for fear which often times goes hand in hand with sadness and anger.
+    </p>
+    <p>
+        Another notable mention is the heights of the peaks for each graph. Keep in mind that this data is all normalized by the amount of followers each user had which means the heights of graph represent the average normalized amount of favorites at each hour. But we can see that analytical and joyus tweets have peaks at 12 and 16 respectively which is much higher than other kinds of emotions. This is likely in part because people tweet a lot of happy and analytical tweets but also that there is high response rate to those tweets as seen by the heightened amount of favorites and retweets. <b>Tweeting something Analytical or Joyus may be in your best interest to maximize the potential of getting favorites or retweets.</b>
     </p>
     <div align="center">
         {{ norm_FavsRTs_emotion_script|safe }}
