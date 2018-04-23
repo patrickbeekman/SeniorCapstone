@@ -20,7 +20,7 @@
 <!-- Page content -->
 <div class="w3-content w3-padding-large w3-margin-top" id="portfolio">
 
-    <h4><u>Intro</u></h4>
+    <h3><u>Intro</u></h3>
     <p>
         Twitter can be a wild and confusing place with a plethora of information readily available.
         Unfortunately twitter is constantly being flooded with noise, often times it is difficult for your
@@ -34,7 +34,9 @@
         to see a general trend in tweets that anyone can follow to give their tweets exposure.
     </p>
 
-    <h4><u>Analysis</u></h4>
+    <h3><u>Analysis</u></h3>
+
+    <h4><u>Comparing days of the week</u></h4>
     <!-- Plots -->
     <p>
         When to tweet is an important part of getting people to see your tweets. I created a bargraph
@@ -74,6 +76,7 @@
         {{ favs_RTS_by_DoW_script|safe }}
         {{ favs_RTS_by_DoW_div|safe }}
     </div>
+    <h4 id="NormTitle"><u>Normalizing the data</u></h4>
     <p>
         You may have noticed while looking at the above two plots that there are some large spikes in the data.
         This kind of plot is not very informative because these are just raw values, maybe one user with a lot of
@@ -114,34 +117,33 @@
         {{ favs_RTs_by_DoW_normalized_script|safe }}
         {{ favs_RTs_by_DoW_normalized_div|safe }}
     </div>
+    <h4><u>Analyzing the emotion of tweets over time</u></h4>
     <p>
-        Now that we have a general idea of the times and days of the week to tweet at you should probably figure out what
-        to tweet about to reach the largest audience and maximize the amount of favorites and retweets you receive. One
-        way to look at what you should be tweeting is to think in terms of the emotions illicited by your tweet. I used
-        IBM Watson's tone analyzer to find the tone of each users tweet. I then took this data and graphed the favorites
-        and retweets received by that tweet split by the emotion, I also normalized for similar reasons stated above.
+        Now that we have a general idea of the times and days of the week to tweet at you should probably figure out the content of your tweet that will reach the largest audience and maximize the amount of favorites and retweets you receive. One way to look at what you should be tweeting is to think in terms of the emotions illicited by your tweet. I used IBM Watson's tone analyzer to find the tone of each users tweet. I then took this data and graphed the favorites and retweets received by that tweet split by the emotion (<a href="#normFavRTs">seen below</a>), I also normalized for <a href="#NormTitle">similar reasons stated above</a>.
     </p>
     <p>
         Something interesting to note in the graphs is the increase in favorites for the sad and angry tweets around
         midnight. None of the other emotions have a relative peak late at night except for these two emotions, except for fear which often times goes hand in hand with sadness and anger.
     </p>
     <p>
-        Another notable mention is the heights of the peaks for each graph. Keep in mind that this data is all normalized by the amount of followers each user had which means the heights of graph represent the average normalized amount of favorites at each hour. But we can see that analytical and joyus tweets have peaks at 12 and 16 respectively which is much higher than other kinds of emotions. This is likely in part because people tweet a lot of happy and analytical tweets but also that there is high response rate to those tweets as seen by the heightened amount of favorites and retweets. <b>Tweeting something Analytical or Joyus may be in your best interest to maximize the potential of getting favorites or retweets.</b>
+        Another notable mention is the heights of the peaks for each graph. Keep in mind that this data is all normalized by the amount of followers each user had which means the heights of graph represent the average normalized amount of favorites at each hour. But we can see that analytical and joyus tweets have peaks at 12 and 16 respectively which is much higher than the other kinds of emotions. This is likely in part because people tweet a lot of happy and analytical tweets but also that there is high response rate to those tweets as seen by the heightened amount of favorites and retweets. <b>Tweeting something Analytical or Joyus may be in your best interest to maximize the potential of getting favorites or retweets.</b>
     </p>
-    <div align="center">
+    <div align="center" id="normFavRTs">
         {{ norm_FavsRTs_emotion_script|safe }}
         {{ norm_FavsRTs_emotion_div|safe }}
     </div>
-    <p>As you can see by the plot above.</p>
     <div align="center">
         {{ tweets_hourly_script|safe }}
         {{ tweets_hourly_div|safe }}
     </div>
-    <p>As you can see by the plot above.</p>
-    <div align="center">
-        {{ hourly_emotion_script|safe }}
-        {{ hourly_emotion_div|safe }}
+    <p>
+        Now If we take a look at the amount of tweets being tweeted per hour and compare it with the amount of favorites and retweets by hour for each emotion we can see that they follow a similar trend with some interesting differences.
+    </p>
+    <div align="center" id="sideBySide">
+        {{ side_by_side_script|safe }}
+        {{ side_by_side_div|safe }}
     </div>
+    <h4><u>Analyzing word counts by emotion</u></h4>
     <p>As you can see by the plot above.</p>
     <div align="center">
         {{ emotions_word_ct_script|safe }}
@@ -152,7 +154,7 @@
         {{ tweet_freq_div|safe }}
     </div>
 
-    <h4><u>Conclusion</u></h4>
+    <h3><u>Conclusion</u></h3>
     <p>conclusion stuff</p>
 
   <!-- Contact -->

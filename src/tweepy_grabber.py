@@ -53,7 +53,7 @@ class TweepyGrabber:
             for page in tweepy.Cursor(self.api.followers_ids, screen_name=screen_name).pages():
                 ids.extend(page)
         except tweepy.TweepError:
-            print("tweepy.TweepError=")
+            print("tweepy.TweepError")
         except:
             e = sys.exc_info()[0]
             print("Error: %s" % e)
