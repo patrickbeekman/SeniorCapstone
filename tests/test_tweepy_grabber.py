@@ -26,7 +26,6 @@ def test_bad_api_connection():
 
 
 def test_user_not_exist_get_users_timeline():
-    api = grabber.api_connect(os.environ['TWEET_PUB'], os.environ['TWEET_PRI'])
     try:
         grabber.get_users_timeline("ponlejkdls", os.path.dirname(__file__) + "/../data/outfile.json")
         assert False
@@ -35,7 +34,6 @@ def test_user_not_exist_get_users_timeline():
 
 
 def test_success_get_users_timeline():
-    api = grabber.api_connect(os.environ['TWEET_PUB'], os.environ['TWEET_PRI'])
     outputfile = os.path.dirname(__file__) + "/../data/longent.json"
     try:
         grabber.get_users_timeline("LongentUSA", outputfile)
@@ -45,3 +43,22 @@ def test_success_get_users_timeline():
         data = json.load(file)
     os.remove(outputfile)
     assert len(data) > 0
+
+def test_get_users_timeline_no_tweets():
+    outputfile = os.path.dirname(__file__) + "/../data/donald.json"
+    try:
+        ret = grabber.get_users_timeline("donaldglover", outputfile)
+        if ret is None:
+            assert True
+    except Exception:
+        assert False
+
+def test_get_users_followers_not_exist():
+    outputfile = os.path.dirname(__file__) + "/../data/test.json"
+    ret = grabber.get_users_followers(outputfile, "ponlejkdls")
+    assert ret is None
+
+def test_get_users_followers_good():
+    outputfile = os.path.dirname(__file__) + "/../data/test.json"
+    ret = grabber.get_users_followers(outputfile, "patrickbeekman")
+    assert len(ret) > 0

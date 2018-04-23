@@ -33,7 +33,7 @@ class TweepyGrabber:
             oldest = all_tweets[-1].id - 1
         except IndexError:
             # If the user has no tweets then just return
-            return
+            return None
         print("Downloaded ", len(all_tweets), " so far =)")
         count = 0
         while len(new_tweets) > 0 and count <= max_tweets:
@@ -54,9 +54,11 @@ class TweepyGrabber:
                 ids.extend(page)
         except tweepy.TweepError:
             print("tweepy.TweepError")
+            return None
         except:
             e = sys.exc_info()[0]
             print("Error: %s" % e)
+            return None
 
         for start in range(0, len(ids), 100):
             end = start + 100
