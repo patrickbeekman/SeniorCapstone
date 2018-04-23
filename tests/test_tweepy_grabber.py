@@ -36,11 +36,11 @@ def test_user_not_exist_get_users_timeline():
 
 def test_success_get_users_timeline():
     api = grabber.api_connect(os.environ['TWEET_PUB'], os.environ['TWEET_PRI'])
+    outputfile = os.path.dirname(__file__) + "/../data/longent.json"
     try:
-        grabber.get_users_timeline("donaldglover", os.path.dirname(__file__) + "/../data/donald.json")
+        grabber.get_users_timeline("LongentUSA", outputfile)
     except Exception:
         assert False
-    outputfile = os.path.dirname(__file__) + "/../data/donald.json"
     with open(outputfile) as file:
         data = json.load(file)
     os.remove(outputfile)
