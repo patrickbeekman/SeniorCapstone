@@ -368,8 +368,9 @@ class TweetsDataAnalysis:
         print("hello")
 
 
-    def time_series_frequency_analysis(self):
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+    def time_series_frequency_analysis(self, data_path):
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        data_path = data_path + "merged/"
         dir_files = os.listdir(data_path)
 
         counts_of_tweets = {}
@@ -425,8 +426,9 @@ class TweetsDataAnalysis:
         print("Frequency of tweets graph created!")
 
 
-    def time_series_day_of_week_plot(self):
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+    def time_series_day_of_week_plot(self, data_path):
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        data_path = data_path + "merged/"
         dir_files = os.listdir(data_path)
 
         counts_of_tweets = {}
@@ -476,8 +478,9 @@ class TweetsDataAnalysis:
         return p
 
 
-    def tweets_per_hour_plot(self, emotion=None, color="#b3de69"):
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+    def tweets_per_hour_plot(self, data_path, emotion=None, color="#b3de69"):
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        data_path = data_path + "merged/"
         dir_files = os.listdir(data_path)
 
         counts_of_tweets = {}
@@ -563,7 +566,7 @@ class TweetsDataAnalysis:
             return plot
 
 
-    def hourly_plot_by_emotion(self):
+    def hourly_plot_by_emotion(self, data_path):
 
         emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
         colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
@@ -572,15 +575,17 @@ class TweetsDataAnalysis:
         for index, emotion in enumerate(emotions):
             plots.append(self.tweets_per_hour_plot(emotion=emotion, color=colors[index]))
 
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        data_path = data_path + "plots/"
         output_file(data_path + "multiple_emotions_by_hour.html")
 
         grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
         #show(grid)
         return grid
 
-    def normalized_num_favs_retweets_by_hour(self, emotion=None, normalize=True, DayOfWeek=None):
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+    def normalized_num_favs_retweets_by_hour(self, data_path, emotion=None, normalize=True, DayOfWeek=None):
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        data_path = data_path + "merged/"
         dir_files = os.listdir(data_path)
 
         counts_of_favs = {}
@@ -695,16 +700,17 @@ class TweetsDataAnalysis:
         else:
             return fig
 
-    def normalized_favs_rts_plot_by_emotion(self, normalize=True):
+    def normalized_favs_rts_plot_by_emotion(self, data_path, normalize=True):
 
         emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
         #colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
 
         plots = []
         for emotion in emotions:
-            plots.append(self.normalized_num_favs_retweets_by_hour(normalize=normalize, emotion=emotion))
+            plots.append(self.normalized_num_favs_retweets_by_hour(data_path=data_path, normalize=normalize, emotion=emotion))
 
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        data_path += "plots/"
         if normalize:
             output_file(data_path + "Norm_favs_rts_multiple_emotions_by_hour.html")
         else:
@@ -714,13 +720,14 @@ class TweetsDataAnalysis:
         #show(grid)
         return grid
 
-    def normalized_favs_rts_plot_by_dayOfWeek(self, normalize=True):
+    def normalized_favs_rts_plot_by_dayOfWeek(self, data_path, normalize=True):
 
         plots = []
         for day in range(7):
-            plots.append(self.normalized_num_favs_retweets_by_hour(normalize=normalize, DayOfWeek=day))
+            plots.append(self.normalized_num_favs_retweets_by_hour(data_path=data_path, normalize=normalize, DayOfWeek=day))
 
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        data_path += "plots/"
         if normalize:
             output_file(data_path + "Normalized_favs_rts_daysOfWeek_by_hour.html")
         else:
@@ -730,8 +737,9 @@ class TweetsDataAnalysis:
         #show(grid)
         return grid
 
-    def word_choice_by_emotion_barchart(self, emotion, color='#b3de69'):
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+    def word_choice_by_emotion_barchart(self, emotion, data_path, color='#b3de69'):
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        data_path += "merged/"
         dir_files = os.listdir(data_path)
 
         most_common_words = {}
@@ -803,15 +811,16 @@ class TweetsDataAnalysis:
         return p
         #show(p)
 
-    def grid_plot_each_emotion_word_count(self):
+    def grid_plot_each_emotion_word_count(self, data_path):
         emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
         colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
 
         plots = []
         for index, emotion in enumerate(emotions):
-            plots.append(self.word_choice_by_emotion_barchart(emotion=emotion, color=colors[index]))
+            plots.append(self.word_choice_by_emotion_barchart(data_path=data_path, emotion=emotion, color=colors[index]))
 
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        data_path += "plots/"
         output_file(data_path + "multiple_emotions_word_counts.html")
 
         grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
@@ -819,26 +828,8 @@ class TweetsDataAnalysis:
         return grid
 
 
-    def plot_heatmap(self):
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
-        dir_files = os.listdir(data_path)
-        data = pd.read_csv(data_path+"../unemployment_data.csv")
-
-        data['Year'] = data['Year'].astype(str)
-        data = data.set_index('Year')
-        data.drop('Annual', axis=1, inplace=True)
-        data.columns.name = 'Month'
-
-        years = list(data.index)
-        months = list(data.columns)
-
-        # reshape to 1D array or rates with a month and year for each row.
-        df = pd.DataFrame(data.stack(), columns=['rate']).reset_index()
-
-        print("hello")
-
-    def create_components_to_json(self):
-        data_path = os.path.dirname(__file__) + "/../data/"
+    def create_components_to_json(self, data_path):
+        #data_path = os.path.dirname(__file__) + "/../data/"
         dict_components = {}
         try:
             with open(data_path + 'plot_components.p', 'rb') as fp:
@@ -846,17 +837,12 @@ class TweetsDataAnalysis:
         except FileNotFoundError:
             print("File not created...Making file =)")
 
-        #del dict_components['favs_RTS_by_DoW_script']
-        #del dict_components['favs_RTS_by_DoW_div']
-        del dict_components['favs_RTs_by_DoW_normalized_script']
-        del dict_components['favs_RTs_by_DoW_normalized_div']
-
         # Time series frequency analysis
         try:
             dict_components['time_series_script']
         except KeyError:
             print("Starting Time Series Frequency Analysis")
-            s1, d1 = components(self.time_series_frequency_analysis())
+            s1, d1 = components(self.time_series_frequency_analysis(data_path))
             dict_components['time_series_script'] = s1
             dict_components['time_series_div'] = d1
 
@@ -865,7 +851,7 @@ class TweetsDataAnalysis:
             dict_components['tweets_hour_script']
         except KeyError:
             print("Starting Tweets Per Hour")
-            s2, d2 = components(self.tweets_per_hour_plot())
+            s2, d2 = components(self.tweets_per_hour_plot(data_path))
             dict_components['tweets_hour_script'] = s2
             dict_components['tweets_hour_div'] = d2
 
@@ -874,7 +860,7 @@ class TweetsDataAnalysis:
             dict_components['hourly_emotion_script']
         except KeyError:
             print("Starting Hourly plot by emotion")
-            s3, d3 = components(self.hourly_plot_by_emotion())
+            s3, d3 = components(self.hourly_plot_by_emotion(data_path))
             dict_components['hourly_emotion_script'] = s3
             dict_components['hourly_emotion_div'] = d3
 
@@ -883,7 +869,7 @@ class TweetsDataAnalysis:
             dict_components['unNormalized_FavsRTs_script']
         except KeyError:
             print("Starting Unormalized number of favorites and retweets")
-            s4, d4 = components(self.normalized_num_favs_retweets_by_hour(normalize=False))
+            s4, d4 = components(self.normalized_num_favs_retweets_by_hour(data_path=data_path, normalize=False))
             dict_components['unNormalized_FavsRTs_script'] = s4
             dict_components['unNormalized_FavsRTs_div'] = d4
 
@@ -892,7 +878,7 @@ class TweetsDataAnalysis:
             dict_components['normalized_FavsRTs_script']
         except KeyError:
             print("Starting Normalized number of favorites and retweets")
-            s5, d5 = components(self.normalized_num_favs_retweets_by_hour(normalize=True))
+            s5, d5 = components(self.normalized_num_favs_retweets_by_hour(data_path=data_path, normalize=True))
             dict_components['normalized_FavsRTs_script'] = s5
             dict_components['normalized_FavsRTs_div'] = d5
 
@@ -901,7 +887,7 @@ class TweetsDataAnalysis:
             dict_components['norm_FavsRTs_emotion_script']
         except KeyError:
             print("Starting Normalized favs/rts by emotion")
-            s6, d6 = components(self.normalized_favs_rts_plot_by_emotion())
+            s6, d6 = components(self.normalized_favs_rts_plot_by_emotion(data_path=data_path))
             dict_components['norm_FavsRTs_emotion_script'] = s6
             dict_components['norm_FavsRTs_emotion_div'] = d6
 
@@ -910,7 +896,7 @@ class TweetsDataAnalysis:
             dict_components['emotions_word_ct_script']
         except KeyError:
             print("Starting word count by emotion")
-            s7, d7 = components(self.grid_plot_each_emotion_word_count())
+            s7, d7 = components(self.grid_plot_each_emotion_word_count(data_path=data_path))
             dict_components['emotions_word_ct_script'] = s7
             dict_components['emotions_word_ct_div'] = d7
 
@@ -919,7 +905,7 @@ class TweetsDataAnalysis:
             dict_components['days_of_week_script']
         except KeyError:
             print("Starting Days of week plot")
-            s8, d8 = components(self.time_series_day_of_week_plot())
+            s8, d8 = components(self.time_series_day_of_week_plot(data_path=data_path))
             dict_components['days_of_week_script'] = s8
             dict_components['days_of_week_div'] = d8
 
@@ -927,7 +913,7 @@ class TweetsDataAnalysis:
             dict_components['favs_RTS_by_DoW_script']
         except KeyError:
             print("Starting Favs/RTs by day of week")
-            s9, d9 = components(self.normalized_favs_rts_plot_by_dayOfWeek(normalize=False))
+            s9, d9 = components(self.normalized_favs_rts_plot_by_dayOfWeek(data_path=data_path, normalize=False))
             dict_components['favs_RTS_by_DoW_script'] = s9
             dict_components['favs_RTS_by_DoW_div'] = d9
 
@@ -935,7 +921,7 @@ class TweetsDataAnalysis:
             dict_components['favs_RTs_by_DoW_normalized_script']
         except KeyError:
             print("Starting Favs/RTs Normalized by day of week")
-            s10, d10 = components(self.normalized_favs_rts_plot_by_dayOfWeek())
+            s10, d10 = components(self.normalized_favs_rts_plot_by_dayOfWeek(data_path=data_path))
             dict_components['favs_RTs_by_DoW_normalized_script'] = s10
             dict_components['favs_RTs_by_DoW_normalized_div'] = d10
 
@@ -966,8 +952,9 @@ def main():
     #                    os.path.dirname(__file__) + "/../data/pbFollowers/plots/")
 
 
-    #x = tda.time_series_frequency_analysis()
-    tda.create_components_to_json()
+    x = tda.time_series_frequency_analysis(os.path.dirname(__file__) + "/../data/pbFollowers/")
+    show(x)
+    #tda.create_components_to_json()
     print("helo")
     #tda.time_series_day_of_week_plot()
     # tda.tweets_per_hour_plot()
