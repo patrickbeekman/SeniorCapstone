@@ -29,7 +29,7 @@ This application can be used at a very high level by:
 5. Once the script has finished executing the website should now be viewable at localhost:5000/ in your favorite web browser.
 
 
-<a id="Note1">**</a> Note that it will only take this long the first time you run this script on a user. The reason this process takes so long requires some understanding as to what the scripts are doing.
+<a id="Note1">**</a> Note that it will only take this long the first time you run this script on a user. The reason this process takes so long requires some understanding as to what the scripts are doing. Below describes the process:
 * Downloads all of the users followers from twitter
 * Downloads ~2000 tweets for each of those followers
 * Analyzes the tone of each tweet
