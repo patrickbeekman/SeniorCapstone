@@ -27,6 +27,8 @@ This application can be used at a very high level by:
 3. Open up a terminal and execute ```python flask_app.py SCREEN_NAME``` replacing with the screen name of the twitter user you would like to analyze.
 4. Now wait for the scripts to execute, Depending on the amount of followers the user has this can take a while. For about 200 followers it can take about [15-30 minutes initially**](#Note1).
 5. Once the script has finished executing the website should now be viewable at localhost:5000/ in your favorite web browser.
+
+
 <a id="Note1">**</a> Note that it will only take this long the first time you run this script on a user. The reason this process takes so long requires some understanding as to what the scripts are doing.
 * Downloads all of the users followers from twitter
 * Downloads ~2000 tweets for each of those followers

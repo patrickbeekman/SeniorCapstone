@@ -18,25 +18,12 @@ def index():
     except IndexError:
         screen_name = input("Twitter screen_name required! Please enter the screen name you would like to use:")
     components_path = driver.analyze_followers_of_user_create_plots(screen_name, screen_name)
-    # driver = tweet_driver.Tweet_Driver()
-    # components_path = driver.analyze_followers_of_user_create_plots("patrickbeekman", "pbFollowers")
-    #getPlots = tweets_data_analysis.TweetsDataAnalysis()
-    #tweet_freq = getPlots.time_series_frequency_analysis()
 
     print("data collection, analysis and plots done!")
 
-    # Create all of my plots
-    #tweet_freq_script, tweet_freq_div = components(tweet_freq)
-
-    #data_path = "./../data/"
-    #with open(data_path + 'plot_components.p', 'rb') as fp:
     with open(components_path, 'rb') as fp:
         plot_components = pickle.load(fp)
 
-
-    name = request.args.get("name")
-    if name == None:
-        name = "Patrick"
     return render_template("index.html", name=name,
                            tweet_freq_script=plot_components['time_series_script'], tweet_freq_div=plot_components['time_series_div'],
                            tweets_hourly_script=plot_components['tweets_hour_script'], tweets_hourly_div=plot_components['tweets_hour_div'],
