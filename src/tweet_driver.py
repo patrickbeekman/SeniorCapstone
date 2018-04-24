@@ -18,6 +18,8 @@ class Tweet_Driver:
 
     def analyze_followers_of_user_create_plots(self, screen_name, data_folder):
         data_path = os.path.dirname(__file__) + "/../data/" + data_folder + "/"
+        if not os.path.dirname(os.path.dirname(__file__) + "/../data/"):
+            os.mkdir(os.path.dirname(__file__) + "/../data/")
         if not os.path.exists(data_path):
             os.mkdir(data_path)
 

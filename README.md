@@ -5,6 +5,20 @@
 An exploratory analysis of a users followers to determine when and what to tweet about to maximize your tweets potential to gain the most amount of attention.
 This tweet attention can be defined as the amount of favorites and retweets a tweet receives.
 
+## Installation and Dependencies
+
+This project use a python Flask app to display my findings. To get started you will first need to clone this repo to your workspace.
+* You will then need to install [anaconda python 3.6](https://conda.io/docs/user-guide/install/index.html)
+* You will then need to install these python packages, which you can easily install these with [python package manager pip](https://pip.pypa.io/en/stable/installing/).
+  * Pandas ```pip install pandas```
+  * Requests ```pip install requests```
+  * Numpy ```pip install numpy```
+  * Pymongo ```pip install pymongo```
+  * tweepy ```pip install tweepy```
+  * Flask ```pip install flask```
+  * Bokeh ```pip install bokeh```
+  * Watson Developer Cloud ```pip install --upgrade watson-developer-cloud```
+
 ## About and Usage
 
 This application can be used at a very high level by:
@@ -22,18 +36,3 @@ This application can be used at a very high level by:
 * Send the plots to the Flask app which inserts them into the HTML
 * And finally it hosts it locally so you can now view the finished product
 Now hopefully you have a better idea of what this application is, how it works and how you can run this on any twitter user.
-
-
-## Installation
-
-This project use a python Flask app to display my findings. To get started you will first need to clone this repo to your workspace.
-* You will then need to install [anaconda python 3.6](https://conda.io/docs/user-guide/install/index.html)
-* You will then need to install these python packages, which you can easily install these with [python package manager pip](https://pip.pypa.io/en/stable/installing/).
-  * Pandas ```pip install pandas```
-  * Requests ```pip install requests```
-  * Numpy ```pip install numpy```
-  * Pymongo ```pip install pymongo```
-  * tweepy ```pip install tweepy```
-  * Flask ```pip install flask```
-  * Bokeh ```pip install bokeh```
-  * Watson Developer Cloud ```pip install --upgrade watson-developer-cloud```
