@@ -105,6 +105,9 @@ class TweepyGrabber:
         folder_files = os.listdir(output_path)
         should_continue = False
 
+        if users is None:
+            return
+
         for user in users.iterrows():
             sn = user[1]['screen_name']
 
@@ -181,7 +184,7 @@ def main():
     # grabber.get_search_results(search_term, outfile)
 
     path = os.path.dirname(__file__) + "/../data/"
-    fllwrs = grabber.get_users_followers(output_path=path, screen_name="LongentUSA")
+    fllwrs = grabber.get_users_followers(output_path=path, screen_name="hrgwea")
     grabber.get_followers_of_followers(fllwrs, path + "../tests/flwrs_flwrs/")
 
 

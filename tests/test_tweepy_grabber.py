@@ -14,7 +14,7 @@ grabber = tweepy_grabber.TweepyGrabber()
 def test_good_api_connection():
     api = grabber.api_connect(os.environ['TWEET_PUB'], os.environ['TWEET_PRI'])
     try:
-        api.user_timeline(screenname="patrickbeekman", count=200)
+        api.user_timeline(screenname="LongentUSA", count=200)
         assert True
     except tweepy.TweepError as e:
         print(e)
@@ -61,14 +61,15 @@ def test_get_users_followers_not_exist():
 
 def test_get_users_followers_good():
     outputfile = os.path.dirname(__file__) + "/../data/test.json"
-    ret = grabber.get_users_followers(outputfile, "patrickbeekman")
+    ret = grabber.get_users_followers(outputfile, "hrgwea")
     assert len(ret) > 0
 
 def test_get_followers_followers():
     output_path = os.path.dirname(__file__) + "/../data/"
-    users = grabber.get_users_followers(output_path, "LongentUSA")
-    df = pd.read_json(output_path + "test_longent.jsonLongentUSA_followers.json")
+    users = grabber.get_users_followers(output_path, "hrgwea")
     output_path = os.path.dirname(__file__) + "/flwrs_flwrs/"
-    grabber.get_followers_of_followers(df, output_path)
+    grabber.get_followers_of_followers(users, output_path)
     files = os.listdir(output_path)
+    for file in files:
+        os.remove(output_path + file)
     assert len(files) > 0
