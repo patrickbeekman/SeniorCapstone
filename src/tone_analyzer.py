@@ -78,6 +78,7 @@ class MyToneAnalyzer:
 
     # Tone analyzer only reads first 100 sentences for tone analysis and only first
     # 1000 sentences for document level analysis. Max filesize = 128KB
+    # tweet_text is a iterable list of text from the tweets
     def clean_text_write_to_json(self, tweet_text, newfilename):
         ninety_tweets = ""
         for tweet in tweet_text:
