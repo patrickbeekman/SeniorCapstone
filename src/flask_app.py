@@ -2,6 +2,7 @@
 from flask import Flask, render_template, request
 from bokeh.embed import components
 import pickle
+import sys
 import os
 import tweets_data_analysis
 import tweet_driver
@@ -11,8 +12,8 @@ app = Flask(__name__, static_folder="/home/patt/Documents/senior_year/SeniorCaps
 # Index page, no args
 @app.route('/')
 def index():
-    driver = tweet_driver.Tweet_Driver()
-    components_path = driver.analyze_followers_of_user_create_plots("patrickbeekman", "pbFollowers")
+    # driver = tweet_driver.Tweet_Driver()
+    # components_path = driver.analyze_followers_of_user_create_plots("patrickbeekman", "pbFollowers")
     #getPlots = tweets_data_analysis.TweetsDataAnalysis()
     #tweet_freq = getPlots.time_series_frequency_analysis()
 
@@ -45,5 +46,11 @@ def index():
 # With debug=True, Flask server will auto-reload
 # when there are code changes
 if __name__ == '__main__':
+    driver = tweet_driver.Tweet_Driver()
+    try:
+        screen_name = sys.argv[1]
+    except IndexError:
+        screen_name = input("Twitter screen_name required! Please enter the screen name you would like to use:")
+    components_path = driver.analyze_followers_of_user_create_plots(screen_name, screen_name)
     app.run(port=5000, debug=True)
 
