@@ -3,6 +3,7 @@ import sys
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + "/../src/")
 import tweepy_grabber
+import pandas as pd
 import tweepy
 import json
 import pytest
@@ -62,3 +63,12 @@ def test_get_users_followers_good():
     outputfile = os.path.dirname(__file__) + "/../data/test.json"
     ret = grabber.get_users_followers(outputfile, "patrickbeekman")
     assert len(ret) > 0
+
+def test_get_followers_followers():
+    output_path = os.path.dirname(__file__) + "/../data/"
+    users = grabber.get_users_followers(output_path, "LongentUSA")
+    df = pd.read_json(output_path + "test_longent.jsonLongentUSA_followers.json")
+    output_path = os.path.dirname(__file__) + "/flwrs_flwrs/"
+    grabber.get_followers_of_followers(df, output_path)
+    files = os.listdir(output_path)
+    assert len(files) > 0
