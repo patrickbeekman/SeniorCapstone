@@ -4,19 +4,26 @@ from bokeh.embed import components
 import pickle
 import os
 import tweets_data_analysis
+import tweet_driver
 
 app = Flask(__name__, static_folder="/home/patt/Documents/senior_year/SeniorCapstone/src/templates/img")
 
 # Index page, no args
 @app.route('/')
 def index():
+    driver = tweet_driver.Tweet_Driver()
+    components_path = driver.analyze_followers_of_user_create_plots("patrickbeekman", "pbFollowers")
     #getPlots = tweets_data_analysis.TweetsDataAnalysis()
     #tweet_freq = getPlots.time_series_frequency_analysis()
 
+    print("data collection, analysis and plots done!")
+
     # Create all of my plots
     #tweet_freq_script, tweet_freq_div = components(tweet_freq)
-    data_path = "./../data/"
-    with open(data_path + 'plot_components.p', 'rb') as fp:
+
+    #data_path = "./../data/"
+    #with open(data_path + 'plot_components.p', 'rb') as fp:
+    with open(components_path, 'rb') as fp:
         plot_components = pickle.load(fp)
 
 

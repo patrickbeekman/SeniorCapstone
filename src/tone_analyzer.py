@@ -100,6 +100,8 @@ class MyToneAnalyzer:
 
         if not os.path.exists(input_filename):
             raise FileNotFoundError()
+        if not os.path.exists(data_path):
+            os.mkdir(data_path)
 
         df = pd.read_json(input_filename)
 
@@ -114,11 +116,13 @@ class MyToneAnalyzer:
 
 
     def create_single_file_tone_analysis(self, analysis_folder, output_path):
+        if not os.path.isdir(analysis_folder):
+            os.mkdir(analysis_folder)
         count = 0
         #output_file = self.path_name("/../data/all_analysis.json")
         #dirFiles = os.listdir(self.path_name("/../data/analysis/"))
         dirFiles = os.listdir(analysis_folder)
-        if not dirFiles:
+        if len(dirFiles) == 0:
             raise FileNotFoundError
         dirFiles.sort()
         print(dirFiles)

@@ -573,7 +573,7 @@ class TweetsDataAnalysis:
 
         plots = []
         for index, emotion in enumerate(emotions):
-            plots.append(self.tweets_per_hour_plot(emotion=emotion, color=colors[index]))
+            plots.append(self.tweets_per_hour_plot(data_path=data_path, emotion=emotion, color=colors[index]))
 
         #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
         data_path = data_path + "plots/"
@@ -830,9 +830,13 @@ class TweetsDataAnalysis:
 
     def create_components_to_json(self, data_path):
         #data_path = os.path.dirname(__file__) + "/../data/"
+        if not os.path.isdir(data_path + "plots/"):
+            os.mkdir(data_path + "plots/")
+
         dict_components = {}
+        output_file_path = data_path + 'plot_components.p'
         try:
-            with open(data_path + 'plot_components.p', 'rb') as fp:
+            with open(output_file_path, 'rb') as fp:
                 dict_components = pickle.load(fp)
         except FileNotFoundError:
             print("File not created...Making file =)")
@@ -927,6 +931,8 @@ class TweetsDataAnalysis:
 
         with open(data_path + "plot_components.p", 'wb') as fp:
             pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+
+        return output_file_path
 
 
 def main():
