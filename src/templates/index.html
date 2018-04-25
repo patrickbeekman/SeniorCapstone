@@ -23,8 +23,8 @@
     <h3><u>Intro</u></h3>
     <p>
         Twitter can be a wild and confusing place with a plethora of information readily available.
-        Unfortunately twitter is constantly being flooded with noise, often times it is difficult for your
-        tweets to stand out and gain traction. That is the inspiration for this analysis, I have studied
+        The problem is that twitter is constantly being flooded with noise, often times making it difficult for your
+        tweets to stand out and gain attention. That is the inspiration for this analysis, I have studied
         the best times to tweet, best emotions and keywords that should be used to give your tweets the most
         traction. Something to note is that all this analysis has been done with my ~200 followers and 2,000
         tweets for each of those users. Not all followers have 2,000 tweets so after all data collection and
@@ -119,50 +119,123 @@
     </div>
     <h4><u>Analyzing the emotion of tweets over time</u></h4>
     <p>
-        Now that we have a general idea of the times and days of the week to tweet at you should probably figure out the content of your tweet that will reach the largest audience and maximize the amount of favorites and retweets you receive. One way to look at what you should be tweeting is to think in terms of the emotions illicited by your tweet. I used IBM Watson's tone analyzer to find the tone of each users tweet. I then took this data and graphed the favorites and retweets received by that tweet split by the emotion (<a href="#normFavRTs">seen below</a>), I also normalized for <a href="#NormTitle">similar reasons stated above</a>.
+        Now that we have a general idea of the times and days of the week to tweet at you should probably figure out the
+        content of your tweet that will reach the largest audience and maximize the amount of favorites and retweets you
+        receive. One way to look at what you should be tweeting is to think in terms of the emotions illicited by your tweet.
+        I used IBM Watson's tone analyzer to find the tone of each users tweet. I then took this data and graphed the favorites
+        and retweets received by that tweet split by the emotion (<a href="#normFavRTs">seen below</a>), I also normalized
+        for <a href="#NormTitle">similar reasons stated above</a>.
     </p>
     <p>
         Something interesting to note in the graphs is the increase in favorites for the sad and angry tweets around
-        midnight. None of the other emotions have a relative peak late at night except for these two emotions, except for fear which often times goes hand in hand with sadness and anger.
+        midnight. None of the other emotions have a local peak late at night except for these two emotions, except for
+        fear which often times goes hand in hand with sadness and anger. This should be in line with what you would expect,
+        it makes sense that people are tweeting sadder during the night because that's when people are reflecting on past
+        events and experiences.
     </p>
     <p>
-        Another notable mention is the heights of the peaks for each graph. Keep in mind that this data is all normalized by the amount of followers each user had which means the heights of graph represent the average normalized amount of favorites at each hour. But we can see that analytical and joyus tweets have peaks at 12 and 16 respectively which is much higher than the other kinds of emotions. This is likely in part because people tweet a lot of happy and analytical tweets but also that there is high response rate to those tweets as seen by the heightened amount of favorites and retweets. <b>Tweeting something Analytical or Joyus may be in your best interest to maximize the potential of getting favorites or retweets.</b>
+        Another notable mention is the heights of the peaks for each graph. Keep in mind that this data is all normalized
+        by the amount of followers each user had which means the heights of graph represent the average normalized amount
+        of favorites at each hour. But we can see that analytical and joyus tweets have peaks at 12 and 16 respectively
+        which is much higher than the other kinds of emotions. This is likely in part because people tweet a lot of happy
+        and analytical tweets but also that there is high response rate to those tweets as seen by the heightened amount of
+        favorites and retweets. <b>Tweeting something Analytical or Joyus may be in your best interest to maximize the
+        potential of getting favorites or retweets.</b>
     </p>
     <div align="center" id="normFavRTsEmotions">
         {{ norm_FavsRTs_emotion_script|safe }}
         {{ norm_FavsRTs_emotion_div|safe }}
     </div>
+    <p>
+        Another type of graph that will help to determine the best time to tweet is to look at how many tweets are also
+        being sent at that hour? The graph below shows the total amount of tweets I collected for each hour from all my followers.
+    </p>
     <div align="center">
         {{ tweets_hourly_script|safe }}
         {{ tweets_hourly_div|safe }}
     </div>
     <p>
-        Now If we take a look at the amount of tweets being tweeted per hour and compare it with the amount of favorites and retweets by hour for each emotion we can see that they follow a similar trend with some interesting differences.
+        The amount of tweets per hour plays a large roll in whether your tweet gets seen or not. The more likely your tweet is
+        to get seen the more likely you are to get favorites and retweets. Comparing the amount of tweets every hour with
+        the amount of favorites and retweets every hour we can determine an ideal time to tweet. The sweet spot is where
+        there are few tweets but a lot of favorites and retweets. Breaking it down by emotion we get the plots below.
     </p>
     <div align="center" id="sideBySide">
         {{ side_by_side_script|safe }}
         {{ side_by_side_div|safe }}
     </div>
+    <p>
+        Examining both graphs side by side we gain some new insight into the ideal time to tweet. Looking at the Sadness
+        graphs we see a peak in the amount of favorites/retweets at midnight but there are also a lot of tweets at that hour
+        so your tweets will be drowned out then. You would be better off waiting until 6,7, or even 8 in the morning to tweet
+        because there is a surplus in the amount of favorites/retweets compared to the amount of tweets being sent at those hours.
+        The same thinking can be applied to all the graphs above. Another example can be seen in the Fear graphs where
+        the peaks in favorites/retweets do not line up with the peaks in the amount of tweets per hour plot.
+    </p>
     <h4><u>Analyzing word counts by emotion</u></h4>
-    <p>As you can see by the plot above.</p>
-    <div align="center">
+    <p>
+        Time and emotion are two important factors to look at when trying to maximize the potential from your tweet, but once
+        you figure out those two things what exactly do you tweet about? Are there certain keywords that you can use in your tweets
+        to gain the largest attention. The plots below help to give you an idea of what keywords to use broken down by emotion.
+        The plots were created by taking the top hundred tweets from each user (sorted by Favorites then retweets) and then
+        creating a word count. After I then removed all of the common words such as 'I', 'He', 'This', etc. and removed some
+        specific words that weren't informative such as '&amp', '`', and '-'.
+    </p>
+    <div align="center" id="wordCount">
         {{ emotions_word_ct_script|safe }}
         {{ emotions_word_ct_div|safe }}
     </div>
-        <div align="center">
+    <h4><u>Interesting Aside</u></h4>
+    <p>
+        This graph below shows a simple time series of the amount of tweets for each day since the beginnings of twitter in 2009ish.
+        While it doesn't necessarily help to maximize the potential of your tweet is interesting to look at the outliers in the graph.
+        For example the peak on <a href="https://en.wikipedia.org/wiki/Portal:Current_events/2014_July_8">July 7th, 2014</a> is likely one of two things, either Germany beating Brazil 7-1 in the world cup
+        to mark history or the earthquake off the coast of Japan that caused a Tsunami and mass evacuation. The next big
+        spike all around <a href="https://en.wikipedia.org/wiki/Portal:Current_events/2014_July_8">June 7th, 2016</a> aligns with the US election primaries.
+        And on <a href="https://en.wikipedia.org/wiki/Portal:Current_events/2016_November_9">November 9th, 2016</a> Donald Trump won the election which can clearly be seen on the graph, whats interesting about
+        this spike is that its just for the day when I felt the shock of him winning lasted more than a day. This was just
+        an interesting aside that I found when exploring the data and creating some preliminary plots.
+    </p>
+    <div align="center">
         {{ tweet_freq_script|safe }}
         {{ tweet_freq_div|safe }}
     </div>
 
     <h3><u>Conclusion</u></h3>
-    <p>conclusion stuff</p>
+    <p>
+        Hopefully with this analysis you now have a good idea of general trends on twitter and some ideas as to how you can
+        increase the potential of your tweets! To generalize from the analysis the ideal day of the week to tweet is Sunday
+        because of the high amount of favorites/retweets and the lower than average amount of tweets for that day. Looking at
+        the hours for that day it would be ideal to tweet between hours 13 and 19, 3pm and 7pm respectively. As for the
+        emotion of your tweet you should consider Joyus and Analytical tweets for their high amounts of favorites/retweets!
+        From here you can now look at the <a href="#sideBySide">favorites/retweets side by side with tweet counts graphs</a>
+        and the <a href="#wordCount">word count graphs</a> to narrow down the content of your tweet more specifically.
+    </p>
+    <p>
+        If this general analysis wasn't enough you can populate all the graphs with
+        your own followers. If you follow the instructions on the <a href="https://github.com/patrickbeekman/SeniorCapstone">github repo page</a> you can analyze your followers and
+        find the ideal times to tweet so that they will favorite and retweet your tweets!
+
+        Better peak detection and removing "fake retweets" that show as a users tweet.
+        Look at amount of comments on a tweet as well as the favorites and retweets.
+    </p>
+    <h3><u>Extensions</u></h3>
+    <p>
+        <ul>
+            <li>Look at the amount of comments on a tweet along with the favorites and retweets.</li>
+            <li>Automatically clean the data better to make the normalized graphs smoother.</li>
+            <li>Look at favorite and retweet trends over a larger time period, possibly comparing month to month.</li>
+            <li>Take twitter bots into account as they are likely a hidden skew factor in the data.</li>
+        </ul>
+    </p>
 
   <!-- Contact -->
   <div class="w3-light-grey w3-padding-large w3-padding-32 w3-margin-top" id="contact">
     <h3 class="w3-center">Contact</h3>
     <hr>
-      <p>Patrick Beekman ~ Appalachian State University</p>
-      <p>Senior Computer Science</p>
+      <p align="center">Patrick Beekman ~ Appalachian State University</p>
+      <p align="center">Senior Computer Science</p>
+      <p align="center">beekmanpc@appstate.edu</p>
 
   </div>
 
