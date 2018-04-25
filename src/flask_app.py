@@ -24,7 +24,7 @@ def index():
     with open(components_path, 'rb') as fp:
         plot_components = pickle.load(fp)
 
-    return render_template("index.html", name=name,
+    return render_template("index.html",
                            tweet_freq_script=plot_components['time_series_script'], tweet_freq_div=plot_components['time_series_div'],
                            tweets_hourly_script=plot_components['tweets_hour_script'], tweets_hourly_div=plot_components['tweets_hour_div'],
                            hourly_emotion_script=plot_components['hourly_emotion_script'], hourly_emotion_div=plot_components['hourly_emotion_div'],
