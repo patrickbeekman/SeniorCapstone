@@ -37,6 +37,11 @@ class Tweet_Driver:
             os.mkdir(all_users_tweets_path)
         if not os.path.exists(data_path + "merged/"):
             os.mkdir(data_path + "merged/")
+        if not os.path.exists(data_path + "analysis/"):
+            os.mkdir(data_path + "analysis/")
+        if not os.path.exists(data_path + "tweets_text/"):
+            os.mkdir(data_path + "tweets_text/")
+
 
         # open up each file of followers accounts and grab 2000 of their tweets
         current_files = os.listdir(followers_path)
