@@ -34,7 +34,8 @@ def index():
                            emotions_word_ct_script=plot_components['emotions_word_ct_script'], emotions_word_ct_div=plot_components['emotions_word_ct_div'],
                            days_of_week_script=plot_components['days_of_week_script'], days_of_week_div=plot_components['days_of_week_div'],
                            favs_RTS_by_DoW_script=plot_components['favs_RTS_by_DoW_script'], favs_RTS_by_DoW_div=plot_components['favs_RTS_by_DoW_div'],
-                           favs_RTs_by_DoW_normalized_script=plot_components['favs_RTs_by_DoW_normalized_script'], favs_RTs_by_DoW_normalized_div=plot_components['favs_RTs_by_DoW_normalized_div'])
+                           favs_RTs_by_DoW_normalized_script=plot_components['favs_RTs_by_DoW_normalized_script'], favs_RTs_by_DoW_normalized_div=plot_components['favs_RTs_by_DoW_normalized_div'],
+                           side_by_side_script=plot_components['side_by_side_script'], side_by_side_div=plot_components['side_by_side_div'])
 
 # With debug=True, Flask server will auto-reload
 # when there are code changes

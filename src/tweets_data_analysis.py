@@ -827,12 +827,30 @@ class TweetsDataAnalysis:
         #show(grid)
         return grid
 
+    def grid_plot_Favs_next_to_freq(self):
+        emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
+        colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
+        favs_rts_plots = []
+        freq_plots = []
+        for index, emotion in enumerate(emotions):
+            favs_rts_plots.append(self.normalized_num_favs_retweets_by_hour(normalize=True, emotion=emotion))
+            freq_plots.append(self.tweets_per_hour_plot(emotion=emotion, color=colors[index]))
+        all_plots = []
+        for i, plot in enumerate(favs_rts_plots):
+            all_plots.append(plot)
+            all_plots.append(freq_plots[i])
+
+        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        output_file(data_path + "Favs_Rts_next_to_freq_plots.html")
+
+        grid = gridplot(all_plots, ncols=2, plot_width=350, plot_height=350)
+        #show(grid)
+        return grid
 
     def create_components_to_json(self, data_path):
         #data_path = os.path.dirname(__file__) + "/../data/"
         if not os.path.isdir(data_path + "plots/"):
             os.mkdir(data_path + "plots/")
-
         dict_components = {}
         output_file_path = data_path + 'plot_components.p'
         try:
@@ -913,6 +931,7 @@ class TweetsDataAnalysis:
             dict_components['days_of_week_script'] = s8
             dict_components['days_of_week_div'] = d8
 
+        # Favs and retweets (unnormalized) by day of week
         try:
             dict_components['favs_RTS_by_DoW_script']
         except KeyError:
@@ -921,6 +940,7 @@ class TweetsDataAnalysis:
             dict_components['favs_RTS_by_DoW_script'] = s9
             dict_components['favs_RTS_by_DoW_div'] = d9
 
+        # Favs and retweets normalized by day of week
         try:
             dict_components['favs_RTs_by_DoW_normalized_script']
         except KeyError:
@@ -928,6 +948,15 @@ class TweetsDataAnalysis:
             s10, d10 = components(self.normalized_favs_rts_plot_by_dayOfWeek(data_path=data_path))
             dict_components['favs_RTs_by_DoW_normalized_script'] = s10
             dict_components['favs_RTs_by_DoW_normalized_div'] = d10
+
+        # Favs and retweets normalized next to frequency of tweets
+        try:
+            dict_components['side_by_side_script']
+        except KeyError:
+            print("Starting Side by Side plot of favs/rts and freq")
+            s11, d11 = components(self.grid_plot_Favs_next_to_freq())
+            dict_components['side_by_side_script'] = s11
+            dict_components['side_by_side_div'] = d11
 
         with open(data_path + "plot_components.p", 'wb') as fp:
             pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
