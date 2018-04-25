@@ -2,28 +2,29 @@
 from flask import Flask, render_template, request
 from bokeh.embed import components
 import pickle
+import sys
 import os
 import tweets_data_analysis
+import tweet_driver
 
 app = Flask(__name__, static_folder="/home/patt/Documents/senior_year/SeniorCapstone/src/templates/img")
 
 # Index page, no args
 @app.route('/')
 def index():
-    #getPlots = tweets_data_analysis.TweetsDataAnalysis()
-    #tweet_freq = getPlots.time_series_frequency_analysis()
+    driver = tweet_driver.Tweet_Driver()
+    try:
+        screen_name = sys.argv[1]
+    except IndexError:
+        screen_name = input("Twitter screen_name required! Please enter the screen name you would like to use:")
+    components_path = driver.analyze_followers_of_user_create_plots(screen_name, screen_name)
 
-    # Create all of my plots
-    #tweet_freq_script, tweet_freq_div = components(tweet_freq)
-    data_path = "./../data/"
-    with open(data_path + 'plot_components.p', 'rb') as fp:
+    print("data collection, analysis and plots done!")
+
+    with open(components_path, 'rb') as fp:
         plot_components = pickle.load(fp)
 
-
-    name = request.args.get("name")
-    if name == None:
-        name = "Patrick"
-    return render_template("index.html", name=name,
+    return render_template("index.html",
                            tweet_freq_script=plot_components['time_series_script'], tweet_freq_div=plot_components['time_series_div'],
                            tweets_hourly_script=plot_components['tweets_hour_script'], tweets_hourly_div=plot_components['tweets_hour_div'],
                            hourly_emotion_script=plot_components['hourly_emotion_script'], hourly_emotion_div=plot_components['hourly_emotion_div'],
@@ -39,5 +40,5 @@ def index():
 # With debug=True, Flask server will auto-reload
 # when there are code changes
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(port=5005, debug=True)
 

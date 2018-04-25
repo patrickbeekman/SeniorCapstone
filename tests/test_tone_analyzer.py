@@ -87,3 +87,23 @@ def test_good_analyze_all_tweets_text_folder():
     os.rmdir(test_folder)
     assert len(filenames) > 0
 
+def test_emtpy_clean_text_write_to_json():
+    #tweets = ["hello this is tweet one.", "second tweet", "https://www.google.com"]
+    tweets = []
+    output = "./clean_empty_text.txt"
+    ta.clean_text_write_to_json(tweets, output)
+    isfile = os.path.isfile(output)
+    os.remove(output)
+    assert isfile
+
+def test_normal_clean_text_write_to_json():
+    tweets = ["hello this is tweet one.", "second tweet", "https://www.google.com"]
+    output = "./clean_full_text.txt"
+    ta.clean_text_write_to_json(tweets, output)
+    isfile = os.path.isfile(output)
+    os.remove(output)
+    assert isfile
+
+
+
+
