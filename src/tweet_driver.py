@@ -16,8 +16,10 @@ class Tweet_Driver:
         self.analyzer = tone_analyzer.MyToneAnalyzer()
         self.analysis = tweets_data_analysis.TweetsDataAnalysis()
 
-    def analyze_followers_of_followers(self, screen_name, data_folder):
+    def analyze_followers_of_user_create_plots(self, screen_name, data_folder):
         data_path = os.path.dirname(__file__) + "/../data/" + data_folder + "/"
+        if not os.path.dirname(os.path.dirname(__file__) + "/../data/"):
+            os.mkdir(os.path.dirname(__file__) + "/../data/")
         if not os.path.exists(data_path):
             os.mkdir(data_path)
 
@@ -33,6 +35,8 @@ class Tweet_Driver:
         all_users_tweets_path = data_path + "users_tweets/"
         if not os.path.exists(all_users_tweets_path):
             os.mkdir(all_users_tweets_path)
+        if not os.path.exists(data_path + "merged/"):
+            os.mkdir(data_path + "merged/")
 
         # open up each file of followers accounts and grab 2000 of their tweets
         current_files = os.listdir(followers_path)
@@ -67,8 +71,7 @@ class Tweet_Driver:
                                                        data_path + "merged/" + user['screen_name'] + "_merged_analysis.json")
                 self.analyzer.temp_file_cleanup(data_path + "analysis/",
                                                 data_path + "tweets_text/")
-        #X = self.analysis.create_X_matrix(data_path + "merged/", data_path + "X_matrix.pkl")
-
+        return self.analysis.create_components_to_json(data_path)
 
     def analyze_search_term(self, data, data_folder):
         data_path = os.path.dirname(__file__) + "/../data/" + data_folder + "/"
@@ -186,9 +189,11 @@ def main():
         'Wyoming'
     ]
     #driver.analyze_search_term(us_states, 'us_states')
-    driver.analyze_followers_of_followers('patrickbeekman', 'pbFollowers')
+    #driver.analyze_followers_of_user_create_plots('patrickbeekman', 'pbFollowers')
     analysis_path = os.path.dirname(__file__) + "/../data/pbFollowers/"
     #driver.analyzer.create_single_file_tone_analysis(analysis_path + "merged/", analysis_path + "single_file_merged.json")
+    driver.analyze_followers_of_user_create_plots('LongentUSA', 'LongentFollowers')
+
 
 if __name__ == "__main__":
     main()

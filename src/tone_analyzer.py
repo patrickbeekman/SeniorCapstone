@@ -78,6 +78,7 @@ class MyToneAnalyzer:
 
     # Tone analyzer only reads first 100 sentences for tone analysis and only first
     # 1000 sentences for document level analysis. Max filesize = 128KB
+    # tweet_text is a iterable list of text from the tweets
     def clean_text_write_to_json(self, tweet_text, newfilename):
         ninety_tweets = ""
         for tweet in tweet_text:
@@ -99,6 +100,8 @@ class MyToneAnalyzer:
 
         if not os.path.exists(input_filename):
             raise FileNotFoundError()
+        if not os.path.exists(data_path):
+            os.mkdir(data_path)
 
         df = pd.read_json(input_filename)
 
@@ -113,11 +116,13 @@ class MyToneAnalyzer:
 
 
     def create_single_file_tone_analysis(self, analysis_folder, output_path):
+        if not os.path.isdir(analysis_folder):
+            os.mkdir(analysis_folder)
         count = 0
         #output_file = self.path_name("/../data/all_analysis.json")
         #dirFiles = os.listdir(self.path_name("/../data/analysis/"))
         dirFiles = os.listdir(analysis_folder)
-        if not dirFiles:
+        if len(dirFiles) == 0:
             raise FileNotFoundError
         dirFiles.sort()
         print(dirFiles)

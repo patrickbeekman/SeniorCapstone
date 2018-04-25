@@ -1,0 +1,171 @@
+<html>
+<title>Determing how to get the most favorites on Twitter</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link
+    href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.15.min.css"
+    rel="stylesheet" type="text/css">
+<link
+    href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.15.min.css"
+    rel="stylesheet" type="text/css">
+
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.15.min.js"></script>
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.15.min.js"></script>
+
+<H1 align="center">How to Maximize your tweet potential</H1>
+<h3 align="center">When and What to tweet about</h3>
+<p align="center">An analysis by Patrick Beekman</p>
+
+<!-- Page content -->
+<div class="w3-content w3-padding-large w3-margin-top" id="portfolio">
+
+    <h4><u>Intro</u></h4>
+    <p>
+        Twitter can be a wild and confusing place with a plethora of information readily available.
+        Unfortunately twitter is constantly being flooded with noise, often times it is difficult for your
+        tweets to stand out and gain traction. That is the inspiration for this analysis, I have studied
+        the best times to tweet, best emotions and keywords that should be used to give your tweets the most
+        traction. Something to note is that all this analysis has been done with my ~200 followers and 2,000
+        tweets for each of those users. Not all followers have 2,000 tweets so after all data collection and
+        cleaning I collected about 250,000 tweets. This analysis is specific to my followers and how I can
+        gear my tweets towards my followers to get the largest exposure. With this project anyone can download
+        the <a href="https://github.com/patrickbeekman/SeniorCapstone" target="_blank">project from github</a> and do this analysis on their own followers. My analysis can still be generalized
+        to see a general trend in tweets that anyone can follow to give their tweets exposure.
+    </p>
+
+    <h4><u>Analysis</u></h4>
+    <!-- Plots -->
+    <p>
+        When to tweet is an important part of getting people to see your tweets. I created a bargraph
+        of the amount of tweets during <a href="#daysOfWeek">each day of the week (shown below)</a> to see if there was an ideal
+        day to tweet when there is more activity happening. Looking at the graph we can see that throughout
+        the week it seems to be about the same amount of activity but it drops off during the weekend. There
+        are about 4000-5000 less tweets on the weekends compared to weekdays this is about a 16% decrease
+        in twitter activity on the weekends. So if you are looking to get more eyes on your tweets you may
+        want to consider tweeting on a weekday.
+    </p>
+    <img src="img/days_of_week.png" alt="daysOfWeek" width="603" height="346" class="w3-image" align="center" id="daysOfWeek">
+    <p>
+        Just knowing what day of the week to possibly tweet on is not enough to get your tweet seen.
+        A more important indicator of tweet exposure is the amount of favorites and retweets you get
+        on your tweets. The more retweets the further exposure you have with your tweets, the more favorites
+        the more people enjoy your tweets and are likely to retweet or share with friends. The <a href="#unNormFavRTs">plot below</a>
+        looks at the number of favorites and retweets grouped by hour for any particular day. We can see
+        there is a spike in the amount of favorites at hours 16(4pm) and 19(7pm). As for retweets the spike
+        is at hours 12(12pm) and 21(9pm). An interesting note is that the amount of retweets and favorites
+        appears to be correlated where the retweets follows the amount of favorites.
+    </p>
+    <div align="center" id="unNormFavRTs">
+        {{ unNormalized_FavsRTs_script|safe }}
+        {{ unNormalized_FavsRTs_div|safe }}
+    </div>
+    <p>
+        For a better informative view we can break it down by day of week to see when
+        favorites and retweets are happening over time for each day(<a href="#favsRTs_DoW">as seen below</a>).
+        Looking through the days we can see that each appears to have a distinct hour where there is a peak in
+        favorites/retweets. For example Sunday:19(7pm), Monday:9(9am) Tuesday:20(8pm), 21(9pm) Wednesday:19(7pm), 22(10pm)...etc.
+        There seems to be a general trend over the days that points to a peak in activity around hours 16 to 19, but the more
+        interesting information is the peaks at the other times of day. Take a look at the graph for Friday, the largest
+        peak for the day is at noon which is different than other days. It should be kept in mind when tweeting on fridays
+        that you will have to tweet earlier in the day to have the greatest potential of favorites and retweets.
+    </p>
+    <div align="center" id="favsRTs_DoW">
+        {{ favs_RTS_by_DoW_script|safe }}
+        {{ favs_RTS_by_DoW_div|safe }}
+    </div>
+    <p>
+        You may have noticed while looking at the above two plots that there are some large spikes in the data.
+        This kind of plot is not very informative because these are just raw values, maybe one user with a lot of
+        followers tweets frequently at a specific hour. This is how the data gets skewed, fortunately there is a
+        way to fix this!
+    </p>
+    <p>
+        To solve this we want every users tweets to have an equal importance to each other. To do this we will normalize
+        the data by the amount of followers the user has. A user that has 40,000 followers and gets 20,000 favorites on a
+        tweet will be accounted for the same as a user who has 400 followers and gets 200 favorites. This smoothes out
+        the plots created by bringing all the users into the same scale thus removing the high peaks in the graphs. This
+        can be seen by comparing the graphs of all tweets favorites and retweets when it is <a href="#normFavRTs">normalized (below)</a>
+        and <a href="#unNormFavRTs">not normalized (above)</a>.
+    </p>
+    <div align="center" id="normFavRTs">
+        {{ normalized_FavsRTs_script|safe }}
+        {{ normalized_FavsRTs_div|safe }}
+    </div>
+    <p>
+        Now that we have normalized the data to reduce the peaks we can get a better idea of how the favorites and retweets are distributed over time. The new normalized value represents the average amount of favorites or retweets for that hour. Using these new plots we have a more accurate representation of when users are online
+        and interacting(favoriting and retweeting) with tweets. Lets take a look at Sunday, in the non-normalized version
+        there are two large peaks of favorites at hours 19(7pm) and 21(9pm) which drones out the rest of the data. With such large outlier
+        data points its hard to see the daily trend. With the normalized view of Sunday we can see there is a wider peak
+        of favorites that ranges from hour 15(3pm) to 19(7pm). This wide peak stretching over a couple of hours is more
+        representative of how users act on twitter rather than two distinct peaking hours as seen in the non-normalized data.
+    </p>
+    <p>
+        Using these graphs we can quickly see at what times you should tweet to have increase the tweet potential of
+        getting more favorites and retweets. Looking at the Tuesday normalized plot (below) there is a big peak in retweets,
+        the largest in any of the graphs and may be an ideal time to tweet if you are looking to get retweets.
+    </p>
+    <p>
+        Something interesting to note is that while Sunday <a href="#daysOfWeek">has the least amount of overall tweets</a> it has
+        the highest consistent peaks of favorites out of any day. It also has the highest consistent peak of retweets. <b>It
+        appears that Sunday from hour 13-19(3pm-7pm) is an ideal time of day to tweet at</b>.
+    </p>
+    <div align="center">
+        {{ favs_RTs_by_DoW_normalized_script|safe }}
+        {{ favs_RTs_by_DoW_normalized_div|safe }}
+    </div>
+    <p>
+        Now that we have a general idea of the times and days of the week to tweet at you should probably figure out what
+        to tweet about to reach the largest audience and maximize the amount of favorites and retweets you receive. One
+        way to look at what you should be tweeting is to think in terms of the emotions illicited by your tweet. I used
+        IBM Watson's tone analyzer to find the tone of each users tweet. I then took this data and graphed the favorites
+        and retweets received by that tweet split by the emotion, I also normalized for similar reasons stated above.
+    </p>
+    <p>
+        Something interesting to note in the graphs is the increase in favorites for the sad and angry tweets around
+        midnight. None of the other emotions have a relative peak late at night except for these two emotions, except for fear which often times goes hand in hand with sadness and anger.
+    </p>
+    <p>
+        Another notable mention is the heights of the peaks for each graph. Keep in mind that this data is all normalized by the amount of followers each user had which means the heights of graph represent the average normalized amount of favorites at each hour. But we can see that analytical and joyus tweets have peaks at 12 and 16 respectively which is much higher than other kinds of emotions. This is likely in part because people tweet a lot of happy and analytical tweets but also that there is high response rate to those tweets as seen by the heightened amount of favorites and retweets. <b>Tweeting something Analytical or Joyus may be in your best interest to maximize the potential of getting favorites or retweets.</b>
+    </p>
+    <div align="center">
+        {{ norm_FavsRTs_emotion_script|safe }}
+        {{ norm_FavsRTs_emotion_div|safe }}
+    </div>
+    <p>As you can see by the plot above.</p>
+    <div align="center">
+        {{ tweets_hourly_script|safe }}
+        {{ tweets_hourly_div|safe }}
+    </div>
+    <p>As you can see by the plot above.</p>
+    <div align="center">
+        {{ hourly_emotion_script|safe }}
+        {{ hourly_emotion_div|safe }}
+    </div>
+    <p>As you can see by the plot above.</p>
+    <div align="center">
+        {{ emotions_word_ct_script|safe }}
+        {{ emotions_word_ct_div|safe }}
+    </div>
+        <div align="center">
+        {{ tweet_freq_script|safe }}
+        {{ tweet_freq_div|safe }}
+    </div>
+
+    <h4><u>Conclusion</u></h4>
+    <p>conclusion stuff</p>
+
+  <!-- Contact -->
+  <div class="w3-light-grey w3-padding-large w3-padding-32 w3-margin-top" id="contact">
+    <h3 class="w3-center">Contact</h3>
+    <hr>
+      <p>Patrick Beekman ~ Appalachian State University</p>
+      <p>Senior Computer Science</p>
+
+  </div>
+
+<!-- End page content -->
+</div>
+
+</html>
+

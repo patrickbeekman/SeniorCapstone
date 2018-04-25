@@ -3,6 +3,7 @@ import numpy as np
 import json
 import os
 from pandas.io.json import json_normalize
+import pickle
 import datetime
 import time
 import math
@@ -15,6 +16,7 @@ import operator
 from nltk.corpus import stopwords
 from bokeh.plotting import figure, output_file, show
 from bokeh.models.annotations import Title
+from bokeh.embed import components
 from bokeh.models.glyphs import VBar
 from bokeh.layouts import gridplot
 from bokeh.transform import factor_cmap
@@ -366,8 +368,9 @@ class TweetsDataAnalysis:
         print("hello")
 
 
-    def time_series_frequency_analysis(self):
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+    def time_series_frequency_analysis(self, data_path):
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        data_path = data_path + "merged/"
         dir_files = os.listdir(data_path)
 
         counts_of_tweets = {}
@@ -417,13 +420,15 @@ class TweetsDataAnalysis:
         p.xaxis.axis_label = 'Date'
         p.yaxis.axis_label = '# of Tweets'
 
-        show(p)
+        #show(p)
+        return p
 
         print("Frequency of tweets graph created!")
 
 
-    def time_series_day_of_week_plot(self):
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+    def time_series_day_of_week_plot(self, data_path):
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        data_path = data_path + "merged/"
         dir_files = os.listdir(data_path)
 
         counts_of_tweets = {}
@@ -456,22 +461,26 @@ class TweetsDataAnalysis:
                           counts_of_tweets[days_of_week[4]], counts_of_tweets[days_of_week[5]],
                           counts_of_tweets[days_of_week[6]]]
 
-        source = ColumnDataSource(data=dict(days_of_week=days_of_week, counts_of_week=counts_of_week))
+        fill_color = ["#ff0000", "#ff4000", "#ff8000", "#ffbf00", "#ffsff00", "#bfff00", "#80ff00"]
+
+        source = ColumnDataSource(data=dict(days_of_week=days_of_week, counts_of_week=counts_of_week, fill_color=fill_color))
 
         hover = HoverTool(tooltips=[
             ('days_of_week', '@days_of_week'),
             ('counts_of_week', '@counts_of_week'),
         ])
 
-        p = figure(x_range=days_of_week, plot_height=350, toolbar_location=None, title="Freq of Tweets by Day of Week", tools=[hover])
+        p = figure(x_range='days_of_week', plot_height=350, toolbar_location=None, title="Freq of Tweets by Day of Week", tools=[hover])
         p.vbar(x='days_of_week', top='counts_of_week', width=0.9, source=source,
-               line_color='white', fill_color=["#ff0000", "#ff4000", "#ff8000", "#ffbf00", "#ffsff00", "#bfff00", "#80ff00"])
+               line_color='white', fill_color='fill_color')
 
-        show(p)
+        #show(p)
+        return p
 
 
-    def tweets_per_hour_plot(self, emotion=None, color="#b3de69"):
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+    def tweets_per_hour_plot(self, data_path, emotion=None, color="#b3de69"):
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        data_path = data_path + "merged/"
         dir_files = os.listdir(data_path)
 
         counts_of_tweets = {}
@@ -484,7 +493,11 @@ class TweetsDataAnalysis:
                     df = df[df.tone_name == emotion]
                 except AttributeError:
                     continue
-            df['created_at'] = df['created_at']/1000
+            try:
+                df['created_at'] = df['created_at']/1000
+            except TypeError:
+                print("\'Created_at\' error where it is somehow a dict")
+                continue
             offset = 0
             try:
                 offset = df['user'][0]['utc_offset']
@@ -550,25 +563,29 @@ class TweetsDataAnalysis:
             return plot
         else:
             show(plot)
+            return plot
 
 
-    def hourly_plot_by_emotion(self):
+    def hourly_plot_by_emotion(self, data_path):
 
         emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
         colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
 
         plots = []
         for index, emotion in enumerate(emotions):
-            plots.append(self.tweets_per_hour_plot(emotion=emotion, color=colors[index]))
+            plots.append(self.tweets_per_hour_plot(data_path=data_path, emotion=emotion, color=colors[index]))
 
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        data_path = data_path + "plots/"
         output_file(data_path + "multiple_emotions_by_hour.html")
 
         grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
-        show(grid)
+        #show(grid)
+        return grid
 
-    def normalized_num_favs_retweets_by_hour(self, emotion=None, normalize=True):
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+    def normalized_num_favs_retweets_by_hour(self, data_path, emotion=None, normalize=True, DayOfWeek=None):
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        data_path = data_path + "merged/"
         dir_files = os.listdir(data_path)
 
         counts_of_favs = {}
@@ -608,6 +625,9 @@ class TweetsDataAnalysis:
             df['std_time'] = [datetime.datetime.fromtimestamp(x) for x in df['std_time']]
             df = df.set_index(df['std_time'])
             temp = pd.DatetimeIndex(df['std_time'])
+            if DayOfWeek is not None:
+                df = df[temp.dayofweek == DayOfWeek]
+                temp = temp[temp.dayofweek == DayOfWeek]
             df['hour'] = temp.hour
             p = df.groupby(df['hour'])
             if not normalize:
@@ -657,7 +677,11 @@ class TweetsDataAnalysis:
             normText = ''
 
         if emotion is None:
-            title = 'Number of Fav\'s and RT\'s by Hour' + normText
+            if DayOfWeek is None:
+                title = 'Number of Fav\'s and RT\'s by Hour' + normText
+            else:
+                calendar_days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+                title = "(" + calendar_days[DayOfWeek] + ") Number Fav\'s and RT\'s by Hour " + normText
         else:
             title = '(' + emotion + ') Number of Fav\'s/RT\'s by Hour ' + normText
 
@@ -671,27 +695,51 @@ class TweetsDataAnalysis:
         fig.legend.location = "top_left"
 
         if emotion is None:
-            show(fig)
+            #show(fig)
+            return fig
         else:
             return fig
 
-    def normalized_favs_rts_plot_by_emotion(self):
+    def normalized_favs_rts_plot_by_emotion(self, data_path, normalize=True):
 
         emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
         #colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
 
         plots = []
         for emotion in emotions:
-            plots.append(self.normalized_num_favs_retweets_by_hour(emotion=emotion))
+            plots.append(self.normalized_num_favs_retweets_by_hour(data_path=data_path, normalize=normalize, emotion=emotion))
 
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
-        output_file(data_path + "favs_rts_multiple_emotions_by_hour.html")
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        data_path += "plots/"
+        if normalize:
+            output_file(data_path + "Norm_favs_rts_multiple_emotions_by_hour.html")
+        else:
+            output_file(data_path + "NoNorm_favs_rts_multiple_emotions_by_hour.html")
 
         grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
-        show(grid)
+        #show(grid)
+        return grid
 
-    def word_choice_by_emotion_barchart(self, emotion, color='#b3de69'):
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+    def normalized_favs_rts_plot_by_dayOfWeek(self, data_path, normalize=True):
+
+        plots = []
+        for day in range(7):
+            plots.append(self.normalized_num_favs_retweets_by_hour(data_path=data_path, normalize=normalize, DayOfWeek=day))
+
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        data_path += "plots/"
+        if normalize:
+            output_file(data_path + "Normalized_favs_rts_daysOfWeek_by_hour.html")
+        else:
+            output_file(data_path + "NoNorm_favs_rts_daysOfWeek_by_hour.html")
+
+        grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
+        #show(grid)
+        return grid
+
+    def word_choice_by_emotion_barchart(self, emotion, data_path, color='#b3de69'):
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
+        data_path += "merged/"
         dir_files = os.listdir(data_path)
 
         most_common_words = {}
@@ -763,39 +811,128 @@ class TweetsDataAnalysis:
         return p
         #show(p)
 
-    def grid_plot_each_emotion_word_count(self):
+    def grid_plot_each_emotion_word_count(self, data_path):
         emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
         colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
 
         plots = []
         for index, emotion in enumerate(emotions):
-            plots.append(self.word_choice_by_emotion_barchart(emotion=emotion, color=colors[index]))
+            plots.append(self.word_choice_by_emotion_barchart(data_path=data_path, emotion=emotion, color=colors[index]))
 
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        data_path += "plots/"
         output_file(data_path + "multiple_emotions_word_counts.html")
 
         grid = gridplot(plots, ncols=3, plot_width=350, plot_height=350)
-        show(grid)
+        #show(grid)
+        return grid
 
 
-    def plot_heatmap(self):
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/merged/"
-        dir_files = os.listdir(data_path)
-        data = pd.read_csv(data_path+"../unemployment_data.csv")
+    def create_components_to_json(self, data_path):
+        #data_path = os.path.dirname(__file__) + "/../data/"
+        if not os.path.isdir(data_path + "plots/"):
+            os.mkdir(data_path + "plots/")
 
-        data['Year'] = data['Year'].astype(str)
-        data = data.set_index('Year')
-        data.drop('Annual', axis=1, inplace=True)
-        data.columns.name = 'Month'
+        dict_components = {}
+        output_file_path = data_path + 'plot_components.p'
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
 
-        years = list(data.index)
-        months = list(data.columns)
+        # Time series frequency analysis
+        try:
+            dict_components['time_series_script']
+        except KeyError:
+            print("Starting Time Series Frequency Analysis")
+            s1, d1 = components(self.time_series_frequency_analysis(data_path))
+            dict_components['time_series_script'] = s1
+            dict_components['time_series_div'] = d1
 
-        # reshape to 1D array or rates with a month and year for each row.
-        df = pd.DataFrame(data.stack(), columns=['rate']).reset_index()
+        # Tweets per hour
+        try:
+            dict_components['tweets_hour_script']
+        except KeyError:
+            print("Starting Tweets Per Hour")
+            s2, d2 = components(self.tweets_per_hour_plot(data_path))
+            dict_components['tweets_hour_script'] = s2
+            dict_components['tweets_hour_div'] = d2
 
-        print("hello")
+        # Hourly plot of emotion
+        try:
+            dict_components['hourly_emotion_script']
+        except KeyError:
+            print("Starting Hourly plot by emotion")
+            s3, d3 = components(self.hourly_plot_by_emotion(data_path))
+            dict_components['hourly_emotion_script'] = s3
+            dict_components['hourly_emotion_div'] = d3
 
+        # UnNormalized favs/rts by hour
+        try:
+            dict_components['unNormalized_FavsRTs_script']
+        except KeyError:
+            print("Starting Unormalized number of favorites and retweets")
+            s4, d4 = components(self.normalized_num_favs_retweets_by_hour(data_path=data_path, normalize=False))
+            dict_components['unNormalized_FavsRTs_script'] = s4
+            dict_components['unNormalized_FavsRTs_div'] = d4
+
+        # Normalized favs/rts by hour
+        try:
+            dict_components['normalized_FavsRTs_script']
+        except KeyError:
+            print("Starting Normalized number of favorites and retweets")
+            s5, d5 = components(self.normalized_num_favs_retweets_by_hour(data_path=data_path, normalize=True))
+            dict_components['normalized_FavsRTs_script'] = s5
+            dict_components['normalized_FavsRTs_div'] = d5
+
+        # Normalized favs/rts by emotion
+        try:
+            dict_components['norm_FavsRTs_emotion_script']
+        except KeyError:
+            print("Starting Normalized favs/rts by emotion")
+            s6, d6 = components(self.normalized_favs_rts_plot_by_emotion(data_path=data_path))
+            dict_components['norm_FavsRTs_emotion_script'] = s6
+            dict_components['norm_FavsRTs_emotion_div'] = d6
+
+        # Word count by emotion
+        try:
+            dict_components['emotions_word_ct_script']
+        except KeyError:
+            print("Starting word count by emotion")
+            s7, d7 = components(self.grid_plot_each_emotion_word_count(data_path=data_path))
+            dict_components['emotions_word_ct_script'] = s7
+            dict_components['emotions_word_ct_div'] = d7
+
+        # Tweets by day of week
+        try:
+            dict_components['days_of_week_script']
+        except KeyError:
+            print("Starting Days of week plot")
+            s8, d8 = components(self.time_series_day_of_week_plot(data_path=data_path))
+            dict_components['days_of_week_script'] = s8
+            dict_components['days_of_week_div'] = d8
+
+        try:
+            dict_components['favs_RTS_by_DoW_script']
+        except KeyError:
+            print("Starting Favs/RTs by day of week")
+            s9, d9 = components(self.normalized_favs_rts_plot_by_dayOfWeek(data_path=data_path, normalize=False))
+            dict_components['favs_RTS_by_DoW_script'] = s9
+            dict_components['favs_RTS_by_DoW_div'] = d9
+
+        try:
+            dict_components['favs_RTs_by_DoW_normalized_script']
+        except KeyError:
+            print("Starting Favs/RTs Normalized by day of week")
+            s10, d10 = components(self.normalized_favs_rts_plot_by_dayOfWeek(data_path=data_path))
+            dict_components['favs_RTs_by_DoW_normalized_script'] = s10
+            dict_components['favs_RTs_by_DoW_normalized_div'] = d10
+
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+
+        return output_file_path
 
 
 def main():
@@ -821,12 +958,17 @@ def main():
     #                    os.path.dirname(__file__) + "/../data/pbFollowers/plots/")
 
 
-    tda.time_series_frequency_analysis()
-    # tda.time_series_day_of_week_plot()
+    x = tda.time_series_frequency_analysis(os.path.dirname(__file__) + "/../data/pbFollowers/")
+    show(x)
+    #tda.create_components_to_json()
+    print("helo")
+    #tda.time_series_day_of_week_plot()
     # tda.tweets_per_hour_plot()
-    #tda.hourly_plot_by_emotion()
+    # tda.hourly_plot_by_emotion()
     # tda.plot_heatmap()
     # tda.normalized_num_favs_retweets_by_hour(normalize=True)
+    #tda.normalized_num_favs_retweets_by_hour(DayOfWeek=0)
+    #tda.normalized_favs_rts_plot_by_dayOfWeek()
     # tda.normalized_favs_rts_plot_by_emotion()
     # tda.word_choice_by_emotion_barchart('Joy')
     # tda.grid_plot_each_emotion_word_count()

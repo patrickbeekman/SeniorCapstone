@@ -3,6 +3,7 @@ import sys
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + "/../src/")
 import tweepy_grabber
+import pandas as pd
 import tweepy
 import json
 import pytest
@@ -13,7 +14,7 @@ grabber = tweepy_grabber.TweepyGrabber()
 def test_good_api_connection():
     api = grabber.api_connect(os.environ['TWEET_PUB'], os.environ['TWEET_PRI'])
     try:
-        api.user_timeline(screenname="patrickbeekman", count=200)
+        api.user_timeline(screenname="LongentUSA", count=200)
         assert True
     except tweepy.TweepError as e:
         print(e)
@@ -26,7 +27,6 @@ def test_bad_api_connection():
 
 
 def test_user_not_exist_get_users_timeline():
-    api = grabber.api_connect(os.environ['TWEET_PUB'], os.environ['TWEET_PRI'])
     try:
         grabber.get_users_timeline("ponlejkdls", os.path.dirname(__file__) + "/../data/outfile.json")
         assert False
@@ -35,13 +35,41 @@ def test_user_not_exist_get_users_timeline():
 
 
 def test_success_get_users_timeline():
-    api = grabber.api_connect(os.environ['TWEET_PUB'], os.environ['TWEET_PRI'])
+    outputfile = os.path.dirname(__file__) + "/../data/longent.json"
     try:
-        grabber.get_users_timeline("donaldglover", os.path.dirname(__file__) + "/../data/donald.json")
+        grabber.get_users_timeline("LongentUSA", outputfile)
     except Exception:
         assert False
-    outputfile = os.path.dirname(__file__) + "/../data/donald.json"
     with open(outputfile) as file:
         data = json.load(file)
     os.remove(outputfile)
     assert len(data) > 0
+
+def test_get_users_timeline_no_tweets():
+    outputfile = os.path.dirname(__file__) + "/../data/donald.json"
+    try:
+        ret = grabber.get_users_timeline("donaldglover", outputfile)
+        if ret is None:
+            assert True
+    except Exception:
+        assert False
+
+def test_get_users_followers_not_exist():
+    outputfile = os.path.dirname(__file__) + "/../data/test.json"
+    ret = grabber.get_users_followers(outputfile, "ponlejkdls")
+    assert ret is None
+
+def test_get_users_followers_good():
+    outputfile = os.path.dirname(__file__) + "/../data/test.json"
+    ret = grabber.get_users_followers(outputfile, "hrgwea")
+    assert len(ret) > 0
+
+def test_get_followers_followers():
+    output_path = os.path.dirname(__file__) + "/../data/"
+    users = grabber.get_users_followers(output_path, "hrgwea")
+    output_path = os.path.dirname(__file__) + "/flwrs_flwrs/"
+    grabber.get_followers_of_followers(users, output_path)
+    files = os.listdir(output_path)
+    for file in files:
+        os.remove(output_path + file)
+    assert len(files) > 0
