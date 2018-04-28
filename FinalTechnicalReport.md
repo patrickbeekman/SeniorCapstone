@@ -8,31 +8,47 @@ April 25, 2018
 ## Abstract
 Write my abstract here
 
-**Keywords:** Python, Data Visualization
+**Keywords:** Python, Data Visualization, Twitter, Data Analysis, Bokeh
 
 ## Table of Contents
+* [Introduction](#Intro)
+* [Design, Development and Testing](#DDT)
+  * [Design](#Design)
+  * [Development](#Development)
+  * [Testing](#Testing)
+* [Results](#Results)
+* [Conclusions and Future Work](#Conclusion)
+* [References](#References)
 
 ---
+<a name="Intro"/>
 ## Introduction
 Write intro here.
 
-## Design, Development, and Testing
+<a name="DDT"/>
+## Design, Development and Testing
 Write that here.
 
+<a name="Design"/>
 ### Design
 Write design here.
 
+<a name="Development"/>
 ### Development
 Write dev here.
 
+<a name="Testing"/>
 ### Testing
 Write tests here.
 
+<a name="Results"/>
 ## Results
 Write results here.
 
-## Conclusion and Future Work
+<a name="Conclusion"/>
+## Conclusions and Future Work
 Conclusion.
 
+<a name="References"/>
 ## References
 refs.
