@@ -18,3 +18,21 @@ Write intro here.
 
 ## Design, Development, and Testing
 Write that here.
+
+### Design
+Write design here.
+
+### Development
+Write dev here.
+
+### Testing
+Write tests here.
+
+## Results
+Write results here.
+
+## Conclusion and Future Work
+Conclusion.
+
+## References
+refs.
