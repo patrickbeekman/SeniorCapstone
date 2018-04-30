@@ -19,15 +19,30 @@ This project use a python Flask app to display my findings. To get started you w
   * Flask ```pip install flask```
   * Bokeh ```pip install bokeh```
   * Watson Developer Cloud ```pip install --upgrade watson-developer-cloud```
+* Create a twitter app to get your api keys, this allows you to connect to the twitter api
+  * Create a Twitter account if you don't have one already
+  * Go to the [Twitter application site](https://apps.twitter.com/)
+  * Click 'Create New App' up in the top left
+  * Fill out the required information
+  * When your app is created click on 'Keys and Access Tokens' in the top middle of the page
+  * Save the 'Consumer Key' and 'Consumer Secret' (you will use this later to run the application)
+* Create an IBM Cloud account to get your Tone Analyzer api keys
+  * Create an IBM Cloud account and login
+  * Go to the [Tone Analyzer services page](https://console.bluemix.net/catalog/services/tone-analyzer)
+  * Choose the free Lite account
+  * Save the username and password seen down in the credentials section (you will use this later to run the application)
 
 ## About and Usage
 
 This application can be used at a very high level by:
 1. [Clone/Download the repository](https://services.github.com/on-demand/github-cli/clone-repo-cli)
-2. Navigate to wherever you cloned/downloaded the repository and go into the src folder where flask_app.py is located.
-3. Open up a terminal at the location navigated to in step 2 and execute ```python flask_app.py SCREEN_NAME``` replacing the screen name with the twitter user you would like to analyze. (the screen name is the @name not the other one)
-4. Now wait for the script to execute, Depending on the amount of followers the user has this can take a while. For about 200 followers it can take about [15-30 minutes initially**](#Note1).
-5. Once the script has finished executing the website should now be viewable at localhost:5000/ in your favorite web browser.
+2. Navigate to wherever you cloned/downloaded the repository
+  * Inside the `data` folder should be a file called secrets.json which is where you can store your api keys
+  * Store your twitter username and password inside the repsective field replacing your key with the text `key goes in here`
+3. Navigate back out of the data folder to the home directory and then into the src folder where flask_app.py is located.
+4. Open up a terminal at the location navigated to in step 2 and execute ```python flask_app.py SCREEN_NAME``` replacing the screen name with the twitter user you would like to analyze. (the screen name is the @name not the other one)
+5. Now wait for the script to execute, Depending on the amount of followers the user has this can take a while. For about 200 followers it can take about [15-30 minutes initially**](#Note1).
+6. Once the script has finished executing the website should now be viewable at localhost:5000/ in your favorite web browser.
 
 ## Developer Instructions
 
