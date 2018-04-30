@@ -869,6 +869,16 @@ class TweetsDataAnalysis:
             dict_components['time_series_script'] = s1
             dict_components['time_series_div'] = d1
 
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
+
         # Tweets per hour
         try:
             dict_components['tweets_hour_script']
@@ -877,6 +887,16 @@ class TweetsDataAnalysis:
             s2, d2 = components(self.tweets_per_hour_plot(data_path))
             dict_components['tweets_hour_script'] = s2
             dict_components['tweets_hour_div'] = d2
+
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
 
         # Hourly plot of emotion
         try:
@@ -887,6 +907,16 @@ class TweetsDataAnalysis:
             dict_components['hourly_emotion_script'] = s3
             dict_components['hourly_emotion_div'] = d3
 
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
+
         # UnNormalized favs/rts by hour
         try:
             dict_components['unNormalized_FavsRTs_script']
@@ -895,6 +925,16 @@ class TweetsDataAnalysis:
             s4, d4 = components(self.normalized_num_favs_retweets_by_hour(data_path=data_path, normalize=False))
             dict_components['unNormalized_FavsRTs_script'] = s4
             dict_components['unNormalized_FavsRTs_div'] = d4
+
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
 
         # Normalized favs/rts by hour
         try:
@@ -905,6 +945,16 @@ class TweetsDataAnalysis:
             dict_components['normalized_FavsRTs_script'] = s5
             dict_components['normalized_FavsRTs_div'] = d5
 
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
+
         # Normalized favs/rts by emotion
         try:
             dict_components['norm_FavsRTs_emotion_script']
@@ -913,6 +963,16 @@ class TweetsDataAnalysis:
             s6, d6 = components(self.normalized_favs_rts_plot_by_emotion(data_path=data_path))
             dict_components['norm_FavsRTs_emotion_script'] = s6
             dict_components['norm_FavsRTs_emotion_div'] = d6
+
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
 
         # Word count by emotion
         try:
@@ -923,6 +983,16 @@ class TweetsDataAnalysis:
             dict_components['emotions_word_ct_script'] = s7
             dict_components['emotions_word_ct_div'] = d7
 
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
+
         # Tweets by day of week
         try:
             dict_components['days_of_week_script']
@@ -931,6 +1001,16 @@ class TweetsDataAnalysis:
             s8, d8 = components(self.time_series_day_of_week_plot(data_path=data_path))
             dict_components['days_of_week_script'] = s8
             dict_components['days_of_week_div'] = d8
+
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
 
         # Favs and retweets (unnormalized) by day of week
         try:
@@ -941,6 +1021,16 @@ class TweetsDataAnalysis:
             dict_components['favs_RTS_by_DoW_script'] = s9
             dict_components['favs_RTS_by_DoW_div'] = d9
 
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
+
         # Favs and retweets normalized by day of week
         try:
             dict_components['favs_RTs_by_DoW_normalized_script']
@@ -949,6 +1039,16 @@ class TweetsDataAnalysis:
             s10, d10 = components(self.normalized_favs_rts_plot_by_dayOfWeek(data_path=data_path))
             dict_components['favs_RTs_by_DoW_normalized_script'] = s10
             dict_components['favs_RTs_by_DoW_normalized_div'] = d10
+
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
 
         # Favs and retweets normalized next to frequency of tweets
         try:
