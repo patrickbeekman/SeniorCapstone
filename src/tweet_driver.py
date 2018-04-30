@@ -15,10 +15,10 @@ class Tweet_Driver:
         data_path = os.path.dirname(__file__) + "/../data/secrets.json"
         if os.path.exists(data_path):
             df = pd.read_json(data_path)
-            twitter_username = df['twitter_username']
-            twitter_password = df['twitter_password']
-            watson_username = df['watson_username']
-            watson_password = df['watson_password']
+            twitter_username = df['twitter_username'][0]
+            twitter_password = df['twitter_password'][0]
+            watson_username = df['watson_username'][0]
+            watson_password = df['watson_password'][0]
         else:
             raise FileNotFoundError("secrets.json file not found, please create file.")
         self.grabber = tweepy_grabber.TweepyGrabber(twitter_username, twitter_password)
