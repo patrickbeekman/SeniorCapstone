@@ -21,8 +21,12 @@ class Tweet_Driver:
             watson_password = df['watson_password'][0]
         else:
             raise FileNotFoundError("secrets.json file not found, please create file.")
-        self.grabber = tweepy_grabber.TweepyGrabber(twitter_username, twitter_password)
-        self.analyzer = tone_analyzer.MyToneAnalyzer(watson_username, watson_password)
+        if twitter_username == 'key goes in here' or twitter_username == "" or twitter_username is None:
+            self.grabber = tweepy_grabber.TweepyGrabber()
+            self.analyzer = tone_analyzer.MyToneAnalyzer()
+        else:
+            self.grabber = tweepy_grabber.TweepyGrabber(twitter_username, twitter_password)
+            self.analyzer = tone_analyzer.MyToneAnalyzer(watson_username, watson_password)
         self.analysis = tweets_data_analysis.TweetsDataAnalysis()
 
     def analyze_followers_of_user_create_plots(self, screen_name, data_folder):
