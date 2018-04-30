@@ -827,20 +827,21 @@ class TweetsDataAnalysis:
         #show(grid)
         return grid
 
-    def grid_plot_Favs_next_to_freq(self):
+    def grid_plot_Favs_next_to_freq(self, data_path):
         emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
         colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
         favs_rts_plots = []
         freq_plots = []
         for index, emotion in enumerate(emotions):
-            favs_rts_plots.append(self.normalized_num_favs_retweets_by_hour(normalize=True, emotion=emotion))
-            freq_plots.append(self.tweets_per_hour_plot(emotion=emotion, color=colors[index]))
+            favs_rts_plots.append(self.normalized_num_favs_retweets_by_hour(data_path=data_path, normalize=True, emotion=emotion))
+            freq_plots.append(self.tweets_per_hour_plot(data_path=data_path, emotion=emotion, color=colors[index]))
         all_plots = []
         for i, plot in enumerate(favs_rts_plots):
             all_plots.append(plot)
             all_plots.append(freq_plots[i])
 
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        data_path += "plots/"
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
         output_file(data_path + "Favs_Rts_next_to_freq_plots.html")
 
         grid = gridplot(all_plots, ncols=2, plot_width=350, plot_height=350)
@@ -954,7 +955,7 @@ class TweetsDataAnalysis:
             dict_components['side_by_side_script']
         except KeyError:
             print("Starting Side by Side plot of favs/rts and freq")
-            s11, d11 = components(self.grid_plot_Favs_next_to_freq())
+            s11, d11 = components(self.grid_plot_Favs_next_to_freq(data_path=data_path))
             dict_components['side_by_side_script'] = s11
             dict_components['side_by_side_div'] = d11
 

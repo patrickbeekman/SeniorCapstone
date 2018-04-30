@@ -13,8 +13,8 @@ from watson_developer_cloud import WatsonInvalidArgument
 class MyToneAnalyzer:
     analyzer = None
 
-    def __init__(self):
-        self.analyzer = self.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], '2018-02-24')
+    def __init__(self, username=os.environ['TONE_U'], password=os.environ['TONE_P']):
+        self.analyzer = self.create_connection(username, password, '2018-02-24')
 
     def create_connection(self, username, password, version_num):
         try:
