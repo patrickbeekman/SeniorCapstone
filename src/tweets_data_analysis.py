@@ -5,13 +5,11 @@ import os
 from pandas.io.json import json_normalize
 import pickle
 import datetime
-import time
 import math
 from itertools import chain
 from collections import Counter
 import matplotlib.pyplot as plt
 import nltk
-import random
 import operator
 from nltk.corpus import stopwords
 from bokeh.plotting import figure, output_file, show
@@ -19,17 +17,12 @@ from bokeh.models.annotations import Title
 from bokeh.embed import components
 from bokeh.models.glyphs import VBar
 from bokeh.layouts import gridplot
-from bokeh.transform import factor_cmap
 from bokeh.models import (
     ColumnDataSource,
     HoverTool,
     DataRange1d,
     LinearAxis,
-    LinearColorMapper,
     Plot,
-    BasicTicker,
-    PrintfTickFormatter,
-    ColorBar,
 )
 import tweepy
 import tweepy_grabber
@@ -164,6 +157,9 @@ class TweetsDataAnalysis:
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
         plt.close()
 
+    '''
+        Flattens the data to easier access the nested tones and user info
+    '''
     def get_flattened_data(self, filename, record_path, meta=[]):
         with open(filename) as f:
             data = json.load(f)
@@ -171,6 +167,9 @@ class TweetsDataAnalysis:
         #print(data_flattened.head())
         return data_flattened
 
+    '''
+        Converts a dataframe of dates to datetime objects
+    '''
     def convert_to_datetime(self, data):
         data.created_at = data.created_at.apply(lambda x: int(str(x)[0:10]))
         data.created_at = data.created_at.apply(lambda x: datetime.fromtimestamp(x).strftime('%Y-%m-%d')) # %H:%M:%S
@@ -277,67 +276,6 @@ class TweetsDataAnalysis:
                 elif tone == 'Sadness':
                     seasons['winter_sad'] += 1
         return seasons
-
-    def create_X_matrix(self, folder_path, output_file_path):
-        X = pd.DataFrame(columns=['screen_name', 'joy', 'sad', 'analytical',
-                                  'tentative', 'fear', 'confident', 'anger',
-                                  'tot_tweets', 'morning', 'mid_day', 'late_night',
-                                  'spring_sad', 'summer_sad', 'fall_sad', 'winter_sad',
-                                  'spring_joy', 'summer_joy', 'fall_joy', 'winter_joy'])
-        counter = 0
-        all_files = os.listdir(folder_path)
-        tot_files = len(all_files)
-        for file in all_files:
-            print('{:.2%}'.format(counter/tot_files))
-            df = self.get_flattened_data(folder_path + file, 'tones', ['created_at', 'user', 'source'])
-            X.loc[counter] = None
-            try:
-                total = df['user'][0]['statuses_count']
-            except ValueError:
-                total = 0
-            except IndexError:
-                continue
-            try:
-                sn = df['user'][0]['screen_name']
-            except ValueError:
-                sn = None
-
-            X.loc[counter]['tot_tweets'] = total
-            X.loc[counter]['screen_name'] = sn
-            counts, total = self.get_tone_counts(df)
-            #tone_percentages = [(x / total) * 100 for x in counts]
-            X.loc[counter]['joy'] = counts[0] #tone_percentages[0]
-            X.loc[counter]['sad'] = counts[1] #tone_percentages[1]
-            X.loc[counter]['analytical'] = counts[2] #tone_percentages[2]
-            X.loc[counter]['tentative'] = counts[3] #tone_percentages[3]
-            X.loc[counter]['fear'] = counts[4] #tone_percentages[4]
-            X.loc[counter]['confident'] = counts[5] #tone_percentages[5]
-            X.loc[counter]['anger'] = counts[6] #tone_percentages[6]
-
-            morning, mid_day, late_night, std_times = self.count_localised_time(df['created_at'], file, df['user'][0]['utc_offset'])
-            X.loc[counter]['morning'] = morning
-            X.loc[counter]['mid_day'] = mid_day
-            X.loc[counter]['late_night'] = late_night
-            s = pd.Series(std_times, index=df.index, name='std_times')
-
-            seasons = self.count_sad_happy_four_seasons(df['tone_name'], s)
-            # attach the seasons to X
-            X.loc[counter]['spring_sad'] = seasons['spring_sad']
-            X.loc[counter]['summer_sad'] = seasons['summer_sad']
-            X.loc[counter]['fall_sad'] = seasons['fall_sad']
-            X.loc[counter]['winter_sad'] = seasons['winter_sad']
-            X.loc[counter]['spring_joy'] = seasons['spring_joy']
-            X.loc[counter]['summer_joy'] = seasons['summer_joy']
-            X.loc[counter]['fall_joy'] = seasons['fall_joy']
-            X.loc[counter]['winter_joy'] = seasons['winter_joy']
-
-            # analyze tone of each users tweets and attach back
-            # determine how to find total number of tweets for season.
-            # can I look at the tones for each season?
-            # When looking at time of day for tweets take into account 'utc_offset'
-            counter+=1
-        X.to_pickle(output_file_path)
-        return X
 
     def create_boxplot(self, data_path, save_path):
         df = pd.read_pickle(data_path)

@@ -5,6 +5,9 @@ import sys
 import os
 import json
 
+'''
+    Connects to the twitter api utilizing the tweepy framework to download tweets, user profiles and followers.
+'''
 class TweepyGrabber:
     api = None
 
