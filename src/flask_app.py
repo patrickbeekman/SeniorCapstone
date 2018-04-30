@@ -12,11 +12,11 @@ app = Flask(__name__, static_folder="/home/patt/Documents/senior_year/SeniorCaps
 # Index page, no args
 @app.route('/')
 def index():
-    driver = tweet_driver.Tweet_Driver()
     try:
         screen_name = sys.argv[1]
     except IndexError:
         screen_name = input("Twitter screen_name required! Please enter the screen name you would like to use:")
+    driver = tweet_driver.Tweet_Driver()
     components_path = driver.analyze_followers_of_user_create_plots(screen_name, screen_name)
 
     print("data collection, analysis and plots done!")

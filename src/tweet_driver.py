@@ -12,8 +12,17 @@ class Tweet_Driver:
     analysis = None
 
     def __init__(self):
-        self.grabber = tweepy_grabber.TweepyGrabber()
-        self.analyzer = tone_analyzer.MyToneAnalyzer()
+        data_path = os.path.dirname(__file__) + "/../data/secrets.json"
+        if os.path.exists(data_path):
+            df = pd.read_json(data_path)
+            twitter_username = df['twitter_username']
+            twitter_password = df['twitter_password']
+            watson_username = df['watson_username']
+            watson_password = df['watson_password']
+        else:
+            raise FileNotFoundError("secrets.json file not found, please create file.")
+        self.grabber = tweepy_grabber.TweepyGrabber(twitter_username, twitter_password)
+        self.analyzer = tone_analyzer.MyToneAnalyzer(watson_username, watson_password)
         self.analysis = tweets_data_analysis.TweetsDataAnalysis()
 
     def analyze_followers_of_user_create_plots(self, screen_name, data_folder):
