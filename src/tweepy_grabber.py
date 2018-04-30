@@ -5,11 +5,14 @@ import sys
 import os
 import json
 
+'''
+    Connects to the twitter api utilizing the tweepy framework to download tweets, user profiles and followers.
+'''
 class TweepyGrabber:
     api = None
 
-    def __init__(self):
-        self.api = self.api_connect(os.environ['TWEET_PUB'], os.environ['TWEET_PRI'])
+    def __init__(self, username=os.environ['TWEET_PUB'], password=os.environ['TWEET_PRI']):
+        self.api = self.api_connect(username, password)
 
     '''
         Connects to the twitter api taking in a consumer key and secret which can be gotten from

@@ -9,13 +9,20 @@ from watson_developer_cloud import WatsonException
 from watson_developer_cloud import WatsonInvalidArgument
 # install with - from watson_developer_cloud import ToneAnalyzerV3
 
-
+'''
+    Utilizes IBM Watsons tone analyzer to determine tone and save the analysis to multiple files.
+    This class also handles merges the analysis with the saved tweets object from TweepyGrabber.
+'''
 class MyToneAnalyzer:
     analyzer = None
 
-    def __init__(self):
-        self.analyzer = self.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], '2018-02-24')
+    def __init__(self, username=os.environ['TONE_U'], password=os.environ['TONE_P']):
+        self.analyzer = self.create_connection(username, password, '2018-02-24')
 
+    '''
+        Creates a connection with IBM Watson's Tone analyzer.
+        https://www.ibm.com/watson/services/tone-analyzer/
+    '''
     def create_connection(self, username, password, version_num):
         try:
             tone_analyzer = ToneAnalyzerV3(
@@ -26,6 +33,9 @@ class MyToneAnalyzer:
             return None
         return tone_analyzer
 
+    '''
+        Directly interacts with the tone analyzer API to analyze a tone and return the response.
+    '''
     def analyze_json_file(self, file_path):
         if not os.path.isfile(file_path):
             raise FileNotFoundError("File does not exist.")
@@ -36,6 +46,10 @@ class MyToneAnalyzer:
                 raise WatsonException(e)
         return tone_resp
 
+    '''
+        Helper function that parses the tone response to only grab the sentence tones and exclude
+        the document tone. Dumps to the specified output_file
+    '''
     def write_only_sentence_tone_to_file(self, resp, output_file):
         # Load the data and create a new string with only the sentence_tones not the document_tone
         data = json.loads(json.dumps(resp))
@@ -55,8 +69,10 @@ class MyToneAnalyzer:
         with open(filename, 'w') as out:
             json.dump(data, out)
 
-    # analyzes all the tweet_text files in /data/tweets_text/ and saves the
-    # analysis files to /data/analysis/
+    '''
+        analyzes all the tweet_text files in /data/tweets_text/ and saves the
+        analysis files to /data/analysis/
+    '''
     def analyze_all_tweets_text_folder(self, tweet_text_path):
         if self.analyzer is None:
             raise ConnectionError("Analyzer not connected")
@@ -75,10 +91,11 @@ class MyToneAnalyzer:
             output_file = tweet_text_path + "../analysis/tone_tweet_" + str(num).zfill(4) + ".json"
             self.write_only_sentence_tone_to_file(tone_resp, output_file)
 
-
-    # Tone analyzer only reads first 100 sentences for tone analysis and only first
-    # 1000 sentences for document level analysis. Max filesize = 128KB
-    # tweet_text is a iterable list of text from the tweets
+    '''
+        Parses each tweets text and cleans it up for analysis. Removes links and end of sentence
+        markers such as [. ! ? \\r \\n]. I add my own end of sentence marker at the end of each tweet,
+        this ensures I get the tone of the whole tweet and not each sentence of the tweet.
+    '''
     def clean_text_write_to_json(self, tweet_text, newfilename):
         ninety_tweets = ""
         for tweet in tweet_text:
@@ -90,8 +107,12 @@ class MyToneAnalyzer:
         with open(newfilename, 'w') as f:
             f.write(new_df)
 
-    # Creates a new tone analysis ready json file of 99 tweets per file
-    # Saves it in /data/tweets_text
+    '''
+        Creates a new tone analysis ready json file of 99 tweets per file and
+        saves it in /data/tweets_text. Tone analyzer only reads first 100 sentences 
+        for tone analysis and only first 1000 sentences for document level analysis.
+        Max filesize = 128KB tweet_text is a iterable list of text from the tweets.
+    '''
     def incremental_send_all_tweets_to_text_json(self, input_filename, data_path):
         num = 0
         start = 0
@@ -115,6 +136,11 @@ class MyToneAnalyzer:
             num += 1
 
 
+    '''
+        Aggregates all of the tone analysis from the /data/analysis/ folder. This needs to 
+        happen because the clean_text_write_to_json method writes each chunk of 99 tweets to a
+        new file.
+    '''
     def create_single_file_tone_analysis(self, analysis_folder, output_path):
         if not os.path.isdir(analysis_folder):
             os.mkdir(analysis_folder)
@@ -144,6 +170,9 @@ class MyToneAnalyzer:
                 outfile.write(data.to_json(orient='records').strip()[1:-1])
             outfile.write(']')
 
+    '''
+        Cleans up any unnecessary files that were created during intermediary processes.
+    '''
     def temp_file_cleanup(self, analysis_path, tweets_text_path):
         #analysis_path = self.path_name("/../data/analysis/")
         #tweets_text_path = self.path_name("/../data/tweets_text/")
@@ -162,6 +191,10 @@ class MyToneAnalyzer:
             except Exception as e:
                 print(e)
 
+    '''
+        Attaches the analysis to the the actual tweet object downloaded using the 
+        tweepy grabber class. This merged analysis is saved to a merged folder.
+    '''
     def attach_analysis_to_tweet(self, analysis_path, tweets_path, merged_path):
         #analysis_path = self.path_name("/../data/all_analysis.json")
         #tweets_path = self.path_name("/../data/tweets.json")

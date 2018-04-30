@@ -48,7 +48,7 @@ def test_success_get_users_timeline():
 def test_get_users_timeline_no_tweets():
     outputfile = os.path.dirname(__file__) + "/../data/donald.json"
     try:
-        ret = grabber.get_users_timeline("donaldglover", outputfile)
+        ret = grabber.get_users_timeline("CapstoneTest1", outputfile)
         if ret is None:
             assert True
     except Exception:
@@ -61,12 +61,12 @@ def test_get_users_followers_not_exist():
 
 def test_get_users_followers_good():
     outputfile = os.path.dirname(__file__) + "/../data/test.json"
-    ret = grabber.get_users_followers(outputfile, "hrgwea")
+    ret = grabber.get_users_followers(outputfile, "CapstoneTest1")
     assert len(ret) > 0
 
 def test_get_followers_followers():
     output_path = os.path.dirname(__file__) + "/../data/"
-    users = grabber.get_users_followers(output_path, "hrgwea")
+    users = grabber.get_users_followers(output_path, "CapstoneTest1")
     output_path = os.path.dirname(__file__) + "/flwrs_flwrs/"
     grabber.get_followers_of_followers(users, output_path)
     files = os.listdir(output_path)

@@ -5,13 +5,11 @@ import os
 from pandas.io.json import json_normalize
 import pickle
 import datetime
-import time
 import math
 from itertools import chain
 from collections import Counter
 import matplotlib.pyplot as plt
 import nltk
-import random
 import operator
 from nltk.corpus import stopwords
 from bokeh.plotting import figure, output_file, show
@@ -19,17 +17,12 @@ from bokeh.models.annotations import Title
 from bokeh.embed import components
 from bokeh.models.glyphs import VBar
 from bokeh.layouts import gridplot
-from bokeh.transform import factor_cmap
 from bokeh.models import (
     ColumnDataSource,
     HoverTool,
     DataRange1d,
     LinearAxis,
-    LinearColorMapper,
     Plot,
-    BasicTicker,
-    PrintfTickFormatter,
-    ColorBar,
 )
 import tweepy
 import tweepy_grabber
@@ -164,6 +157,9 @@ class TweetsDataAnalysis:
         plt.savefig(os.path.dirname(__file__) + "/../data/plots/" + filename)
         plt.close()
 
+    '''
+        Flattens the data to easier access the nested tones and user info
+    '''
     def get_flattened_data(self, filename, record_path, meta=[]):
         with open(filename) as f:
             data = json.load(f)
@@ -171,6 +167,9 @@ class TweetsDataAnalysis:
         #print(data_flattened.head())
         return data_flattened
 
+    '''
+        Converts a dataframe of dates to datetime objects
+    '''
     def convert_to_datetime(self, data):
         data.created_at = data.created_at.apply(lambda x: int(str(x)[0:10]))
         data.created_at = data.created_at.apply(lambda x: datetime.fromtimestamp(x).strftime('%Y-%m-%d')) # %H:%M:%S
@@ -277,67 +276,6 @@ class TweetsDataAnalysis:
                 elif tone == 'Sadness':
                     seasons['winter_sad'] += 1
         return seasons
-
-    def create_X_matrix(self, folder_path, output_file_path):
-        X = pd.DataFrame(columns=['screen_name', 'joy', 'sad', 'analytical',
-                                  'tentative', 'fear', 'confident', 'anger',
-                                  'tot_tweets', 'morning', 'mid_day', 'late_night',
-                                  'spring_sad', 'summer_sad', 'fall_sad', 'winter_sad',
-                                  'spring_joy', 'summer_joy', 'fall_joy', 'winter_joy'])
-        counter = 0
-        all_files = os.listdir(folder_path)
-        tot_files = len(all_files)
-        for file in all_files:
-            print('{:.2%}'.format(counter/tot_files))
-            df = self.get_flattened_data(folder_path + file, 'tones', ['created_at', 'user', 'source'])
-            X.loc[counter] = None
-            try:
-                total = df['user'][0]['statuses_count']
-            except ValueError:
-                total = 0
-            except IndexError:
-                continue
-            try:
-                sn = df['user'][0]['screen_name']
-            except ValueError:
-                sn = None
-
-            X.loc[counter]['tot_tweets'] = total
-            X.loc[counter]['screen_name'] = sn
-            counts, total = self.get_tone_counts(df)
-            #tone_percentages = [(x / total) * 100 for x in counts]
-            X.loc[counter]['joy'] = counts[0] #tone_percentages[0]
-            X.loc[counter]['sad'] = counts[1] #tone_percentages[1]
-            X.loc[counter]['analytical'] = counts[2] #tone_percentages[2]
-            X.loc[counter]['tentative'] = counts[3] #tone_percentages[3]
-            X.loc[counter]['fear'] = counts[4] #tone_percentages[4]
-            X.loc[counter]['confident'] = counts[5] #tone_percentages[5]
-            X.loc[counter]['anger'] = counts[6] #tone_percentages[6]
-
-            morning, mid_day, late_night, std_times = self.count_localised_time(df['created_at'], file, df['user'][0]['utc_offset'])
-            X.loc[counter]['morning'] = morning
-            X.loc[counter]['mid_day'] = mid_day
-            X.loc[counter]['late_night'] = late_night
-            s = pd.Series(std_times, index=df.index, name='std_times')
-
-            seasons = self.count_sad_happy_four_seasons(df['tone_name'], s)
-            # attach the seasons to X
-            X.loc[counter]['spring_sad'] = seasons['spring_sad']
-            X.loc[counter]['summer_sad'] = seasons['summer_sad']
-            X.loc[counter]['fall_sad'] = seasons['fall_sad']
-            X.loc[counter]['winter_sad'] = seasons['winter_sad']
-            X.loc[counter]['spring_joy'] = seasons['spring_joy']
-            X.loc[counter]['summer_joy'] = seasons['summer_joy']
-            X.loc[counter]['fall_joy'] = seasons['fall_joy']
-            X.loc[counter]['winter_joy'] = seasons['winter_joy']
-
-            # analyze tone of each users tweets and attach back
-            # determine how to find total number of tweets for season.
-            # can I look at the tones for each season?
-            # When looking at time of day for tweets take into account 'utc_offset'
-            counter+=1
-        X.to_pickle(output_file_path)
-        return X
 
     def create_boxplot(self, data_path, save_path):
         df = pd.read_pickle(data_path)
@@ -827,20 +765,21 @@ class TweetsDataAnalysis:
         #show(grid)
         return grid
 
-    def grid_plot_Favs_next_to_freq(self):
+    def grid_plot_Favs_next_to_freq(self, data_path):
         emotions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Analytical', 'Tentative', 'Confident']
         colors = ['#ffff4d', '#668cff', '#ff3333', '#e67300', '#5cd65c', '#ff33ff', '#00ff00']
         favs_rts_plots = []
         freq_plots = []
         for index, emotion in enumerate(emotions):
-            favs_rts_plots.append(self.normalized_num_favs_retweets_by_hour(normalize=True, emotion=emotion))
-            freq_plots.append(self.tweets_per_hour_plot(emotion=emotion, color=colors[index]))
+            favs_rts_plots.append(self.normalized_num_favs_retweets_by_hour(data_path=data_path, normalize=True, emotion=emotion))
+            freq_plots.append(self.tweets_per_hour_plot(data_path=data_path, emotion=emotion, color=colors[index]))
         all_plots = []
         for i, plot in enumerate(favs_rts_plots):
             all_plots.append(plot)
             all_plots.append(freq_plots[i])
 
-        data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
+        data_path += "plots/"
+        #data_path = os.path.dirname(__file__) + "/../data/pbFollowers/plots/"
         output_file(data_path + "Favs_Rts_next_to_freq_plots.html")
 
         grid = gridplot(all_plots, ncols=2, plot_width=350, plot_height=350)
@@ -868,6 +807,16 @@ class TweetsDataAnalysis:
             dict_components['time_series_script'] = s1
             dict_components['time_series_div'] = d1
 
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
+
         # Tweets per hour
         try:
             dict_components['tweets_hour_script']
@@ -876,6 +825,16 @@ class TweetsDataAnalysis:
             s2, d2 = components(self.tweets_per_hour_plot(data_path))
             dict_components['tweets_hour_script'] = s2
             dict_components['tweets_hour_div'] = d2
+
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
 
         # Hourly plot of emotion
         try:
@@ -886,6 +845,16 @@ class TweetsDataAnalysis:
             dict_components['hourly_emotion_script'] = s3
             dict_components['hourly_emotion_div'] = d3
 
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
+
         # UnNormalized favs/rts by hour
         try:
             dict_components['unNormalized_FavsRTs_script']
@@ -894,6 +863,16 @@ class TweetsDataAnalysis:
             s4, d4 = components(self.normalized_num_favs_retweets_by_hour(data_path=data_path, normalize=False))
             dict_components['unNormalized_FavsRTs_script'] = s4
             dict_components['unNormalized_FavsRTs_div'] = d4
+
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
 
         # Normalized favs/rts by hour
         try:
@@ -904,6 +883,16 @@ class TweetsDataAnalysis:
             dict_components['normalized_FavsRTs_script'] = s5
             dict_components['normalized_FavsRTs_div'] = d5
 
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
+
         # Normalized favs/rts by emotion
         try:
             dict_components['norm_FavsRTs_emotion_script']
@@ -912,6 +901,16 @@ class TweetsDataAnalysis:
             s6, d6 = components(self.normalized_favs_rts_plot_by_emotion(data_path=data_path))
             dict_components['norm_FavsRTs_emotion_script'] = s6
             dict_components['norm_FavsRTs_emotion_div'] = d6
+
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
 
         # Word count by emotion
         try:
@@ -922,6 +921,16 @@ class TweetsDataAnalysis:
             dict_components['emotions_word_ct_script'] = s7
             dict_components['emotions_word_ct_div'] = d7
 
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
+
         # Tweets by day of week
         try:
             dict_components['days_of_week_script']
@@ -930,6 +939,16 @@ class TweetsDataAnalysis:
             s8, d8 = components(self.time_series_day_of_week_plot(data_path=data_path))
             dict_components['days_of_week_script'] = s8
             dict_components['days_of_week_div'] = d8
+
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
 
         # Favs and retweets (unnormalized) by day of week
         try:
@@ -940,6 +959,16 @@ class TweetsDataAnalysis:
             dict_components['favs_RTS_by_DoW_script'] = s9
             dict_components['favs_RTS_by_DoW_div'] = d9
 
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
+
         # Favs and retweets normalized by day of week
         try:
             dict_components['favs_RTs_by_DoW_normalized_script']
@@ -949,12 +978,22 @@ class TweetsDataAnalysis:
             dict_components['favs_RTs_by_DoW_normalized_script'] = s10
             dict_components['favs_RTs_by_DoW_normalized_div'] = d10
 
+        # Save to file and then reopen file
+        with open(data_path + "plot_components.p", 'wb') as fp:
+            pickle.dump(dict_components, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dict_components = {}
+        try:
+            with open(output_file_path, 'rb') as fp:
+                dict_components = pickle.load(fp)
+        except FileNotFoundError:
+            print("File not created...Making file =)")
+
         # Favs and retweets normalized next to frequency of tweets
         try:
             dict_components['side_by_side_script']
         except KeyError:
             print("Starting Side by Side plot of favs/rts and freq")
-            s11, d11 = components(self.grid_plot_Favs_next_to_freq())
+            s11, d11 = components(self.grid_plot_Favs_next_to_freq(data_path=data_path))
             dict_components['side_by_side_script'] = s11
             dict_components['side_by_side_div'] = d11
 

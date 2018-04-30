@@ -5,17 +5,41 @@ import pandas as pd
 from watson_developer_cloud import WatsonException
 import os
 
+'''
+    Controls the logic flow of the application from downloading tweets to creating the plots.
+'''
 class Tweet_Driver:
 
     grabber = None
     analyzer = None
     analysis = None
 
+    '''
+        Initializes the Driver object and reads the keys from secrets.json inside the data folder.
+        It also creates the Tweepygrabber, tone analyzer and analysis creation objects.
+    '''
     def __init__(self):
-        self.grabber = tweepy_grabber.TweepyGrabber()
-        self.analyzer = tone_analyzer.MyToneAnalyzer()
+        data_path = os.path.dirname(__file__) + "/../data/secrets.json"
+        if os.path.exists(data_path):
+            df = pd.read_json(data_path)
+            twitter_username = df['twitter_username'][0]
+            twitter_password = df['twitter_password'][0]
+            watson_username = df['watson_username'][0]
+            watson_password = df['watson_password'][0]
+        else:
+            raise FileNotFoundError("secrets.json file not found, please create file.")
+        if twitter_username == 'key goes in here' or twitter_username == "" or twitter_username is None:
+            self.grabber = tweepy_grabber.TweepyGrabber()
+            self.analyzer = tone_analyzer.MyToneAnalyzer()
+        else:
+            self.grabber = tweepy_grabber.TweepyGrabber(twitter_username, twitter_password)
+            self.analyzer = tone_analyzer.MyToneAnalyzer(watson_username, watson_password)
         self.analysis = tweets_data_analysis.TweetsDataAnalysis()
 
+    '''
+        The main driver of the application. This controls the logic flow and pieces together the 
+        downloading, tone analysis, data analysis, and plotting.
+    '''
     def analyze_followers_of_user_create_plots(self, screen_name, data_folder):
         data_path = os.path.dirname(__file__) + "/../data/" + data_folder + "/"
         if not os.path.dirname(os.path.dirname(__file__) + "/../data/"):
@@ -30,8 +54,11 @@ class Tweet_Driver:
             os.mkdir(followers_path)
         if not os.path.exists(followers_path + screen_name + "_followers.json"):
             followers = self.grabber.get_users_followers(followers_path, screen_name)
+        # Uncomment below to also get followers of followers **Disclaimer this will increase the
+        # runtime of the program exponentially.
         #self.grabber.get_followers_of_followers(followers, followers_path)
 
+        # setup paths and make sure they exist
         all_users_tweets_path = data_path + "users_tweets/"
         if not os.path.exists(all_users_tweets_path):
             os.mkdir(all_users_tweets_path)
@@ -58,6 +85,7 @@ class Tweet_Driver:
                 if os.path.exists(data_path + "merged/" + user['screen_name'] + "_merged_analysis.json"):
                     continue
 
+                # Start the tone analysis and merging into a single file
                 print("Starting: " + user['screen_name'])
                 try:
                     self.analyzer.incremental_send_all_tweets_to_text_json(user_tweets_path, data_path + "tweets_text/")
@@ -76,8 +104,15 @@ class Tweet_Driver:
                                                        data_path + "merged/" + user['screen_name'] + "_merged_analysis.json")
                 self.analyzer.temp_file_cleanup(data_path + "analysis/",
                                                 data_path + "tweets_text/")
+        # After all files have been created and saved in their respective locations we can then
+        # start to create the plots and return this to the flask app for displaying on the html site.
         return self.analysis.create_components_to_json(data_path)
 
+    '''
+        Takes in a list of search terms and iterates through them saving 2500 of the most recent
+        tweets for that search. This is not used in the main application flow but is an interesting feature 
+        that can be extended upon.
+    '''
     def analyze_search_term(self, data, data_folder):
         data_path = os.path.dirname(__file__) + "/../data/" + data_folder + "/"
         if not os.path.exists(data_path):
