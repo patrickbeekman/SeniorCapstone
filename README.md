@@ -1,9 +1,10 @@
-# SeniorCapstone
+# TweetMaximizer
 
 [![Build Status](https://travis-ci.org/patrickbeekman/SeniorCapstone.svg?branch=master)](https://travis-ci.org/patrickbeekman/SeniorCapstone)
 
-An exploratory analysis of a users followers to determine when and what to tweet about to maximize your tweets potential to gain the most amount of attention.
-This tweet attention can be defined as the amount of favorites and retweets a tweet receives.
+An application to analyze the trends of your followers so you can maximize the potential of your tweets. My analysis looks at when and you should tweet about so you can gain the largest amount of favorites and retweets. This can be useful for businesses and advertisers who want to ensure each of their tweets makes the largest impact on their followers to help grow the businesses image on twitter. While useful for businesses it is also a great tool for twitter users who have something important to say and want to make sure the news gets spread! For example you may have something important to add to the #metoo campaign so you can use this application to find the best times to tweet and some keywords/emotional tones you may want to think about while drafting your tweet.
+
+<a name="installation-and-dependencies"/>
 
 ## Installation and Dependencies
 
@@ -22,12 +23,34 @@ This project use a python Flask app to display my findings. To get started you w
 ## About and Usage
 
 This application can be used at a very high level by:
-1. Clone the repo
-2. Navigate to repo/src (where flask_app.py is located)
-3. Open up a terminal and execute ```python flask_app.py SCREEN_NAME``` replacing with the screen name of the twitter user you would like to analyze.
-4. Now wait for the scripts to execute, Depending on the amount of followers the user has this can take a while. For about 200 followers it can take about [15-30 minutes initially**](#Note1).
+1. [Clone/Download the repository](https://services.github.com/on-demand/github-cli/clone-repo-cli)
+2. Navigate to wherever you cloned/downloaded the repository and go into the src folder where flask_app.py is located.
+3. Open up a terminal at the location navigated to in step 2 and execute ```python flask_app.py SCREEN_NAME``` replacing the screen name with the twitter user you would like to analyze. (the screen name is the @name not the other one)
+4. Now wait for the script to execute, Depending on the amount of followers the user has this can take a while. For about 200 followers it can take about [15-30 minutes initially**](#Note1).
 5. Once the script has finished executing the website should now be viewable at localhost:5000/ in your favorite web browser.
 
+## Developer Instructions
+
+### Setting up developer environment
+Setup developer environment? Huh?
+* Code style checking is done with [PEP8](https://www.python.org/dev/peps/pep-0008/) and handled automatically with the [Python Pycharm IDE](https://www.jetbrains.com/pycharm/).
+
+### Testing
+All tests were written using [pytest](https://docs.pytest.org/en/latest/).
+* Follow the [installation and dependencies section](#installation-and-dependencies)
+* Clone the repository
+* Open a terminal and navigate to the repository
+* Run ```pytest``` in the terminal
+
+### Contribution
+This project is not open source although anyone is free to fork or download my application and modify it however you see fit.
+
+## Resources
+
+* [Project proposal](ProjectProposal.md)
+* [Final Technical Report](FinalTechnicalReport.md)
+
+## Notes
 
 <a id="Note1">**</a> Note that it will only take this long the first time you run this script on a user. The reason this process takes so long requires some understanding as to what the scripts are doing. Below describes the process:
 * Downloads all of the users followers from twitter
