@@ -11,8 +11,18 @@ from watson_developer_cloud import WatsonException
 import datetime
 
 now = datetime.datetime.now()
-ta = tone_analyzer.MyToneAnalyzer()
-analyzer = ta.create_connection(os.environ['TONE_U'], os.environ['TONE_P'], now.strftime("%Y-%m-%d"))
+data_path = os.path.dirname(__file__) + "/../data/secrets.json"
+if os.path.exists(data_path):
+    df = pd.read_json(data_path)
+    watson_username = df['watson_username'][0]
+    watson_password = df['watson_password'][0]
+else:
+    ta = tone_analyzer.MyToneAnalyzer()
+
+if watson_username == 'key goes in here' or watson_username == "" or watson_username is None:
+    ta = tone_analyzer.MyToneAnalyzer()
+else:
+    ta = tone_analyzer.MyToneAnalyzer(watson_username, watson_password)
 
 
 def test_good_connection():

@@ -8,7 +8,18 @@ import tweepy
 import json
 import pytest
 
-grabber = tweepy_grabber.TweepyGrabber()
+data_path = os.path.dirname(__file__) + "/../data/secrets.json"
+if os.path.exists(data_path):
+    df = pd.read_json(data_path)
+    twitter_username = df['twitter_username'][0]
+    twitter_password = df['twitter_password'][0]
+else:
+    grabber = tweepy_grabber.TweepyGrabber()
+
+if twitter_username == 'key goes in here' or twitter_username == "" or twitter_username is None:
+    grabber = tweepy_grabber.TweepyGrabber()
+else:
+    grabber = tweepy_grabber.TweepyGrabber(twitter_username, twitter_password)
 
 
 def test_good_api_connection():
