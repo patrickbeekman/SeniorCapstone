@@ -17,6 +17,9 @@ Write my abstract here
   * [Development](#Development)
   * [Testing](#Testing)
 * [Results](#Results)
+  * [Findings](#Findings)
+  * [Features](#Features)
+  * [Problems encountered, accuracy of estimates](#Problems)
 * [Conclusions and Future Work](#Conclusion)
 * [References](#References)
 
@@ -89,6 +92,8 @@ I did not test the TweetDriver class for a similar reason stated above because i
 ## Results
 Within a semester I can proudly say I was able to implement almost all of what I planned. While initially I did not know what my data analysis was going to be, I knew that I wanted to analyze tweets from twitter and display my findings on a website which is what I did. This project allows anyone to easily analyze the general trends specific to their followers or any generic user and view these findings on an interactive website to determine when and what you should ideally tweet about to maximize the potential of favorites and retweets for your tweet. 
 
+<a name="Findings"/>
+
 ### Findings
 To really understand the project it is important to interpret the plots and results that appear on the website. Currently the website walks through how to analyze each of the graphs and points out some interesting pieces from the graphs produced from running the application on my twitter account and that is how I will describe my findings here as well. 
 
@@ -132,6 +137,8 @@ Looking at the two graphs side by side for the Analytical emotion we want to fin
 
 All in all the ideal time to tweet to maximize the amount of favorites and retweets based on my followers is Sunday at either 8am or 3pm and I should tweet something analytical. 
 
+<a name="Features"/>
+
 ### Features
 The core functionality of my application got finished within the semester, unfortunately I was not able to finish some features. The two biggest unfinished features that I would have liked to get done are hosting the site online for anyone to view and then to optimize my code so that it runs much quicker. If I took the time to optimize my code and remove code blockers I think I could get it to run in about half the time as it takes right now.
 
@@ -145,6 +152,8 @@ The core functionality of my application got finished within the semester, unfor
 | Create plots to visualize my analysis |  |
 | Make the plots interactive |  |
 | Generalize my application to any user |  |
+
+<a name="Problems"/>
 
 ### Problems encountered, accuracy of estimates
 The biggest problem that I faced throughout this project was not having a well defined goal. I knew that I wanted to analyze tweets and display them on a website but I did not know what question I wanted to ask of the data. After I got to point in my project where I could download and analyze the tone of tweets I got stuck and just did some exploratory analysis for two to three weeks before finally deciding on my current analysis. Another problem was unit testing, I found this very difficult to do for this project and spent a lot of time creating and debugging my tests while my code was working correctly. Another problem I ran into was with all the MEAN stack stuff. It was overkill for my project and bogged down my development, that is why I switched to using a Flask app instead because it was much simpler and barebones. My accuracy of estimates was on schedule, even with the problems I encountered I was still able to implement most of the features I wanted. I did underestimate the amount of time it would take me to get a MEAN stack site running with all my plots embedded, hence why I switched to the simpler Flask app.
