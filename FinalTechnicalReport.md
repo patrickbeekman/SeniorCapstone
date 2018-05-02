@@ -79,7 +79,55 @@ I did not test the TweetDriver class for a similar reason stated above because i
 <a name="Results"/>
 
 ## Results
-Write results here.
+Within a semester I can proudly say I was able to implement almost all of what I planned. While initially I did not know what my data analysis was going to be, I knew that I wanted to analyze tweets from twitter and display my findings on a website which is what I did. This project allows anyone to easily analyze the general trends specific to their followers or any generic user and view these findings on an interactive website to determine when and what you should ideally tweet about to maximize the potential of favorites and retweets for your tweet. 
+
+### Findings
+What I found
+To really understand the project it is important to interpret the plots and results that appear on the website. Currently the website walks through how to analyze each of the graphs and points out some interesting pieces from the graphs produced from running the application on my twitter account and that is how I will describe my findings here as well. 
+
+< Insert bar graph >
+
+The bar graph above [Figure 1.3](#Fig1.3) shows the amount of tweets for each day of the week. If we are looking to maximize the potential that our tweet has we have to consider two things, the amount of other tweets and the amount of people scrolling on twitter that day. Looking at the graph we see that on the weekends there are substantially less tweets (about 16% less) which might be an indicator that there are less people on twitter then as well. Just from this graph it seems you should tweet during a weekday when there are the most people to potentially see and favorite/retweet your tweet. This plot is not enough to determine that, supplemental information is necessary. 
+
+<Insert SundayMondayUnNormalized >
+
+Above the two graphs are showing the same thing just for different days (Sunday and Monday left to right). The graphs show the raw number of favorites and retweets for each hour of that day of the week. As you can see Sunday has a massive spike at hour 19 (7pm) but this doesn’t make sense, we would expect for the graph to be a little more gradual and not so jagged. This is because it treats each users tweets equally, if one user has a lot of followers who can favorite/retweet their tweets and they so happen to tweet at specific hours then that will appear in the graphs and skew the analysis. To fix this issue I have normalized each users tweet by the amount of followers they have. For example a popular user with 100,000 followers and gets 10,000 favorites will have a normalized value of 0.1 while an average user with 100 followers and 10 favorites will also have a normalized value 0.1. This is a more accurate representation of favorites and helps to smooth out the plots as seen below in the normalized graphs of Sunday and Monday. 
+
+< Insert SundayMondayNormalized >
+
+Now using the normalized graph we can answer the question of whether you should tweet on a weekday or a weekend? A good comparison of the two days can be found by looking at the peak hours of favorites/retweets. Sunday has a sustained peak from 13 (1pm) to 19ish (7pm) averaging about 6-7 normalized favorites, meanwhile Monday has a somewhat sustained peak from hour 12ish to 18ish (6pm) averaging around 5-6 normalized favorites. This is surprising given what we found in the [bar chart above](LINK TO BARCHART), we assumed because there were less tweets on Sunday that there were less people online therefore less people to potentially favorite/retweet your tweet. This does not appear to be the case, there are less people and a higher average amount of favorites on Sunday compared to Monday. Comparing all of the days it seems that Sunday appears to be the best day, check for yourself with the rest of the days below.
+
+< Insert Daysofweek1 >
+< Insert Daysofweek2 >
+
+Another important thing to think about before you tweet is the content and tone of that tweet. Looking at the normalized amount of favorites and retweets broken down by emotion can give us some insight into this, plotted in [Figure 1.X](#AllEmotions) below. In the graphs we notice that analytical and joyus tweets have peaks at 12 and 16 respectively which is much higher than the other emotions. This is likely in part because people tweet a lot of happy and analytical tweets but also that there is high response rate to those tweets as seen by the heightened amount of favorites and retweets. Tweeting something Analytical or Joyus is in the users best interest to maximize the potential of getting favorites or retweets.
+
+< Insert AllEmotions >
+
+Simply just tweeting when the most favorites occurs is not the best solution, a better solution would be to compare this with the amount of tweets happening each hour for that emotion. Below is a side by side graph comparing the Analytical graph which just decided would be a good emotional tone for your tweet in the last paragraph. 
+
+< Insert AnalyticalSideSide >
+
+Looking at the two graphs side by side for the Analytical emotion we want to find a time that maximizes the amount of favorites and reduces the amount of tweets. Two good times to tweet that I notice are at 8am when there is the local peak of around 11 normalized favorites and only 1279 tweets for that hour. The other is at hour 15 (3pm) where there’s about 16 normalized favorites and 2424 tweets per hour which is about 200-300 tweets less than the surrounding hours. Other graphs include the most popular word counts of users top tweets grouped by emotion which can be helpful to determine keyword choice. 
+
+All in all the ideal time to tweet to maximize the amount of favorites and retweets based on my followers is Sunday at either 8am or 3pm and I should tweet something analytical. 
+
+### Features
+The core functionality of my application got finished within the semester, unfortunately I was not able to finish some features. The two biggest unfinished features that I would have liked to get done are hosting the site online for anyone to view and then to optimize my code so that it runs much quicker. If I took the time to optimize my code and remove code blockers I think I could get it to run in about half the time as it takes right now.
+
+| Implemented | Not Implemented |
+| ------------ | ------------ |
+| Connect to Twitter api | Host on AWS to be accessible anywhere |
+| Download Twitter followers and tweets | Stylize the website with CSS |
+| Connect to IBM Watson Tone Analyzer | Remove code blockers and generally optimize the code |
+| Analyze the tone of a group of tweets | Visualize the network of my followers |
+| Create a website to host results | Take into account emojis during my analysis |
+| Create plots to visualize my analysis |  |
+| Make the plots interactive |  |
+| Generalize my application to any user |  |
+
+### Problems encountered, accuracy of estimates
+The biggest problem that I faced throughout this project was not having a well defined goal. I knew that I wanted to analyze tweets and display them on a website but I did not know what question I wanted to ask of the data. After I got to point in my project where I could download and analyze the tone of tweets I got stuck and just did some exploratory analysis for two to three weeks before finally deciding on my current analysis. Another problem was unit testing, I found this very difficult to do for this project and spent a lot of time creating and debugging my tests while my code was working correctly. Another problem I ran into was with all the MEAN stack stuff. It was overkill for my project and bogged down my development, that is why I switched to using a Flask app instead because it was much simpler and barebones. My accuracy of estimates was on schedule, even with the problems I encountered I was still able to implement most of the features I wanted. I did underestimate the amount of time it would take me to get a MEAN stack site running with all my plots embedded, hence why I switched to the simpler Flask app.
 
 <a name="Conclusion"/>
 
