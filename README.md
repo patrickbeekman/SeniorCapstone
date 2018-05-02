@@ -12,9 +12,7 @@ This project use a python Flask app to display my findings. To get started you w
 * You will then need to install [anaconda python 3.6](https://conda.io/docs/user-guide/install/index.html)
 * You will then need to install these python packages, which you can easily install these with [python package manager pip](https://pip.pypa.io/en/stable/installing/).
   * Pandas ```pip install pandas```
-  * Requests ```pip install requests```
   * Numpy ```pip install numpy```
-  * Pymongo ```pip install pymongo```
   * tweepy ```pip install tweepy```
   * Flask ```pip install flask```
   * Bokeh ```pip install bokeh```
