@@ -157,15 +157,43 @@ Conclusion.
 <a name="References"/>
 
 ## References
+\[1\]: https://help.twitter.com/en/using-twitter/twitter-timeline
+
 [1]: https://help.twitter.com/en/using-twitter/twitter-timeline
+
+\[2\]: https://help.twitter.com/en/managing-your-account/using-the-tweet-activity-dashboard
+
 [2]: https://help.twitter.com/en/managing-your-account/using-the-tweet-activity-dashboard
 
 ### Libraries
+pandas: https://pandas.pydata.org/
+
 [pandas]: https://pandas.pydata.org/
+
+numpy: http://www.numpy.org/
+
 [numpy]: http://www.numpy.org/
+
+tweepy: https://github.com/tweepy/tweepy
+
 [tweepy]: https://github.com/tweepy/tweepy
+
+flask: http://flask.pocoo.org/
+
 [flask]: http://flask.pocoo.org/
+
+bokeh: https://bokeh.pydata.org/en/latest/
+
 [bokeh]: https://bokeh.pydata.org/en/latest/
+
+watson: https://www.ibm.com/watson/developer/
+
 [watson]: https://www.ibm.com/watson/developer/
+
+pytest: https://docs.pytest.org/en/latest/
+
 [pytest]: https://docs.pytest.org/en/latest/
+
+travis: https://travis-ci.org/
+
 [travis]: https://travis-ci.org/
