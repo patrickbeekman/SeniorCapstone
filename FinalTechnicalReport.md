@@ -1,4 +1,5 @@
-<H1 align="center">How to maximize your tweet potential</H1>
+<H1 align="center">Tweetential</H1>
+<H3 align="center">A study of how to maximize your tweet potential</H3>
 <p align="center">
 By Patrick Beekman
 May 1st, 2018
@@ -163,8 +164,14 @@ The biggest problem that I faced throughout this project was not having a well d
 
 <a name="Conclusion"/>
 
-## Conclusions and Future Work
+## Conclusions
 Conclusion.
+
+### Lessons Learned
+I have learned a lot creating this project throughout the semester. The biggest lessons being clearly defining a goal that can be easily broken down into multiple sub-goals. I started this project without an idea just some technologies and a data source that I wanted to explore. If I had known what my end product would look like before I started then I could have designed my project to  be better optimized.
+
+### Future work
+future work here.
 
 <a name="References"/>
 
