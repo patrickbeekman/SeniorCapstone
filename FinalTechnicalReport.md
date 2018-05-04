@@ -7,7 +7,8 @@ May 1st, 2018
 
 ---
 ## Abstract
-Write my abstract here
+With the rise of social media Twitter has become an important tool to help businesses grow and interact with their customers. Unfortunately as your network of followers grows it becomes harder to interact and notice trends in your followers. My application solves this problem by analyzing the tweets of all the specified users followers to determine the ideal time, emotional tone and keywords to maximize the potential of favorites and retweets for your tweet. 
+FINISHHHHHHH
 
 **Keywords:** Python, Data Visualization, Twitter, Data Analysis, Bokeh, Flask, Tweepy
 
