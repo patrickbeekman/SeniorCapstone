@@ -7,8 +7,7 @@ May 1st, 2018
 
 ---
 ## Abstract
-With the rise of social media Twitter has become an important tool to help businesses grow and interact with their customers. Unfortunately as your network of followers grows it becomes harder to interact and notice trends in your followers. My application solves this problem by analyzing the tweets of all the specified users followers to determine the ideal time, emotional tone and keywords to maximize the potential of favorites and retweets for your tweet. 
-FINISHHHHHHH
+With the rise of social media Twitter has become an important tool to help businesses grow and interact with their customers. Unfortunately as your network of followers grows it becomes harder to interact and find trends in your followers. My application solves this problem by analyzing the tweets of all the specified users followers to determine the ideal time, emotional tone and keywords to maximize the potential of favorites and retweets for your tweet. The application is easy to use by simply accepting a users twitter screen name at which point it downloads all their followers tweets, analyzes, graphs and displays this all on a website. The website contains a bunch of easy to read graphs that users can then further analyze themselves and determine a single or multiple ideal times to tweet. After consulting all the graphs and analyzing the trends of my followers I was able to determine that an ideal tweet should be tweeted on Sunday at either 8am or 3pm with the content tone being analytical. This application does not specify a single best time to tweet but rather lets you parse the graphs and determine multiple ideal times to tweet based on any criteria that you want to look for.
 
 **Keywords:** Python, Data Visualization, Twitter, Data Analysis, Bokeh, Flask, Tweepy
 
