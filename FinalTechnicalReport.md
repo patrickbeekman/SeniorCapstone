@@ -147,16 +147,21 @@ All in all the ideal time to tweet to maximize the amount of favorites and retwe
 ### Features
 The core functionality of my application got finished within the semester, unfortunately I was not able to finish some features. The two biggest unfinished features that I would have liked to get done are hosting the site online for anyone to view and then to optimize my code so that it runs much quicker. If I took the time to optimize my code I estimate that I could get it to run in about half the time it takes right now.
 
-| Implemented | Not Implemented |
+| Feature | Implemented/Not Implemented |
 | ------------ | ------------ |
-| Connect to Twitter api | Host on AWS to be accessible anywhere |
-| Download Twitter followers and tweets | Stylize the website with CSS |
-| Connect to IBM Watson Tone Analyzer | Remove code blockers and generally optimize the code |
-| Analyze the tone of a group of tweets | Visualize the network of my followers |
-| Create a website to host results | Take into account emojis during my analysis |
-| Create plots to visualize my analysis |  |
-| Make the plots interactive |  |
-| Generalize my application to any user |  |
+| Connect to Twitter api | yes |
+| Download Twitter followers and tweets | yes |
+| Connect to IBM Watson Tone Analyzer | yes |
+| Analyze the tone of a group of tweets | yes |
+| Create a website to host results | yes |
+| Create plots to visualize my analysis | yes |
+| Make the plots interactive | yes |
+| Generalize my application to any user | yes |
+| Host on AWS to be accessible anywhere | no |
+| Stylize the website with CSS | no |
+| Remove code blockers and generally optimize the code | no |
+| Visualize the network of my followers | no |
+| Take into account emojis during my analysis | no |
 
 <a name="Problems"/>
 
