@@ -2,7 +2,11 @@
 
 [![Build Status](https://travis-ci.org/patrickbeekman/SeniorCapstone.svg?branch=master)](https://travis-ci.org/patrickbeekman/SeniorCapstone)
 
-An application to analyze the trends of your followers so you can maximize the potential of your tweets. My analysis looks at when and you should tweet about so you can gain the largest amount of favorites and retweets. This can be useful for businesses and advertisers who want to ensure each of their tweets makes the largest impact on their followers to help grow the businesses image on twitter. While useful for businesses it is also a great tool for twitter users who have something important to say and want to make sure the news gets spread! For example you may have something important to add to the #metoo campaign so you can use this application to find the best times to tweet and some keywords/emotional tones you may want to think about while drafting your tweet.
+An application to analyze the trends of your followers so you can maximize the potential of your tweets. My analysis looks at when and you should tweet about so you can gain the largest amount of favorites and retweets. This can be useful for businesses and advertisers who want to ensure each of their tweets makes the largest impact on their followers to help grow the businesses image on twitter. While useful for businesses it is also a great tool for twitter users who have something important to say and want to make sure the news gets spread! For example you may have something important to add to the [#metoo campaign](https://en.wikipedia.org/wiki/Me_Too_movement) so you can use this application to find the best times to tweet and some keywords/emotional tones you may want to think about while drafting your tweet. Shown below are some examples of visualizations on the website that users can analyze to help determine an ideal time to tweet.
+
+| Normalized graph of Favorites and Retweets by hour | Amount of tweets by hour |
+| -------- | ---------- |
+| ![Normalized Sunday Monday](images/SundayMondayNormalized.png) | ![Frequency of Tweets](images/FreqTweets.png) |
 
 <a name="installation-and-dependencies"/>
 
