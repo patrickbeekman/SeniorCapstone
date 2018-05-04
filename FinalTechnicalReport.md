@@ -2,7 +2,7 @@
 <H3 align="center">A study of how to maximize your tweet potential</H3>
 <p align="center">
 By Patrick Beekman
-May 1st, 2018
+May 4th, 2018
 </p>
 
 ---
