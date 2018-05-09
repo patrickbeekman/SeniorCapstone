@@ -60,7 +60,7 @@ All tests were written using [pytest](https://docs.pytest.org/en/latest/).
 * Run ```pytest``` in the terminal
 
 ### Contribution
-This project is not open source although anyone is free to fork or download my application and modify it however you see fit.
+This project is open source under the [GNU General Public Licencse](LICENSE.md). 
 
 ## Resources
 
